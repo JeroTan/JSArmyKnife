@@ -1,0 +1,19 @@
+{
+  "name": "templatejs",
+  "version": "1.0.0",
+  "description": "Template For Building an App using JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeroTan/TemplateJS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JeroTan/TemplateJS/issues"
+  },
+  "homepage": "https://github.com/JeroTan/TemplateJS#readme"
+}
