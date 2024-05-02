@@ -17,4 +17,3 @@ export function tokenRead(token, expire=false){
 export function tokenHash(data){
     return jwt.sign(data, Secret, { expiresIn: ExpiresIn});
 }
-
