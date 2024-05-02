@@ -54,3 +54,11 @@ export function propertyExclusion(key, object){//Exclude the given property(key)
     })
     return newObject;
 }
+
+export function propertyFiller(key, object){
+    key.forEach(e => {
+        object[e] = object[e] ?? "";     
+    });
+
+    return object;
+}

@@ -1,5 +1,6 @@
 import { ApiVerifyAuth } from "./API";
 
+//Insert the AuthVerifier Here
 async function AuthVerifier(){
     return await new Promise((resolve, reject)=>{
         resolve(true);
