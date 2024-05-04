@@ -15,26 +15,26 @@ class MakeIcon{
         return this;
     }
     addFill(d=""){
-        this.vectors.push = {
+        this.vectors.push({
             element:"path",
             d:d,
-        }
+        })
         return this;
     }
     addStroke(d="",fillRule="evenodd", clipRule="evenodd"){
-        this.vectors.push ={
+        this.vectors.push({
             element: "path",
             fillRule: fillRule,
             clipRule: clipRule,
             d:d,
-        }
+        })
         return this;
     }
     addPath(element){
-        this.vectors.push = {
+        this.vectors.push({
             element: "path",
             ...element
-        }
+        })
         return this;
     }   
     addViewBox(viewBox){
@@ -43,7 +43,11 @@ class MakeIcon{
     }
 
     get(){
-        return this.iconData;
+        const iconData = {
+            svg: this.svg,
+            vectors: this.vectors,
+        }
+        return iconData;
     }
 }
 
