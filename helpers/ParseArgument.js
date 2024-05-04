@@ -62,3 +62,13 @@ export function propertyFiller(key, object){
 
     return object;
 }
+
+export function openLink(link){
+    window.open(link, '_blank');
+}
+
+export function openLinkCallback(link){
+    return ()=>{
+        openLink(link);
+    }
+}
