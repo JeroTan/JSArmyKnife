@@ -39,7 +39,7 @@ function successProcessing(success){
 }
 //<< --------------  InHouse Helper ---------------------
 
-class ApiRequestPlate{
+export class ApiRequestPlate{
     constructor(){
         this.reset();
     }
