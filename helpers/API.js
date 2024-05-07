@@ -1,20 +1,10 @@
 //Required Dependencies: Knex
-import 'dotenv/config';
 import axios from "axios";
 
-//LINKS
-const domain =  process?.env?.APIDOMAIN ?? "localhost:8000/";
-const protocol = process?.env?.APIPROTOCOL ?? "http://";
-const apiVersionIndex = process?.env?.APIVERSIONINDEX ?? "api/v1/";
-
-
 //>> --------------  InHouse Helper ---------------------
-//To read Request Cancellation
+//To read Request Cancellationfau
 const abortion = new AbortController();
-//Package the Http URL
-export function relink(query="", withApiLink = true){
-    return protocol+domain+(withApiLink&&apiVersionIndex)+query;
-}
+
 //To simplify abortion
 export function abortLink (){
     abortion.abort();
@@ -40,10 +30,13 @@ function successProcessing(success){
 //<< --------------  InHouse Helper ---------------------
 
 export class ApiRequestPlate{
-    constructor(){
+    constructor(baseURL = "https://localhost:8000/api/v1"){
         this.reset();
+        this.baseURL(baseURL);
     }
-
+    baseURL(baseURL){
+        this.Config.baseURL = baseURL;
+    }
     url(url){
         this.Config["url"] = url;
         return this;
@@ -122,7 +115,6 @@ export class ApiRequestPlate{
 
     reset(){
         this.Config = {
-            baseURL: ApiLink(),
             headers: {
                 "Accept": "application/json",
                 'Access-Control-Allow-Credentials': 'true',
@@ -142,39 +134,43 @@ export class Fetcher{
     constructor(api=undefined){
         if(api && typeof api == "function")
             this.api = api;
+        this.apiParam = [];
+        this.dataWatch = false;
         this.fetching = false;
         this.cache = false;
-        this.param = false;
-        this.todo = ()=>false;
     }
     addParam(param){ //Param is the param that will be inserted to your given api if you that param on it
-        this.param = arguments;
+        this.apiParam = arguments;
+        return this;
+    }
+    addDataWatch(dataWatch){
+        this.dataWatch = dataWatch;
         return this;
     }
     newApi(api){ //New api is to add new api 
         this.api = api;
         return this;
     }
-    addTodo(todo){ //Once fetching is finish to the very end, your callback will be called to do your own thing
-        this.todo = todo;
-        return this;
-    }
     fetch(){
-        if(this.fetching)
-            return this;
-
-        this.cache = this.param; //put the param in cache in case there is a param for it to check
-        this.fetching = true;
-
         const This = this;
-        this.api(...this.param).then(x=>{
-            
-            this.fetching = false;
-            if(  JSON.stringify(this.cache) !== JSON.stringify(this.param) )
-                This.fetch();
-            
-            this.todo(x); 
-        })
-        return this;
+
+        function internalFetching(This, resolve){
+            if(This.fetching)
+                return This;
+
+            This.cache = this.dataWatch; 
+            This.fetching = true;
+            This.api(...This.apiParam).then(x=>{
+                This.fetching = false;
+                if( This.cache !== This.dataWatch )
+                    This.internalFetching();
+
+                resolve(x);
+            })
+        }
+
+        return new Promise((resolve, reject)=>{
+            internalFetching(This, resolve);
+        });
     }
 }
