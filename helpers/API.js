@@ -173,7 +173,7 @@ export class Fetcher{
             if(  JSON.stringify(this.cache) !== JSON.stringify(this.param) )
                 This.fetch();
             
-            this.todo(x.status, x.data); 
+            this.todo(x); 
         })
         return this;
     }
