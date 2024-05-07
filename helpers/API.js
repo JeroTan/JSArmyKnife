@@ -1,5 +1,5 @@
 //Required Dependencies: Knex
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 //>> --------------  InHouse Helper ---------------------
 //To read Request Cancellationfau
@@ -30,12 +30,12 @@ function successProcessing(success){
 //<< --------------  InHouse Helper ---------------------
 
 export class ApiRequestPlate{
-    constructor(baseURL = "https://localhost:8000/api/v1"){
-        this.reset();
-        this.baseURL(baseURL);
+    constructor(baseURL = "http://localhost:8000/api/v1"){
+        this.reset(baseURL);
     }
     baseURL(baseURL){
-        this.Config.baseURL = baseURL;
+        this.Config["baseURL"] = baseURL;
+        return this;
     }
     url(url){
         this.Config["url"] = url;
@@ -94,6 +94,9 @@ export class ApiRequestPlate{
         try{
             return successProcessing(await this.Inst.request(this.Config));
         }catch(e){
+            if( !e.response ){
+                return {status: 400, data:"Bad Request"};
+            }
             return errorProcessing(e);
         }
     }
@@ -113,8 +116,9 @@ export class ApiRequestPlate{
         return this;
     }
 
-    reset(){
+    reset(baseURL = false){
         this.Config = {
+            baseURL: baseURL || ( this.Config.baseURL ? this.Config.baseURL : ""  ),
             headers: {
                 "Accept": "application/json",
                 'Access-Control-Allow-Credentials': 'true',
@@ -153,24 +157,23 @@ export class Fetcher{
     }
     fetch(){
         const This = this;
-
-        function internalFetching(This, resolve){
+        function internalFetching(This, resolve, reject){
             if(This.fetching)
-                return This;
+                return reject("Still Processing!");
 
-            This.cache = this.dataWatch; 
+            This.cache = This.dataWatch; 
             This.fetching = true;
             This.api(...This.apiParam).then(x=>{
                 This.fetching = false;
                 if( This.cache !== This.dataWatch )
-                    This.internalFetching();
+                    internalFetching(This, resolve, reject);
 
                 resolve(x);
             })
         }
 
         return new Promise((resolve, reject)=>{
-            internalFetching(This, resolve);
+            internalFetching(This, resolve, reject);
         });
     }
 }
