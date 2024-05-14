@@ -33,16 +33,20 @@ export function anyToArr(input, strSplitter = ","){
     return arrayResult;
 }
 
+export function capitalFirst(str){
+    return  str.length ? (str[0].toUpperCase()  + str.slice(1)) : "";
+}
+
 export function getRegex(input){
     if(typeof input === "object")
         return new RegExp(input);
     return input;
-    
+
 }
 
 export function propertyExclusion(key, object){//Exclude the given property(key) to the inputted object.
     const newObject = {};
-    Object.keys(object).forEach(e=>{ 
+    Object.keys(object).forEach(e=>{
 
         //If object keys is equal to the given key, then skip
         if(key.some(k=>k == e))
@@ -50,14 +54,14 @@ export function propertyExclusion(key, object){//Exclude the given property(key)
 
         //else Copy that object to the newObject
         newObject[e] = object[e];
-    
+
     })
     return newObject;
 }
 
 export function propertyFiller(key, object){
     key.forEach(e => {
-        object[e] = object[e] ?? "";     
+        object[e] = object[e] ?? "";
     });
 
     return object;
@@ -71,4 +75,12 @@ export function openLinkCallback(link){
     return ()=>{
         openLink(link);
     }
+}
+
+//Check the error payload from 422
+export function isThereError(errorData){
+    //Format would be {key:message} for the object
+    return Object.keys(errorData).every(key=>{
+        return !errorData[key];
+    })
 }
