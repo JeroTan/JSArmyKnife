@@ -30,10 +30,12 @@ function successProcessing(success){
 //<< --------------  InHouse Helper ---------------------
 
 export class ApiRequestPlate{
-    constructor(baseURL = "http://localhost:8000/api/v1"){
+    baseURLCache = "http://localhost:8000/api/v1";
+    constructor(baseURL = false){
         this.reset(baseURL);
     }
     baseURL(baseURL){
+        this.baseURLCache = baseURL;
         this.Config["baseURL"] = baseURL;
         return this;
     }
@@ -57,8 +59,8 @@ export class ApiRequestPlate{
         this.Config["onDownloadProgress"] = callback;
         return this;
     }
-    
-    
+
+
     //DefineModifiers
     file(){
         this.Config.headers["Content-Type"] = "multipart/form-data";
@@ -105,7 +107,7 @@ export class ApiRequestPlate{
         abortion.signal.addEventListener("abort", callback);
         return this;
     }
-    
+
     uploadProgress( callback ){
         this.Config.onUploadProgress = callback;
         return this;
@@ -118,7 +120,7 @@ export class ApiRequestPlate{
 
     reset(baseURL = false){
         this.Config = {
-            baseURL: baseURL || ( this.Config.baseURL ? this.Config.baseURL : ""  ),
+            baseURL: baseURL || ( baseURLCache ? baseURLCache : ""  ),
             headers: {
                 "Accept": "application/json",
                 'Access-Control-Allow-Credentials': 'true',
@@ -130,7 +132,7 @@ export class ApiRequestPlate{
         this.Inst = axios.create(this.Config);
         return this;
     }
-    
+
 }
 
 //ApiFetch that waits for it to finish and do try again if ever| param is array, api is the api in api caller and todo is the callback
@@ -151,7 +153,7 @@ export class Fetcher{
         this.dataWatch = dataWatch;
         return this;
     }
-    newApi(api){ //New api is to add new api 
+    newApi(api){ //New api is to add new api
         this.api = api;
         return this;
     }
@@ -161,7 +163,7 @@ export class Fetcher{
             if(This.fetching)
                 return reject("Still Processing!");
 
-            This.cache = This.dataWatch; 
+            This.cache = This.dataWatch;
             This.fetching = true;
             This.api(...This.apiParam).then(x=>{
                 This.fetching = false;
