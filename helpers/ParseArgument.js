@@ -33,6 +33,19 @@ export function anyToArr(input, strSplitter = ","){
     return arrayResult;
 }
 
+export function objToString(object, splitter = " "){
+    if(typeof object == "object" && Array.isArray(object))
+        return object.join(splitter);
+
+    if(typeof object == "object"){
+        return Object.values(object).join(splitter);
+    }
+    if(typeof object == "string")
+        return object;
+
+    return ""+object;
+}
+
 export function capitalFirst(str){
     return  str.length ? (str[0].toUpperCase()  + str.slice(1)) : "";
 }
@@ -84,3 +97,50 @@ export function isThereError(errorData){
         return !errorData[key];
     })
 }
+
+
+//Data Importer
+export class Data{
+    constructor( dispatch=false){
+        //Dispatch callback must have a parameter that also accepts a callback. That callback must have a parameter about the old data;
+        if(dispatch && typeof dispatch == "function")
+            this.dispatch = dispatch;
+    }
+    addDispatch(dispatch){
+        this.dispatch = dispatch;
+        return this;
+    }
+    store(key, val){
+        this.dispatch(prev=>{
+            const refPrev = {...prev};
+            refPrev[key] = val;
+            return refPrev
+        });
+        return this;
+    }
+    clear(key){
+        this.dispatch(prev=>{
+            const refPrev = {...prev};
+            refPrev[key] = "";
+            return refPrev
+        });
+        return this;
+    }
+    batch(object, refresh = false){
+        if(!refresh){
+            this.dispatch(object);
+            return this;
+        }
+
+        this.dispatch(prev=>{
+            const refPrev = {...prev};
+            Object.keys(refPrev).forEach(x=>{
+                refPrev[x] = object[x];
+            });
+            return refPrev;
+        })
+    }
+}
+
+//Error Importer
+export class Error extends Data{}
