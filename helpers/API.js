@@ -120,7 +120,7 @@ export class ApiRequestPlate{
 
     reset(baseURL = false){
         this.Config = {
-            baseURL: baseURL || ( baseURLCache ? baseURLCache : ""  ),
+            baseURL: baseURL || ( this.baseURLCache ? this.baseURLCache : ""  ),
             headers: {
                 "Accept": "application/json",
                 'Access-Control-Allow-Credentials': 'true',
