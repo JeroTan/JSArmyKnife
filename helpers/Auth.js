@@ -1,55 +1,56 @@
-import { ApiVerifyAuth } from "./API";
 
-//Insert the AuthVerifier Here
-async function AuthVerifier(){
-    return await new Promise((resolve, reject)=>{
-        resolve(true);
-    });
-}
+export class AuthToken{
+    verifierFromAPI(){
+        return new Promise((resolve, reject)=>{
+            resolve(true);
+        });
+    }
+    constructor(api = false){
+        if(api)
+            this.verifierFromAPI = api;
+    }
+    addVerifier(api){
+        this.verifierFromAPI = api;
+    }
 
 
-class Auth{
-    storeToken(token){
+    store(token){
         localStorage.setItem('token', token);
     }
-    tokenExist(){
+    exist(){
         if(localStorage.getItem('token') === null){
             return false;
         }
         return true;
 
     }
-    getToken(){
-        if(this.tokenExist()){
+    get(){
+        if(this.exist()){
             return localStorage.getItem('token');
         }
         return "";
-        
+
     }
-    removeToken(){
+    remove(){
         if(localStorage.getItem('token') === null)
             return false;
-        
+
         localStorage.removeItem('token');
     }
-    verifyToken(){
+    verify(){
         const THIS = this;
         return new Promise((resolve, reject)=>{
-            if(!THIS.tokenExist()){
+            if(!THIS.exist()){
                 return resolve(false);
             }
-            AuthVerifier().then(x=>{
+            THIS.verifierFromAPI().then(x=>{
                 if(x?.status ===  200){
                     return resolve(true);
                 }
-                THIS.removeToken();
+                THIS.remove();
                 return resolve(false);
             });
         });
     }
 }
 
-
-
-//CALL THIS
-export const auth = new Auth;

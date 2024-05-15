@@ -288,7 +288,7 @@ export class ApiRequestPlate{
 
 }
 
-
+//****** THIS MUST BE CHANGE It needs to not start something only when the last request is finished and the cache is different from the first one if possible add debounce */
 
 //ApiFetch that waits for it to finish and do try again if ever| param is array, api is the api in api caller and todo is the callback
 export class Fetcher{
@@ -296,16 +296,19 @@ export class Fetcher{
         if(api && typeof api == "function")
             this.api = api;
         this.apiParam = [];
-        this.dataWatch = false;
         this.fetching = false;
-        this.cache = false;
+        this.fetchCount = 0; //must be zero to not fetch again
+
+        this.debounce = false;
+        this.timer= undefined;
+    }
+    withDebounce(debounce = false){//how ms. Please do not use this on framework that has rerender because it will shut down the timer.
+        if(debounce && !isNaN(debounce))
+            this.debounce = debounce;
+        return this;
     }
     addParam(param){ //Param is the param that will be inserted to your given api if you that param on it
         this.apiParam = arguments;
-        return this;
-    }
-    addDataWatch(dataWatch){
-        this.dataWatch = dataWatch;
         return this;
     }
     newApi(api){ //New api is to add new api
@@ -313,24 +316,38 @@ export class Fetcher{
         return this;
     }
     fetch(){
-        const This = this;
-        function internalFetching(This, resolve, reject){
-            if(This.fetching)
+        const THIS = this;
+        function internalFetching(THIS, resolve, reject){
+            if(THIS.fetching){
+                THIS.fetchCount += 1; //Add Count since someone wants to fetch but the current one is still fetching;
                 return reject("Still Processing!");
+            }
+            function callTheApi(){
+                THIS.fetching = true;
+                THIS.api(...THIS.apiParam).then(x=>{
+                    THIS.fetching = false;
+                    if( THIS.fetchCount > 0 ){
+                        THIS.fetchCount = 0; //Reset it to zero since we found out that there is are some who still fetch while this one is currently fetching
+                        //Meaning this will not repeat again unless something fetch again while this thing is still fetching.
+                        internalFetching(THIS, resolve, reject);
+                        return; //It will stop here since resolve will done on the next fetching
+                    }
 
-            This.cache = This.dataWatch;
-            This.fetching = true;
-            This.api(...This.apiParam).then(x=>{
-                This.fetching = false;
-                if( This.cache !== This.dataWatch )
-                    internalFetching(This, resolve, reject);
+                    resolve(x); //In order to stay in promise, we use a Promise and sent it here to resolve it outside.
+                });
+            }
 
-                resolve(x);
-            })
+            if(!THIS.debounce)
+                return callTheApi();
+            clearInterval(THIS.timer);//Just in case this timer is still running in other universe
+            THIS.timer = setTimeout(x=>{
+                callTheApi();
+                clearInterval(THIS.timer);
+            }, THIS.debounce);
         }
 
         return new Promise((resolve, reject)=>{
-            internalFetching(This, resolve, reject);
+            internalFetching(THIS, resolve, reject);
         });
     }
 }
