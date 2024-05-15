@@ -144,3 +144,12 @@ export class Data{
 
 //Error Importer
 export class Error extends Data{}
+
+
+//Laravel Error Validation Error Parse To String instead of arrays
+export function laravelValErrToStr( errors  ){
+    Object.keys(errors).forEach(name=>{
+        errors[name] = objToString(errors[name]);
+    });
+    return errors;
+}
