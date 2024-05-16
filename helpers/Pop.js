@@ -1,30 +1,54 @@
+//Export this to a Reducer State OR other handler that will cater this properties
+export const popStructure = {
+    isOpen: false,
+    width: "450px",
+    icon: "check",
+    iconColor: "fill-green-600",
+    iconAnimate: "a-fade-in-scale",
+    title: "Title",
+    message: "Lorem Ipsum Dfss Mfde fjdkfss DFfjdfjf fsfsdfsdf",
+    acceptButton: true,
+    rejectButton: true,
+    acceptButtonText: "Okay",
+    rejectButtonText: "Cancel",
+    acceptButtonCallback: undefined,
+    rejectButtonCallback: undefined,
+    closeButton: true,
+    closeButtonCallback: undefined,
+    backdropTrigger: true,
+    backdropTriggerCallback: undefined,
+    customDialog: undefined,
+};
+//Export this to reducer dispatcher OR cater this to handle state changes of properties
+export function popDispatch(popUpData, action){
+    popUpData = { ...popUpData };
+    switch(action.pop){
+        case "open":
+            popUpData.isOpen = true;
+        break;
+        case "close":
+            popUpData.isOpen = false;
+        break;
+        case "update":
+            Object.keys(action.val).forEach(key => {
+                popUpData[key] = action.val[key];
+            });
+            popUpData = {...popUpData};
+        break;
+    }
+
+    return popUpData;
+}
+
+
 // Pop is used to modify the dialog modal
 export class Pop{
-    constructor(state, dispatch){
-        this.state = state; //The Existing Data
-        this.dispatch = dispatch; //Use to change the property
-        
+    constructor(dispatch){
+        this.dispatch = dispatch; //External function that is use to change a property
+
         //Shorteners
-        const basicContent = {
-            isOpen: true,
-            width: "450px",
-            icon: "check",
-            iconColor: "fill-green-600",
-            iconAnimate: "a-fade-in-scale",
-            title: "",
-            message: "",
-            acceptButton: true,
-            rejectButton: true,
-            acceptButtonText: "Okay",
-            rejectButtonText: "Cancel",
-            acceptButtonCallback: undefined,
-            rejectButtonCallback: undefined,
-            closeButton: true,
-            closeButtonCallback: undefined,
-            backdropTrigger: true,
-            backdropTriggerCallback: undefined,
-            customDialog: undefined,
-        }
+        const basicContent = popStructure;
+        basicContent.isOpen = true; //Upon creation of this one, automatically open the pop;
         //Shorteners
 
         this.frame = {//This will be the basis of types
@@ -41,7 +65,7 @@ export class Pop{
                 ...basicContent,
                 icon: "cross",
                 iconColor: "fill-red-600",
-                title: "Error",   
+                title: "Error",
             },
             info:{
                 ...basicContent,
@@ -73,115 +97,84 @@ export class Pop{
                 closeButton: true,
             }
         };
+        this.cachedContent = basicContent;
     }
 
     //--InHouseHelper--//
-    updateOne(key, data){
-        this.dispatch( { pop:"update", val: {[key]: data } } );
+    cacheData(object){//Accepts object key:value
+        const THIS = this;
+        Object.keys(object).forEach(key=>{
+            THIS.cachedContent[key] = object[key];
+        })
+        //this.dispatch( { pop:"update", val: object } );
+        return THIS;
     }
     //--InHouseHelper--//
 
-    //--Setter--//
-    addState(state){
-        this.state = state;
+    //--DispatchRunner--//
+    //** You must overload this one if you want to change how updating from external function works */
+    run(){
+        this.dispatch( { pop:"update", val: this.cachedContent } );
         return this;
     }
+    //--DispatchRunner--//
+
+    //--Setter--//
     addDispatch(dispatch){
         this.dispatch = dispatch;
         return this;
     }
     type(type){//This will determine the basic structure of the popup
-        this.dispatch({pop:"update", val:this.frame[type]});
+        this.cacheData(this.frame[type]);
         return this;
     }
     width(width){
-        this.updateOne("width", width);
+        this.cacheData({width: width});
+        return this;
     }
     title(title){
-        this.updateOne("title", title);
+        this.cacheData({title: title});
         return this;
     }
     message(message){
-        this.updateOne("message", message);
+        this.cacheData({message: message});
         return this;
     }
     /*@accept - callback for accept button, @reject - callback for reject/cancel button, @close - callback for close button. All of them must accept "close" argument. */
-    callback(accept = undefined, reject = undefined, close = undefined, backdrop = undefined){ 
-        this.dispatch( { pop:"update", val: {
+    callback(accept = undefined, reject = undefined, close = undefined, backdrop = undefined){
+        this.cacheData({
             acceptButtonCallback: accept && typeof accept === "function"?accept : undefined,
             rejectButtonCallback: reject && typeof reject === "function"?reject : undefined,
             closeButtonCallback: close && typeof close === "function"?close : undefined,
             backdropTriggerCallback: backdrop && typeof backdrop === "function"?backdrop : undefined,
-        } } );
+        });
         return this;
     }
     button(accept = true, reject = true, close = true, backdrop = true){
-        this.dispatch( { pop:"update", val: {
+        this.cacheData({
             acceptButton: accept,
             rejectButton: reject,
             closeButton: close,
             backdropTrigger: backdrop,
-        } } );
-
+        });
         return this;
     }
     custom(callback){
-        this.dispatch({pop:"update", val:{ customDialog:callback, backdropTrigger: true, closeButton: true,}});
+        this.cacheData({
+            customDialog:callback,
+            backdropTrigger: true,
+            closeButton: true,
+        })
         return this;
     }
     close(){
-        this.dispatch({pop:"close"});
+        this.cacheData({isOpen: false });
         return this;
     }
     open(){
-        this.dispatch({pop:"open"});
+        this.cacheData({isOpen: true });
         return this;
     }
-       
+
     //--Setter--//
 }
-
-//Export this to a Reducer State OR other handler that will cater this properties
-export const popStructure = {
-    isOpen: false,
-    width: "450px",
-    icon: "check",
-    iconColor: "fill-green-600",
-    iconAnimate: "a-fade-in-scale",
-    title: "Title",
-    message: "Lorem Ipsum Dfss Mfde fjdkfss DFfjdfjf fsfsdfsdf",
-    acceptButton: true,
-    rejectButton: true,
-    acceptButtonText: "Okay",
-    rejectButtonText: "Cancel",
-    acceptButtonCallback: undefined,
-    rejectButtonCallback: undefined,
-    closeButton: true,
-    closeButtonCallback: undefined,
-    backdropTrigger: true,
-    backdropTriggerCallback: undefined,
-    customDialog: undefined,
-};
-//Export this to reducer dispatcher OR cater this to handle state changes of properties
-export function popUpdater(action, popUpData){
-    if(!action?.pop)
-        return popUpData;
-
-    popUpData = { ...popUpData };
-    switch(action.pop){
-        case "open":
-            popUpData.isOpen = true;
-        break;
-        case "close":
-            popUpData.isOpen = false;
-        break;
-        case "update":
-            Object.keys(action.val).forEach(key => {
-                popUpData[key] = action.val[key];
-            });
-            popUpData = {...popUpData};
-        break;
-    }
-
-    return popUpData;
-} 
