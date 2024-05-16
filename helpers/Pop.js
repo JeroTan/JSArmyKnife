@@ -6,7 +6,7 @@ export const popStructure = {
     iconColor: "fill-green-600",
     iconAnimate: "a-fade-in-scale",
     title: "Title",
-    message: "Lorem Ipsum Dfss Mfde fjdkfss DFfjdfjf fsfsdfsdf",
+    message: "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Minima adipisci recusandae tempore unde. Ut rem a asperiores laboriosam fugiat molestiae possimus quisquam excepturi, ullam ratione rerum distinctio, et inventore obcaecati.",
     acceptButton: true,
     rejectButton: true,
     acceptButtonText: "Okay",
