@@ -20,24 +20,24 @@ export const popStructure = {
     customDialog: undefined,
 };
 //Export this to reducer dispatcher OR cater this to handle state changes of properties
-export function popDispatch(popUpData, action){
-    popUpData = { ...popUpData };
+export function popDispatch(state, action){
+    state = { ...state };
     switch(action.pop){
         case "open":
-            popUpData.isOpen = true;
+            state.isOpen = true;
         break;
         case "close":
-            popUpData.isOpen = false;
+            state.isOpen = false;
         break;
         case "update":
             Object.keys(action.val).forEach(key => {
-                popUpData[key] = action.val[key];
+                state[key] = action.val[key];
             });
-            popUpData = {...popUpData};
+            state = {...state};
         break;
     }
 
-    return popUpData;
+    return state;
 }
 
 
@@ -47,7 +47,7 @@ export class Pop{
         this.dispatch = dispatch; //External function that is use to change a property
 
         //Shorteners
-        const basicContent = popStructure;
+        const basicContent = {...popStructure};
         basicContent.isOpen = true; //Upon creation of this one, automatically open the pop;
         //Shorteners
 
@@ -106,7 +106,6 @@ export class Pop{
         Object.keys(object).forEach(key=>{
             THIS.cachedContent[key] = object[key];
         })
-        //this.dispatch( { pop:"update", val: object } );
         return THIS;
     }
     //--InHouseHelper--//
