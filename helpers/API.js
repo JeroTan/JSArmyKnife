@@ -185,7 +185,10 @@ export class Resolve{
 export class ApiRequestPlate{
     baseURLCache = "http://localhost:8000/api/v1";
     constructor(baseURL = false){
-        this.reset(baseURL);
+        if(baseURL){
+            this.reset(baseURL);
+            this.baseURLCache = baseURL;
+        }
     }
     baseURL(baseURL){
         this.baseURLCache = baseURL;
