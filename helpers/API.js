@@ -34,6 +34,7 @@ function successProcessing(success){
 export class Resolve{
     constructor(promiseResponse){ //It must accept a promise;
         this.promiseResponse = promiseResponse;
+        this.excludeStatus = []; //If use already use the s200, then when you use sOthers it will not trigger the s200. In simple terms none will trigger if you already trigger it.
     }
     async checkStatus(status){
         try{
@@ -58,8 +59,9 @@ export class Resolve{
 
         return this;
     }
-    checkAndParse(status, callback){
+    checkParseExclude(status, callback){
         const THIS = this;//To prevent from invalid Self Referencing
+        this.excludeStatus.push(status);
         THIS.checkStatus(status).then(match=>{
             if(match){
                 THIS.parseData(callback);
@@ -75,108 +77,125 @@ export class Resolve{
     //Success
     //200
     s200(callback){ //OK
-        return this.checkAndParse(200, callback);
+        return this.checkParseExclude(200, callback);
     }
     s201(callback){ //Created
-        return this.checkAndParse(201, callback);
+        return this.checkParseExclude(201, callback);
     }
     s202(callback){ //Accepted
-        return this.checkAndParse(202, callback);
+        return this.checkParseExclude(202, callback);
     }
     s203(callback){ //Non-Authoritative Information
-        return this.checkAndParse(203, callback);
+        return this.checkParseExclude(203, callback);
     }
     s204(callback){ //No Content
-        return this.checkAndParse(204, callback);
+        return this.checkParseExclude(204, callback);
     }
     s205(callback){ //Reset Content
-        return this.checkAndParse(205, callback);
+        return this.checkParseExclude(205, callback);
     }
     //300
     s300(callback){ //Multiple Choices
-        return this.checkAndParse(300, callback);
+        return this.checkParseExclude(300, callback);
     }
     s301(callback){ //Moved Permanently
-        return this.checkAndParse(301, callback);
+        return this.checkParseExclude(301, callback);
     }
     //Error
     //400
     s400(callback){ //Bad Request
-        return this.checkAndParse(400, callback);
+        return this.checkParseExclude(400, callback);
     }
     s401(callback){ //Unauthorized
-        return this.checkAndParse(401, callback);
+        return this.checkParseExclude(401, callback);
     }
     s402(callback){ //Payment Required
-        return this.checkAndParse(402, callback);
+        return this.checkParseExclude(402, callback);
     }
     s403(callback){ //Forbidden
-        return this.checkAndParse(403, callback);
+        return this.checkParseExclude(403, callback);
     }
     s404(callback){ //Not Found
-        return this.checkAndParse(404, callback);
+        return this.checkParseExclude(404, callback);
     }
     s408(callback){ //Request Timeout
-        return this.checkAndParse(405, callback);
+        return this.checkParseExclude(405, callback);
     }
     s410(callback){ //Gone
-        return this.checkAndParse(410, callback);
+        return this.checkParseExclude(410, callback);
     }
     s413(callback){ //Payload Too Large
-        return this.checkAndParse(413, callback);
+        return this.checkParseExclude(413, callback);
     }
     s414(callback){ //URI Too Long
-        return this.checkAndParse(414, callback);
+        return this.checkParseExclude(414, callback);
     }
     s415(callback){ //Unsupported Media Type
-        return this.checkAndParse(415, callback);
+        return this.checkParseExclude(415, callback);
     }
     s416(callback){ //Range Not Satisfiable
-        return this.checkAndParse(416, callback);
+        return this.checkParseExclude(416, callback);
     }
     s417(callback){ //Expectation Failed
-        return this.checkAndParse(417, callback);
+        return this.checkParseExclude(417, callback);
     }
     s418(callback){ //I'm a teapot
-        return this.checkAndParse(418, callback);
+        return this.checkParseExclude(418, callback);
     }
     s421(callback){ //Misdirected Request
-        return this.checkAndParse(421, callback);
+        return this.checkParseExclude(421, callback);
     }
     s422(callback){ //Unprocessable Content
-        return this.checkAndParse(422, callback);
+        return this.checkParseExclude(422, callback);
     }
     s431(callback){ //Request Header Fields Too Large
-        return this.checkAndParse(431, callback);
+        return this.checkParseExclude(431, callback);
     }
     s451(callback){ //Unavailable For Legal Reasons
-        return this.checkAndParse(451, callback);
+        return this.checkParseExclude(451, callback);
     }
     //Server Error
     //500
     s500(callback){ //Internal Server Error
-        return this.checkAndParse(500, callback);
+        return this.checkParseExclude(500, callback);
     }
     s501(callback){ //Not Implemented
-        return this.checkAndParse(501, callback);
+        return this.checkParseExclude(501, callback);
     }
     s502(callback){ //Bad Gateway
-        return this.checkAndParse(502, callback);
+        return this.checkParseExclude(502, callback);
     }
     s503(callback){ //Service Unavailable
-        return this.checkAndParse(503, callback);
+        return this.checkParseExclude(503, callback);
     }
     s504(callback){ //Gateway Timeout
-        return this.checkAndParse(504, callback);
+        return this.checkParseExclude(504, callback);
     }
     s505(callback){ //HTTP Version Not Supported
-        return this.checkAndParse(505, callback);
+        return this.checkParseExclude(505, callback);
     }
     s506(callback){ //Variant Also Negotiates
-        return this.checkAndParse(506, callback);
+        return this.checkParseExclude(506, callback);
     }
     s507(callback){ //Insufficient Storage
-        return this.checkAndParse(507, callback);
+        return this.checkParseExclude(507, callback);
+    }
+    //others
+    sOthers(callback){
+        (async(THIS)=>{
+            try{
+                const {status, data} = await THIS.promiseResponse;
+                if( THIS.excludeStatus.some(x=>x==status) )
+                    return THIS;
+                callback(data);
+            }catch(e){
+                console.error(e);
+            }
+        })(this);
+        return this;
+    }
+    sElse(callback){//This do a thing if everything is finish while it still returns like a normal one it is not recommended to use since it doesn't specify the status code
+        return this.parseData(callback);
     }
 }
 
@@ -213,6 +232,14 @@ export class ApiRequestPlate{
     }
     onDownloadProgress(callback){
         this.Config["onDownloadProgress"] = callback;
+        return this;
+    }
+    withCredentials(){
+        this.Config["withCredentials"] = true;
+        return this;
+    }
+    withXSRFToken(){
+        this.Config["withXSRFToken"] = true;
         return this;
     }
 
@@ -281,6 +308,8 @@ export class ApiRequestPlate{
                 "Accept": "application/json",
                 'Access-Control-Allow-Credentials': 'true',
                 "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
                 "Content-Type": "application/json",
             },
             signal: abortion.signal,

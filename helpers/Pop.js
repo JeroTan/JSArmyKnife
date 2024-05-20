@@ -42,6 +42,7 @@ export function popDispatch(state, action){
 
 
 // Pop is used to modify the dialog modal
+// Color here uses TailwindCSS but you may configure it here if you want.
 export class Pop{
     constructor(dispatch){
         this.dispatch = dispatch; //External function that is use to change a property
@@ -82,7 +83,7 @@ export class Pop{
             loading:{
                 ...basicContent,
                 icon:"loadingDonut",
-                iconColor: "fill-yellow-500",
+                iconColor: "fill-sky-300",
                 iconAnimate: "a-kuru-kuru",
                 title: "",
                 message: "Loading. . .",

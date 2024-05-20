@@ -129,4 +129,6 @@ export const IconList = {
     trash: iconNew().addFill("7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zm2-4h2V8H9zm4 0h2V8h-2z").get(),
 
     naturalNote: iconNew().addFill("M10 8.75V3.5H8v14l6-2.25v5.25h2v-14l-6 2.25m4 4.5l-4 1.5v-4l4-1.5v4Z").get(),
+
+    share: iconNew().addFill("M11 9V5l7 7l-7 7v-4.1c-5 0-8.5 1.6-11 5.1c1-5 4-10 11-11m6-1V5l7 7l-7 7v-3l4-4z").get()
 }
