@@ -153,3 +153,96 @@ export function laravelValErrToStr( errors  ){
     });
     return errors;
 }
+
+
+
+//DEBOUNCEr - use this to delay a function call or to be precise put an interval on time to allow the final input to be serve.
+export class Debouncer {
+    constructor(timer = false){
+        if(timer)
+            this.timer = timer;
+        this.debouncer = false;
+    }
+    time(timer = 0){
+        this.timer = timer;
+        return this;
+    }
+    do(callback = ()=>true){
+        this.callback = callback;
+        return this;
+    }
+    run(){
+        clearTimeout(this.debouncer);
+        this.debouncer = setTimeout(this.callback, this.timer);
+        return this;
+    }
+}
+
+
+//CACHEr - use this to store a data in localstorage;
+export class Cacher{
+    constructor(baseKey = ""){
+        if(!baseKey)
+            this.baseKey = baseKey;
+        this.baseKey = "";
+    }
+    //** InHouse */
+    valueTransform(value){
+        switch(typeof value){
+            case "object":
+                return JSON.stringify(value);
+            case "string":
+                return String(value);
+            default:
+                return value;
+        }
+    }
+    //** InHouse */
+
+    store(key = "", value = ""){
+        const THIS = this;
+        if(typeof key === "string" ){
+            value = THIS.valueTransform(value);
+            if( THIS.exist(key, value) )
+                return this;
+
+            if(this.baseKey)
+                key == this.baseKey+"."+key;
+
+            localStorage.setItem(key, value);
+            return this;
+        }
+
+        if( !(typeof key === "object" && !Array.isArray(key)) )
+            return this;
+
+        Object.keys(key).map((i=>{
+            let value = key[i];
+            let key = i;
+            value = THIS.valueTransform(value);
+            if( THIS.exist(key, value) )
+                return this;
+
+            if(this.baseKey)
+                key == this.baseKey+"."+key;
+
+            localStorage.setItem(key, value);
+        }))
+        return this;
+    }
+    exist(key, value = undefined){
+        if(this.baseKey)
+            key == this.baseKey+"."+key;
+        if(value === undefined){
+            return localStorage.getItem(key) !== null
+        }
+        value = this.valueTransform(value);
+        return localStorage.getItem(key) !== null && localStorage.getItem(key) === value;
+    }
+    get(key){
+        if(this.baseKey)
+            key == this.baseKey+"."+key;
+        return localStorage.getItem(key);
+    }
+
+}

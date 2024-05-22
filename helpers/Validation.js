@@ -1,4 +1,4 @@
-import { anyToArr } from "./ParseArgument.js";
+import { anyToArr } from "./ParseData.js";
 
 /*****************TEMPLATE //Do not touch *********************/
 export class Validation{
@@ -41,7 +41,7 @@ export class Validation{
     createErrorMessage(reject, custom, original){
         if(custom)
             return reject(this.parseCustomMessage(custom));
-        
+
         reject(original);
     }
     getFieldName(){
@@ -51,7 +51,7 @@ export class Validation{
 
     //--Public Object Method--//
     required(argument=[], customMessage=false){
-        
+
         return this.addValidateAction((resolve, reject)=>{
             if(this.input !== null && this.input !== undefined && this.input !== "" && this.input !== 0 && (Array.isArray(this.input) ? this.input.length > 0 :true ) ){
                 return resolve(true);
@@ -105,7 +105,7 @@ export class Validation{
             return this.createErrorMessage(reject,customMessage, errorMessage );
         });
     }
-    
+
     regex(argument=[], customMessage=false){
         return this.addValidateAction((resolve, reject)=>{
             const ThisInput = this.input;
@@ -120,7 +120,7 @@ export class Validation{
 
             const errorMessage = `${this.getFieldName()} is invalid.`;
             return this.createErrorMessage(reject,customMessage,errorMessage);
-            
+
         });
     }
     notRegex(argument=[], customMessage=false){
@@ -149,7 +149,7 @@ export class Validation{
                 return resolve(true);
             }
 
-            
+
 
             let errorMessage = `${this.getFieldName()} exceeded the limit of ${argument[0]}.`;
             if(typeof this.input === "string"){
@@ -185,7 +185,7 @@ export class Validation{
             argument = anyToArr(argument, ",");
             if( argument[0].input === this.input )
                 return resolve(true);
- 
+
             const errorMessage = `${this.getFieldName()} is not the same with ${argument[0].fieldName}`;
             return this.createErrorMessage(reject,customMessage, errorMessage);
         });
@@ -198,7 +198,7 @@ export class Validation{
 
             const errorMessage = `${this.getFieldName()} only accepts the following: ${argument.join(", ").substring(-2)}`;
             return this.createErrorMessage(reject,customMessage, errorMessage);
-           
+
         });
     }
 
@@ -217,7 +217,7 @@ export class Validation{
                 if(result === true){
                     return await doValidation(action, current+1);//call this again to do the next one
                 }
-                
+
             }catch(e){
                 return e;
             }
@@ -234,7 +234,7 @@ export class Validation{
                 return false;
             }
         }
-        
+
     }
 }
 
@@ -253,7 +253,7 @@ export async function multiValidate(valInst){
 
         if(result !== true){
             errorData[v.fieldName] = result;
-        }   
+        }
     }
 
     return errorData;
