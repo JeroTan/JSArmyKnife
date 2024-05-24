@@ -26,6 +26,9 @@ export function removeDecimal(number){
 export function ceilDecimal(number){
     return removeDecimal( Math.ceil(number) );
 }
+export function floorDecimal(number){
+    return removeDecimal( Math.floor(number) );
+}
 
 export function adjustDecimal(number, addPlaceValue = true, trimZero=true){
     const placeValue = typeof addPlaceValue === "boolean" ? 2 : Number(addPlaceValue);
@@ -76,14 +79,14 @@ export function padNumber(number, length){
     if(length < 0)
         length = 0;
     const paddingValue = 10 ** length;
-    
+
     if(paddingValue > raw.whole){
         raw.whole = (paddingValue + raw.whole).toString().substring(1);
         return combineNumber(raw, false);
     }
 
     return combineNumber(raw, false);
-    
+
 }
 
 
@@ -104,7 +107,7 @@ export function transformDate(date, format="simple"){
             return `${dateMe.getFullYear()}, ${ monthName(dateMe.getMonth()+1) } ${dateMe.getDate()} ${dayName(dateMe.getDay()+1)} | ${hour12(dateMe.getHours())}:${padNumber(dateMe.getMinutes(), 2)}${ dateMe.getHours() >=13 ? "pm":"am"  }`;
         }
     }
-   
+
 }
 export function getToday(){
     return transformDate(Date.now());
@@ -219,7 +222,7 @@ export class DateNavigator extends Date{
         }else
             super(date);
         const second = 1000; //1000 milliseconds == 1 second;
-        const minute = 60 * second; 
+        const minute = 60 * second;
         const hour = 60 * minute;
         const day = 24 * hour;
         this.reference = {
@@ -244,19 +247,19 @@ export class DateNavigator extends Date{
             "5":5, "month":5,       "Month":5,       "mm":5,    "MM":5,
             "6":6, "year":6,        "Year":6,        "y":6,     "y":6,       "yyyy":6,  "YYYY":7,
         }
-        
+
         if(translate[whatTime] == undefined){
             return this;
         }
-   
+
         if( translate[whatTime] >=0 ){
             super.setMilliseconds( type=="min"?0:999 );
         }
-        
+
         if( translate[whatTime] >=1 ){
             super.setSeconds( type=="min"?0:59 );
         }
-        
+
         if( translate[whatTime] >=2 ){
             super.setMinutes( type=="min"?0:59 );
         }
@@ -282,7 +285,7 @@ export class DateNavigator extends Date{
                     super.setDate(0);
                 }
             }
-            
+
         }
 
         if(translate[whatTime] >=5){
@@ -292,7 +295,7 @@ export class DateNavigator extends Date{
         if(translate[whatTime] >=6){
             super.setFullYear( type=="min"?1970:2037 );
         }
-            
+
         return this;
     }
 
@@ -380,7 +383,7 @@ export class DateNavigator extends Date{
             super.setDate(32);
             super.setDate(0);
         }
-            
+
         return this;
     }
     nextYear(n=1){
