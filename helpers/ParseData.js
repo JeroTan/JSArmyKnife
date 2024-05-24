@@ -46,6 +46,10 @@ export function objToString(object, splitter = " "){
     return ""+object;
 }
 
+export function onlyAlphaString(stringData){
+    return stringData.replace(/[^a-zA-Z]+/g, "");;
+}
+
 export function capitalFirst(str){
     return  str.length ? (str[0].toUpperCase()  + str.slice(1)) : "";
 }
@@ -97,6 +101,9 @@ export function isThereError(errorData){
         return !errorData[key];
     })
 }
+
+
+
 
 
 //Data Importer
