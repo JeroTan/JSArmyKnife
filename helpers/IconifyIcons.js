@@ -5,12 +5,14 @@ class MakeIcon{
         this.reset();
     }
     reset(){
+        //This.svg is the parent of vectors
         this.svg = {
             viewBox:"0 0 24 24",
             width:"100%",
             height:"100%",
             xmlns:"http://www.w3.org/2000/svg",
         }
+        //This.vectors is the child of svg that will be use to show a graphics
         this.vectors = [];
         return this;
     }
@@ -36,7 +38,7 @@ class MakeIcon{
             ...element
         })
         return this;
-    }   
+    }
     addViewBox(viewBox){
         this.svg.viewBox = viewBox;
         return this;
@@ -87,13 +89,13 @@ export const IconList = {
     down: iconNew().addFill("m5 8l7 8l7-8").get(),
 
     upload: iconNew().addFill("M11 16V7.85l-2.6 2.6L7 9l5-5l5 5l-1.4 1.45l-2.6-2.6V16zm-5 4q-.825 0-1.412-.587T4 18v-3h2v3h12v-3h2v3q0 .825-.587 1.413T18 20z").get(),
-    
+
     eye: iconNew().addFill("M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5").get(),
 
     right: iconNew().addFill("M5.536 21.886a1.004 1.004 0 0 0 1.033-.064l13-9a1 1 0 0 0 0-1.644l-13-9A1 1 0 0 0 5 3v18a1 1 0 0 0 .536.886").get(),
 
     lastNext: iconNew().addFill("M3 4.753c0-1.408 1.578-2.24 2.74-1.444l10.498 7.194a1.75 1.75 0 0 1 .01 2.88L5.749 20.685C4.59 21.492 3 20.66 3 19.248zM21 3.75a.75.75 0 0 0-1.5 0v16.5a.75.75 0 0 0 1.5 0z").get(),
-    
+
     firstPrev: iconNew().addFill("M3 3.75a.75.75 0 0 1 1.5 0v16.5a.75.75 0 0 1-1.5 0zm18 1.003c0-1.408-1.578-2.24-2.74-1.444L7.763 10.503a1.75 1.75 0 0 0-.01 2.88l10.499 7.302c1.16.807 2.749-.024 2.749-1.437z").get(),
 
     next: iconNew().addFill("m184.49 136.49l-80 80a12 12 0 0 1-17-17L159 128L87.51 56.49a12 12 0 1 1 17-17l80 80a12 12 0 0 1-.02 17").addViewBox("0 0 256 256").get(),
@@ -130,5 +132,6 @@ export const IconList = {
 
     naturalNote: iconNew().addFill("M10 8.75V3.5H8v14l6-2.25v5.25h2v-14l-6 2.25m4 4.5l-4 1.5v-4l4-1.5v4Z").get(),
 
-    share: iconNew().addFill("M11 9V5l7 7l-7 7v-4.1c-5 0-8.5 1.6-11 5.1c1-5 4-10 11-11m6-1V5l7 7l-7 7v-3l4-4z").get()
+    house: iconNew().addFill("M224 120v96a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8v-52a4 4 0 0 0-4-4h-40a4 4 0 0 0-4 4v52a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a16 16 0 0 1 4.69-11.31l80-80a16 16 0 0 1 22.62 0l80 80A16 16 0 0 1 224 120").addViewBox("0 0 256 256"),
+
 }
