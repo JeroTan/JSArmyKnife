@@ -1,3 +1,13 @@
+/**
+ * You may use the following helpers
+ * Class:
+ * - HttpPlate
+ * - Resolve
+ * - Fetcher
+ * Function:
+ * - abortRequest
+ */
+
 //Required Dependencies: Axios
 import axios, { AxiosError } from "axios";
 
@@ -159,7 +169,7 @@ export class HttpPlate{
 }
 
 //This function, when call, will abort the current on going request.
-export function abortLink (){
+export function abortRequest (){
     abortion.abort();
 }
 
