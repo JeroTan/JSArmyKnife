@@ -42,11 +42,13 @@ function successProcessing(success){
 //The actual HTTP Request abstraction. It uses axios under the hood.
 export class HttpPlate{
     //You may overload the properties of this class;
-    Config = {}
+    Config = {
+        headers:{}
+    }
     defaultBaseURL = "http://localhost:8000/api/v1";
     defaultHeaders = {
         "Accept": "application/json",
-        'Access-Control-Allow-Credentials': 'true',
+        "Access-Control-Allow-Credentials": 'true',
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
@@ -54,8 +56,8 @@ export class HttpPlate{
     }
     constructor(baseURL = false, headers = false){
         this.reset(baseURL, headers);
-        this.defaultHeaders = headers !== false ? headers : this.headers;
-        this.defaultBaseURL = baseURL !== false ? baseURL : this.defaultBaseURL; 
+        this.defaultBaseURL = baseURL !== false ? baseURL : this.defaultBaseURL;
+        this.defaultHeaders = headers !== false ? headers : this.defaultHeaders;
     }
 
 
@@ -156,10 +158,10 @@ export class HttpPlate{
         }
     }
 
-    reset(baseURL = false, headers = false){
+    reset(baseURL = false, headers = false){console.log(this);
         this.Config = {
             baseURL: baseURL || ( this.defaultBaseURL ? this.defaultBaseURL : "" ),
-            headers: headers || ( this.defaultHeaders ? this.defaultHeaders : "" ),
+            headers: headers || ( this.defaultHeaders ? this.defaultHeaders : {} ),
             signal: abortion.signal,
         };
         this.Inst = axios.create(this.Config);
@@ -202,7 +204,7 @@ export class Resolve{
 
         return this;
     }
-    checkParseExclude(status, callback){
+    checkParseExclude(status, callback){//Normally you should just use parseData to get the resolve but we need to exclude some status code once the callback is already use
         const THIS = this;//To prevent from invalid Self Referencing
         this.excludeStatus.push(status);
         THIS.checkStatus(status).then(match=>{
@@ -323,13 +325,14 @@ export class Resolve{
     s507(callback){ //Insufficient Storage
         return this.checkParseExclude(507, callback);
     }
-    //others
+    //If somehow you already specify all the status code and you need to get the unpredictable one then use this.
     sOthers(callback){
         (async(THIS)=>{
             try{
                 const {status, data} = await THIS.promiseResponse;
                 if( THIS.excludeStatus.some(x=>x==status) )
                     return THIS;
+                THIS.excludeStatus.push(status);
                 callback(data);
             }catch(e){
                 console.error(e);
@@ -337,7 +340,8 @@ export class Resolve{
         })(this);
         return this;
     }
-    sElse(callback){//This do a thing if everything is finish while it still returns like a normal one it is not recommended to use since it doesn't specify the status code
+    //This is same with default but it doesn't return raw response but instead works like status codes method. However this one works regardless of status code, and it may trigger both twice like you call the method 200 and chain this one then those two will run together. Maybe use this as an after-effect once everything is finish.
+    sElse(callback){
         return this.parseData(callback);
     }
 }
@@ -346,7 +350,7 @@ export class Resolve{
 /** Sometimes you want to add a debounce(or delay the user or have the user a small window of time before submitting a request on the server) on the request plate.
  * This class offers a time-based or turn-based.
  * Time-based - uses time to tell when to submit the request to server.
- * Turn-based - will wait for the current request finish before sending another request to the server. 
+ * Turn-based - will wait for the current request finish before sending another request to the server.
  * by default, it uses Turn-based, so better add with Debounce to add a timer
  */
 export class Fetcher{
