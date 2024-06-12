@@ -158,7 +158,7 @@ export class HttpPlate{
         }
     }
 
-    reset(baseURL = false, headers = false){console.log(this);
+    reset(baseURL = false, headers = false){
         this.Config = {
             baseURL: baseURL || ( this.defaultBaseURL ? this.defaultBaseURL : "" ),
             headers: headers || ( this.defaultHeaders ? this.defaultHeaders : {} ),
