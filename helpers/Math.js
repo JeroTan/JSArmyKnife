@@ -236,6 +236,7 @@ export class DateNavigator extends Date{
         // TO BE CONTINUE
         return this;
     }
+    //transform the date on its max or min without changing other data
     normalize(whatTime, type="min"){//@whatTime = Year(2037 or 1970), Month(0 or 11), Day(0, 28,29,30,31), Hour(0, 23), Minute(0, 59), Seconds(0, 59), Milliseconds(0,999)
         const {day} = this.reference;
         const translate = {

@@ -33,6 +33,20 @@ export function anyToArr(input, strSplitter = ","){
     return arrayResult;
 }
 
+export function anyToStr(input){
+    if(typeof input === "string"){
+        return input;
+    }else if(typeof input === "object"){
+        return JSON.stringify(input);
+    }else if(typeof input === "number"){
+        return String(input)
+    }else if(input instanceof RegExp){
+        return RegExp.toString();
+    }else{
+        return ""
+    }
+}
+
 export function objToString(object, splitter = " "){
     if(typeof object == "object" && Array.isArray(object))
         return object.join(splitter);
@@ -107,7 +121,7 @@ export function isThereError(errorData){
 
 
 //Data Importer
-export class Data{
+export class DataDispatch{//This is mostly for React Use
     constructor( dispatch=false){
         //Dispatch callback must have a parameter that also accepts a callback. That callback must have a parameter about the old data;
         if(dispatch && typeof dispatch == "function")
@@ -125,10 +139,10 @@ export class Data{
         });
         return this;
     }
-    clear(key){
+    clear(key, defaultClearValue = ""){
         this.dispatch(prev=>{
             const refPrev = {...prev};
-            refPrev[key] = "";
+            refPrev[key] = defaultClearValue;
             return refPrev
         });
         return this;
@@ -181,116 +195,6 @@ export class Debouncer {
     run(){
         clearTimeout(this.debouncer);
         this.debouncer = setTimeout(this.callback, this.timer);
-        return this;
-    }
-}
-
-
-//CACHEr - use this to store a data in localstorage;
-export class Cacher{
-    constructor(baseKey = ""){
-        if(baseKey)
-            this.baseKey = baseKey;
-        else{
-            this.baseKey = undefined;
-        }
-
-        this.cDataExist = undefined; //boolean when used
-        this.cDataToStore = {key:"", value:""};
-        this.cDataCurrent = "";
-    }
-    //** InHouse */
-    valueTransform(value){
-        switch(typeof value){
-            case "object":
-                return JSON.stringify(value);
-            case "string":
-                return String(value);
-            default:
-                return value;
-        }
-    }
-    //** InHouse */
-
-    store(key = "", value = ""){
-        const THIS = this;
-        if(typeof key === "string" ){
-            value = THIS.valueTransform(value);
-
-            if(this.baseKey)
-                key = this.baseKey+"."+key;
-
-            localStorage.setItem(key, value);
-            return this;
-        }
-
-        if( !(typeof key === "object" && !Array.isArray(key)) )
-            return this;
-
-        Object.keys(key).map((i=>{
-            let value = key[i];
-            let key = i;
-            value = THIS.valueTransform(value);
-
-            if(this.baseKey)
-                key = this.baseKey+"."+key;
-
-            localStorage.setItem(key, value);
-        }))
-        return this;
-    }
-    exist(key, value = undefined){
-        if(this.baseKey)
-            key = this.baseKey+"."+key;
-        if(value === undefined){
-            return localStorage.getItem(key) !== null
-        }
-        value = this.valueTransform(value);
-        return localStorage.getItem(key) !== null && localStorage.getItem(key) === value;
-    }
-    get(key){
-        if(this.baseKey)
-            key = this.baseKey+"."+key;
-        return localStorage.getItem(key);
-    }
-
-    //This is for chaining |If the data already exist and it's the same data then do not store and do not do or not do the callback
-    cExist(key, value = undefined){
-        this.cDataExist = this.exist(key, value);
-        this.cDataToStore = {key:key, value:value};
-        if(this.cDataExist)
-            this.cDataCurrent = this.get(key);
-        return this;
-    }
-    cStore(key=false, value=false){
-        if(this.cDataExist)
-            return this;
-        if(key)
-            this.cDataToStore.key = key;
-        if(value)
-            this.cDataToStore.value = value;
-
-        this.store(this.cDataToStore.key, this.cDataToStore.value);
-        return this;
-    }
-    cDoWhenNotExist(callback = ()=>true){
-        if(this.cDataExist)
-            return this;
-
-        callback(this.cDataCurrent);
-        return this;
-    }
-    cDoWhenExist(callback = ()=>true){
-        if(!this.cDataExist)
-            return this;
-
-        callback(this.cDataCurrent);
-        return this;
-    }
-    cReset(){//reset the cDataExist and cDataToStore Here
-        this.cDataExist = undefined;
-        this.cDataToStore = {key:"",value:""}
-        this.cDataCurrent = ""
         return this;
     }
 }

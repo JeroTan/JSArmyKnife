@@ -48,7 +48,7 @@ export class Pop{
         this.dispatch = dispatch; //External function that is use to change a property
 
         //Shorteners
-        const basicContent = {...popStructure};
+        const basicContent = {...popStructure}; //Get the reference default structure of Pop
         basicContent.isOpen = true; //Upon creation of this one, automatically open the pop;
         //Shorteners
 
@@ -98,14 +98,14 @@ export class Pop{
                 closeButton: true,
             }
         };
-        this.cachedContent = basicContent;
+        this.popContent = basicContent;
     }
 
     //--InHouseHelper--//
-    cacheData(object){//Accepts object key:value
+    updatePopContent(object){//Accepts object key:value
         const THIS = this;
         Object.keys(object).forEach(key=>{
-            THIS.cachedContent[key] = object[key];
+            THIS.popContent[key] = object[key];
         })
         return THIS;
     }
@@ -114,7 +114,7 @@ export class Pop{
     //--DispatchRunner--//
     //** You must overload this one if you want to change how updating from external function works */
     run(){
-        this.dispatch( { pop:"update", val: this.cachedContent } );
+        this.dispatch( { pop:"update", val: this.popContent } );
         return this;
     }
     //--DispatchRunner--//
@@ -125,24 +125,24 @@ export class Pop{
         return this;
     }
     type(type){//This will determine the basic structure of the popup
-        this.cacheData(this.frame[type]);
+        this.updatePopContent(this.frame[type]);
         return this;
     }
     width(width){
-        this.cacheData({width: width});
+        this.updatePopContent({width: width});
         return this;
     }
     title(title){
-        this.cacheData({title: title});
+        this.updatePopContent({title: title});
         return this;
     }
     message(message){
-        this.cacheData({message: message});
+        this.updatePopContent({message: message});
         return this;
     }
     /*@accept - callback for accept button, @reject - callback for reject/cancel button, @close - callback for close button. All of them must accept "close" argument. */
     callback(accept = undefined, reject = undefined, close = undefined, backdrop = undefined){
-        this.cacheData({
+        this.updatePopContent({
             acceptButtonCallback: accept && typeof accept === "function"?accept : undefined,
             rejectButtonCallback: reject && typeof reject === "function"?reject : undefined,
             closeButtonCallback: close && typeof close === "function"?close : undefined,
@@ -151,7 +151,7 @@ export class Pop{
         return this;
     }
     button(accept = true, reject = true, close = true, backdrop = true){
-        this.cacheData({
+        this.updatePopContent({
             acceptButton: accept,
             rejectButton: reject,
             closeButton: close,
@@ -160,7 +160,7 @@ export class Pop{
         return this;
     }
     custom(callback){
-        this.cacheData({
+        this.updatePopContent({
             customDialog:callback,
             backdropTrigger: true,
             closeButton: true,
@@ -168,11 +168,11 @@ export class Pop{
         return this;
     }
     close(){
-        this.cacheData({isOpen: false });
+        this.updatePopContent({isOpen: false });
         return this;
     }
     open(){
-        this.cacheData({isOpen: true });
+        this.updatePopContent({isOpen: true });
         return this;
     }
 
