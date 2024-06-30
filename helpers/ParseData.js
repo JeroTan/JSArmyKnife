@@ -164,7 +164,7 @@ export class DataDispatch{//This is mostly for React Use
 }
 
 //Error Importer
-export class Error extends Data{}
+export class ErrorDispatch extends DataDispatch{}
 
 
 //Laravel Error Validation Error Parse To String instead of arrays

@@ -18,11 +18,11 @@ class Storage{
         return localStorage.getItem(this.key) !== null
     }
     store(value){
-        localStorage.storeItem(this.key, anyToStr(value));
+        localStorage.setItem(this.key, anyToStr(value));
     }
-    get(transformToJSON = true){
+    get(parseJSON = true){
         let value = localStorage.getItem(this.key);
-        if(transformToJSON){
+        if(parseJSON){
             try{ value = JSON.parse(value); }catch{};
         }
         return value;
@@ -31,26 +31,30 @@ class Storage{
 
 
 //Data that will help to retrieve/run specific function when data from storage with condition
-class DataConvoy{
+export class DataConvoy{
     constructor(isSuccess = true, value = null){
         this.isSuccess = isSuccess;
         this.value = value;
     }
     setSuccess(isSuccess){
         this.isSuccess = isSuccess;
+        return this;
     }
     setValue(value){
         this.value = value;
+        return this;
     }
     success(callback){
         if(!this.isSuccess)
             return this;
         callback(this.value);
+        return this;
     }
     fail(callback){
         if(this.isSuccess)
             return this;
         callback(this.value);
+        return this;
     }
     getValue(){
         return this.value;
@@ -58,7 +62,7 @@ class DataConvoy{
 }
 
 //Cache that compare Storage and given data and then store if not the same and move on with still new one
-class Cacher{
+export class Cacher{
     storage;
 
     constructor(key="1"){
@@ -91,7 +95,7 @@ class Cacher{
 
 
 //This uses Date and local.storage api
-class TimeCacher{
+export class TimeCacher{
     //Strucuture
     expireDate;
     baseInterval = 0;//if 0, then every time you retrieved something it will update the current storage. This is in milliseconds
