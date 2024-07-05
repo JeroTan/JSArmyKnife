@@ -251,3 +251,10 @@ export async function multiValidate(valInst){
 
     return errorData;
 }
+//Check the error payload from 422
+export function isThereError(errorData){
+    //Format would be {key:message} for the object
+    return Object.keys(errorData).every(key=>{
+        return !errorData[key];
+    })
+}
