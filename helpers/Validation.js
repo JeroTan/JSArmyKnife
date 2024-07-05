@@ -1,10 +1,10 @@
-import { anyToArr } from "./ParseData.js";
+import { anyToArr } from "./ParseData.ts";
 
 /*****************TEMPLATE //Do not touch *********************/
+
 export class Validation{
     errorMessage = {
         required: "",
-        
     }
     constructor(input = "", fieldName = ""){
         this.input = input;

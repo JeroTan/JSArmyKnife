@@ -35,7 +35,7 @@
 
 //====================================================================================================================================//
 //>>> Convert to Other Types
-export function anyToArr(input: any[] | string | number | boolean | RegExp, splitter:string = ",") :any[]
+export function anyToArr(input: any[] | string | number | boolean |typeof RegExp, splitter:string = ",") :any[]
 {//splitter will be used when input is string to split string with delimiter
     let arrayResult: any[] = [];
 
