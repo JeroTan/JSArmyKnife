@@ -2,6 +2,10 @@ import { anyToArr } from "./ParseData.js";
 
 /*****************TEMPLATE //Do not touch *********************/
 export class Validation{
+    errorMessage = {
+        required: "",
+        
+    }
     constructor(input = "", fieldName = ""){
         this.input = input;
         this.fieldName = fieldName;
@@ -205,7 +209,7 @@ export class Validation{
     //--Public Object Method--//
 
 
-    async validate(response = false){
+    async validate(){
         const ThisAction = this.action;
         async function doValidation(action = ThisAction, current = 0){
             if(action.length <= current){
@@ -223,18 +227,7 @@ export class Validation{
             }
         }
         const result = await doValidation();
-        if(response === false){
-            return result;
-        }else{
-            if(result!== true){
-                response.status(422).json( {[this.fieldName]: result} );
-                return true;
-            }else{
-                response.sendStatus(200);
-                return false;
-            }
-        }
-
+        return result;
     }
 }
 

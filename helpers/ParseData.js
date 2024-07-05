@@ -64,6 +64,10 @@ export function onlyAlphaString(stringData){
     return stringData.replace(/[^a-zA-Z]+/g, "");;
 }
 
+export function removeSpace(stringData){
+    return stringData.replace(/ */g, "")
+}
+
 export function capitalFirst(str){
     return  str.length ? (str[0].toUpperCase()  + str.slice(1)) : "";
 }
