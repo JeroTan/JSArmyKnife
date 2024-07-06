@@ -1,4 +1,4 @@
-import { anyToArr, toRegex, type AnyObject } from "./ParseData.ts";
+import { anyToArr, capitalFirst, toRegex, type AnyObject } from "./ParseData.ts";
 
 /*****************TEMPLATE //Do not touch *********************/
 interface ValidationProps{
@@ -11,7 +11,7 @@ interface RejectArgument{
     arg?:(string|any)[],
 }
 
-type PromiseCallback = (resolve: Function, reject: Function)=>void;
+type ValidatorResponse = (thisClass: any)=>Promise<true|RejectArgument>|true|RejectArgument;
 
 export class ValidationErrorMessage{
     required= '%field% is required.';
@@ -29,7 +29,7 @@ export class ValidationErrorMessage{
 
 export class Validation{
     props:ValidationProps = { input: "", field: "" }
-    action:PromiseCallback[] = [];
+    action:ValidatorResponse[] = [];
     errorMessages:AnyObject = new ValidationErrorMessage;
 
     constructor(input:any = undefined, field:string|undefined = undefined, display:string|undefined = undefined ){
@@ -69,7 +69,7 @@ export class Validation{
     //--Getter--//
 
     //--Internal--//
-    private validationStackPush(process: PromiseCallback){
+    private validationStackPush(process: ValidatorResponse){
         this.action[this.action.length] = process;
         return this;
     }
@@ -77,155 +77,146 @@ export class Validation{
 
     //--Public Object Method--//
     public required(){
-        const { input, field } = this.props;
-        this.validationStackPush((resolve, reject)=>{
-            if( input || ( Array.isArray(this.input) && this.input.length>0 ) ){
-                return resolve(true);
+        this.validationStackPush((THIS)=>{
+            const {input} = THIS.props;
+            if( input || ( Array.isArray(input) && input.length>0 ) ){
+                return true;
             }
-            return reject({validator:"required"});
+            return {validator:"required"};
         })
         return this;
     }
     string(){//Check if string
-        const { input, field } = this.props;
-        this.validationStackPush((resolve, reject)=>{
+        this.validationStackPush((THIS)=>{
+            const {input} = THIS.props;
             if(typeof input === "string"){
-                return resolve(true);
+                return true
             }
-            return reject({validator:"string"});
+            return {validator:"string"}
         })
         return this;
     }
     number(argument:boolean = false){ //True means convert the string into number if it is a string with a number
-        const { input } = this.props;
-        const THIS = this;
-        this.validationStackPush((resolve, reject)=>{
-            console.log(input, typeof input === "number" )
+        this.validationStackPush((THIS)=>{
+            const {input} = THIS.props;
             if(typeof input === "number"){
-                return resolve(true);
+                return true
             }
             if(typeof input === "string" && !isNaN(Number(input))){
                 THIS.props.input = argument? Number(input) : input;
-                return resolve(true);
+                return true
             }
 
-            return reject({validator:"number"});
+            return{validator:"number"};
         })
         return this;
     }
     date(argument: boolean = false){
-        const { input } = this.props;
-        const THIS = this;
-        this.validationStackPush((resolve, reject)=>{
+        this.validationStackPush((THIS)=>{
+            const { input } = THIS.props;
             if(input instanceof Date){
-                return resolve(true);
+                return true;
             }
             if(typeof input === "string" || typeof input === "number"){
                 const date = new Date(input);
                 if( isNaN(Number(date)) ){
                     if(argument)
                         THIS.props.input = date;
-                    return resolve(true);
+                    return true;
                 }
             }
 
-            return reject({validator:"date"});
+            return {validator:"date"}
         })
         return this;
     }
 
     regex( argument: string|typeof RegExp|any[] ){
-        const THIS = this;
-        const { input } = THIS.props;
-        this.validationStackPush((resolve, reject)=>{
+        this.validationStackPush((THIS)=>{
+            const { input } = THIS.props;
             argument = anyToArr(argument);
             if(
                 argument.every(x=>{
                     return toRegex(x).test(input);
                 })
             ){
-                return resolve(true);
+                return true
             }
 
-            return reject({validator:"regex"});
+            return {validator:"regex"};
         })
         return this;
     }
     notRegex( argument: string|typeof RegExp|any[] ){
-        const THIS = this;
-        const { input } = THIS.props;
-        this.validationStackPush((resolve, reject)=>{
+        this.validationStackPush((THIS)=>{
+            const { input } = THIS.props;
             argument = anyToArr(argument);
             if(
                 argument.every(x=>{
                     return !toRegex(x).test(input);
                 })
             ){
-                return resolve(true);
+                return true
             }
 
-            return reject({validator:"notRegex"});
+            return {validator:"notRegex"};
         })
         return this;
     }
 
-    max(argument:number){
-        const THIS = this;
-        const { input } = THIS.props;
-        this.validationStackPush((resolve, reject)=>{
+    max(argument:number){        
+        this.validationStackPush((THIS)=>{
+            const { input } = THIS.props;
             if(typeof input === "string" && input.length <= argument){
-                return resolve(true);
+                return true;
             }else if(typeof input === "number" && input <= argument){
-                return resolve(true);
+                return true;
             }else if(typeof input === "object" && Array.isArray(input) && input.length <= argument ){
-                return resolve(true);
+                return true;
             }else if(typeof input === "object" && Object.keys(input).length <= argument){
-                return resolve(true);
+                return true;
             }
 
-            return reject({validator:"max", arg:[argument]});
+            return {validator:"max", arg:[argument]};
         })
         return this;
     }
-    min(argument:number){
-        const THIS = this;
-        const { input } = THIS.props;
-        this.validationStackPush((resolve, reject)=>{
+    min(argument:number){        
+        this.validationStackPush((THIS)=>{
+            const { input } = THIS.props;
             if(typeof input === "string" && input.length >= argument){
-                return resolve(true);
+                return true;
             }else if(typeof input === "number" && input >= argument){
-                return resolve(true);
+                return true;
             }else if(typeof input === "object" && Array.isArray(input) && input.length >= argument ){
-                return resolve(true);
+                return true;
             }else if(typeof input === "object" && Object.keys(input).length >= argument){
-                return resolve(true);
+                return true;
             }
 
-            return reject({validator:"min", arg:[argument]});
+            return {validator:"min", arg:[argument]};
         })
         return this;
     }
     same(argument: this){//accept argument as instance of this class;
-        const THIS = this;
-        const { input } = THIS.props;
-        this.validationStackPush((resolve, reject)=>{
+        this.validationStackPush((THIS)=>{
+            const { input } = THIS.props;
             if( argument.getInput() === input ){
-                return resolve(true);
+                return true
             }
 
-            return reject({validator:"same", arg:[argument.getField()]});
+            return {validator:"same", arg:[argument.getField()]};
         })
         return this;
     }
     match(argument:any[]|string|number){//Match the given Array
-        const THIS = this;
-        const { input } = THIS.props;
-        this.validationStackPush((resolve, reject)=>{
+        this.validationStackPush((THIS)=>{
+            const { input } = THIS.props;
             argument = anyToArr(argument, ",");
             if( argument.some(x=>(x).toString()===input.toString()) ){
-                return resolve(true);
+                return true
             }
-            return reject({validator:"same", arg:argument});
+            return {validator:"same", arg:argument};
         })
         return this;
     }
@@ -239,48 +230,69 @@ export class Validation{
         })
         return this;
     }
-    public async validate(){
+    public validate(){
         const THIS = this;
         const { action } = THIS;
         const { field, display } = THIS.props;
 
-        const actionPromise = action.map(x=>{
-            return ()=>{//I use callback so that error will happen under the try catch field
-                return new Promise((resolve, reject)=>{
-                    x(resolve, reject);
-                })
-            };
-        })
-
-        async function iterateValidation(validator: any[] = actionPromise, current = 0){
+        async function iterateValidation(validator: any[] = action, current = 0){
             if(action.length <= current){//It means that it reaches the validation stack limit and there is no error found.
                 return true;
             }
-            try{
-                const result = await actionPromise[current]()//check the current validation by hitting with await
-                if(result === true){
-                    return iterateValidation(validator, current+1);//call this again to do the next one if there is no error found.
-                }
-            }catch(e: any){//e returns the ff key in an object: validator-the name of validation, arg-array that returns additional options.
-                let errorMessage:string = "";
-                errorMessage += THIS.errorMessages[e.validator].replace("%field%", display?field:display)
-                if(e.arg){
-                    e.arg.forEach((element:string, index:number) => {
+            let result = validator[current](THIS); //Check the validation for each stack
+            if(result instanceof Promise){
+                result = await result;
+            }
+            
+            if(result === true){ //Validate again when true
+                return await iterateValidation(validator, current+1);
+            }else{ //else return an error message;
+                let errorMessage:string = THIS.errorMessages[result.validator].replace("%field%", display?display:capitalFirst(field));
+                if(result.arg){
+                    result.arg.forEach((element:string, index:number) => {
                         errorMessage = errorMessage.replace(`%arg${index+1}%`, element);
                     });
                 }
                 return errorMessage;
             }
         }
-        const result =  await iterateValidation();
-        if(result){//Remove Stored after using it
-            this.action = [];
-            this.input("");
-        }
-        return result;
+
+        //Return a promise for ValidationResult Class
+        return new ValidationResult(iterateValidation());
     }
     //--Processing Methods--//
 
+}
+
+
+export class ValidationResult{
+    validationPromise: Promise<string|true|undefined> = new Promise(()=>{});//String means error message and boolean means true if there is no error
+
+    constructor(validationPromise:Promise<string|true|undefined>|undefined = undefined){
+        if(validationPromise!== undefined)
+            this.addPromise(validationPromise);
+    }
+    addPromise(validationPromise:Promise<string|true|undefined>){
+        this.validationPromise = validationPromise;
+        return this;
+    }
+    
+    success(callback: Function): this{
+        this.validationPromise.then(x=>{
+            if(x===true){
+                callback();
+            }
+        })
+        return this;
+    }
+    fail(callback: (errorMessage:string)=>{}): this{
+        this.validationPromise.then(x=>{
+            if(x!==true && typeof x === "string"){
+                callback(x);
+            }
+        })
+        return this;
+    }
 }
 
 
