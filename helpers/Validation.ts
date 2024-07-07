@@ -293,6 +293,15 @@ export class ValidationResult{
         })
         return this;
     }
+    promise(callback: Function|undefined): Promise<string|true|undefined|void>{
+        if(callback){
+            return this.validationPromise.then(x=>{
+                callback(x)
+                return x;
+            })
+        }
+        return this.validationPromise;
+    }
 }
 
 
