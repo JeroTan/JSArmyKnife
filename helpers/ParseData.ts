@@ -58,8 +58,10 @@ export function anyToArr(input: any[] | string | number | boolean |typeof RegExp
     return arrayResult;
 }
 
-export function anyToStr( input: string|object|number|typeof RegExp ): string{
-    if(typeof input === "object" && input instanceof RegExp){
+export function anyToStr( input: string|object|number|typeof RegExp|null|undefined ): string{
+    if(typeof input === "undefined" || input === null){
+        return "";
+    }else if(typeof input === "object" && input instanceof RegExp){
         return RegExp.toString();
     }else if(typeof input === "object"){
         return JSON.stringify(input);
@@ -103,7 +105,7 @@ export function capitalFirst(text: string){
 //====================================================================================================================================//
 //>>> Object Manipulation
 export interface AnyObject {//Use To Tell the object to accept dynamic ones
-    [key: string]: any
+    [key: string|number]: any
 }
 export function propsExclude(keys: (string|number)[], objects: AnyObject ): object{//Exclude the given property(key) to the inputted object.
     const newObject:any = {};
