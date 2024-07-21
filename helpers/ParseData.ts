@@ -87,6 +87,16 @@ export function toRegex(input: string|RegExp): RegExp{
 export function isInstance(object: any, classCopy: Function): boolean{
     return object instanceof classCopy;
 }
+export function isJSON(data:any) {
+    if (typeof data !== 'string') return false;
+    try {
+        const result = JSON.parse(data);
+        const type = Object.prototype.toString.call(result);
+        return type === '[object Object]' || type === '[object Array]';
+    } catch (err) {
+        return false;
+    }
+}
 
 //<<< Variable/Value Checking
 //====================================================================================================================================//
