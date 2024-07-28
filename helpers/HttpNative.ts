@@ -497,3 +497,105 @@ interface AllHeaders{
             return this.parseData(callback);
         }
     }
+    
+    /*|---------------------------------------------------------------------------------------|*/
+    /*|----------This one is for vanilla JS Form Request--------------------------------------|*/
+    /*|---------------------------------------------------------------------------------------|*/
+    interface DOMRequestConfig{
+        method:undefined|"POST"|"GET",
+        action:undefined|string,
+        target?:undefined|string,
+        enctype?:undefined|string,
+    }
+    interface DOMRequestData{
+        key:string,
+        value:string|any,
+        type?:string,
+    }
+    
+    class DOMRequest{
+        private config:DOMRequestConfig = {method:undefined, action:undefined, target:undefined};
+        private dataContainer:any[] = [];
+    
+        constructor(method?:undefined|"POST"|"GET", action?:undefined|string, target?:undefined|string){
+            if(method)
+                this.method(method);
+            if(action)
+                this.action(action);
+            if(target)
+                this.target(target);
+        }
+    
+        //--Setter--//
+        public method(method:"POST"|"GET"){
+            this.config.method = method;
+            return this;
+        }
+        public get(){
+            return this.method("GET");
+        }
+        public post(){
+            return this.method("POST");
+        }
+        public action(action:string){
+            this.config.action = action;
+            return this;
+        }
+        public url(action:string){
+            return this.action(action);
+        }
+        public target(target:string){
+            this.config.target = target;
+            return this;
+        }
+        //--Setter--//
+    
+        //--In House--//
+        protected pushDataToStack(data:DOMRequestData){
+            const newElement = document.createElement("input");
+            newElement.name = data.key;
+            newElement.value = data.value;
+            if(data.type)
+                newElement.type = data.type;
+            
+            this.dataContainer.push( newElement );
+        }
+        //--In House--//1
+    
+    
+        //--Functionalities--//
+        public data(data:DOMRequestData|DOMRequestData[]){
+            const THIS = this;
+    
+            if(!Array.isArray(data)){
+                this.pushDataToStack(data);
+                return this;
+            }
+    
+            data.forEach((e:DOMRequestData)=>{
+                THIS.pushDataToStack(e);
+            })
+            
+            return this;
+        }
+        public request(){
+            if(this.config.action === undefined || this.config.method === undefined)
+                return;
+            const formContainer = document.createElement("form");
+            formContainer.action = this.config.action;
+            formContainer.method = this.config.method;
+    
+            this.dataContainer.forEach((e:any)=>{
+                formContainer.appendChild(e);
+            });
+    
+            const submitButton = document.createElement("button");
+            submitButton.type = "submit";
+    
+            formContainer.appendChild(submitButton);
+    
+            //Finally submit the request
+            submitButton.click();
+        }
+        //--Functionalities--//
+    }

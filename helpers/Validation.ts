@@ -131,7 +131,7 @@ export class Validation{
         return this;
     }
 
-    regex( argument: string|typeof RegExp|any[] ){
+    regex( argument: string|RegExp|RegExpConstructor|any[] ){
         this.validationStackPush((THIS)=>{
             const { input } = THIS.props;
             argument = anyToArr(argument);
@@ -285,7 +285,7 @@ export class ValidationResult{
         })
         return this;
     }
-    fail(callback: (errorMessage:string)=>{}): this{
+    fail(callback: (errorMessage:string)=>void): this{
         this.validationPromise.then(x=>{
             if(x!==true && typeof x === "string"){
                 callback(x);
@@ -293,7 +293,7 @@ export class ValidationResult{
         })
         return this;
     }
-    promise(callback: Function|undefined): Promise<string|true|undefined|void>{
+    promise(callback?: Function|undefined): Promise<string|true|undefined|void>{
         if(callback){
             return this.validationPromise.then(x=>{
                 callback(x)

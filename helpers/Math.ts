@@ -255,6 +255,16 @@ export function dayName(number:NUMBER_OF_DAYS, format="short"){
 export function hour12(hour24:number){
     return removeDecimal(hour24%12) || 12;
 }
+export function timeToMilliseconds(timeString:string){
+    if(!timeString.match(/^\d+:\d{1,2}:\d{1,2}(:\d{1,4})?$/))
+        return 0;
+    
+    const splitTime = timeString.split(":").map(x=>Number(x));
+    if(splitTime.length === 3){
+        splitTime.push(0);
+    }
+    return splitTime[0]*hour + splitTime[1]*minute + splitTime[2]*second + splitTime[3];
+}
 
 //Time in Milliseconds
 const second = 1000; //1000 milliseconds == 1 second;

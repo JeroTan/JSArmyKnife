@@ -32,10 +32,12 @@
  * - parseLarevelError()
  */
 
+import { ceil } from "./Math";
+
 
 //====================================================================================================================================//
 //>>> Convert to Other Types
-export function anyToArr(input: any[] | string | number | boolean |typeof RegExp, splitter:string = ",") :any[]
+export function anyToArr(input: any[] | string | number | boolean |typeof RegExp | RegExpConstructor | RegExp, splitter:string = ",") :any[]
 {//splitter will be used when input is string to split string with delimiter
     let arrayResult: any[] = [];
 
@@ -183,7 +185,7 @@ export class DataDispatch{// Get the value of state changer
         this.dispatch = dispatch;
         return this;
     }
-    store(key:(string|number)[], val: any){
+    store(key:string|number, val: any){
         this.dispatch( (old:object)=>{
             const newData:AnyObject = {...old};
             newData[String(key)] = val;
@@ -191,7 +193,7 @@ export class DataDispatch{// Get the value of state changer
         });
         return this;
     }
-    clear(key:(string|number)[], clearValue:any = ""){
+    clear(key:string|number, clearValue:any = ""){
         this.dispatch( (old:object)=>{
             const newData:AnyObject = {...old};
             newData[String(key)] = clearValue;
@@ -228,3 +230,18 @@ export function parseLarevelError( errors:AnyObject ): object{
     return errors;
 }
 //<<< For Laravel Utilities | But can stand alone as vanilla JS
+//====================================================================================================================================//
+//>>> Advance Algorithm
+export function binarySearchIndex(list:any[], callback:Function, indexPoint = 0): (number|-1){//For the callback you must use x <= y where x is the thing you need to search and y is reference
+    const halfPoint = ceil(list.length/2)-1;
+    const direction = callback( list[halfPoint], list[0], list[list.length-1] );//Returns -1 means direction; 0 means found; 1 means goRight;
+    if(direction === 0)
+        return indexPoint+halfPoint;
+    else if(direction !==0 && list.length <= 1)
+        return -1;
+
+    if(direction < 0)
+        return binarySearchIndex( list.slice(0, (halfPoint+1)), callback, indexPoint+0);
+    else
+        return binarySearchIndex( list.slice((halfPoint+1)), callback, indexPoint+(halfPoint+1));
+};
