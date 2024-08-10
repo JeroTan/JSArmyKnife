@@ -203,62 +203,43 @@ interface AllHeaders{
     
     }
     interface HttpConfig{
-        [key: string|number]: any;
+        headers: AllHeaders,
+        method: "get"|"post"|"put"|"patch"|"delete",
+        body?: string|null|ReadableStream|ArrayBuffer|DataView|Blob|File|FormData,
     }
-    
-    //------------------------ In house function
-    //To have an ability of abortion
-    const abortion = new AbortController();
     
     
     //------------------------ In public utility
     export class HttpNativePlate{
         private Config: HttpConfig = {
-            headers:{}
+            headers: {
+                "Content-Type":"application/json",
+            },
+            method: "get",
         }
-        private defaultBaseURL:string = "http://localhost:8000/api";
-        private defaultHeaders: AllHeaders = {
-            "Accept": "application/json",
-            "Access-Control-Allow-Credentials": 'true',
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-            "Content-Type": "application/json",
-        }
+        private baseURL: string = ""
+        private signal : AbortController = new AbortController;
+    
         private pathURL: string = "/";
+    
+        private paramObject: {[key: string|number]: string} = {};;
         
-        constructor(baseURL?:undefined|string, headers?:undefined|AllHeaders){
+        constructor(baseURL?:undefined|string, initialHeaders?:undefined|AllHeaders){
             
             if(baseURL !== undefined)
-                this.addBaseURL(baseURL);
-            if(headers !== undefined)
-                this.addDefaultHeaders(headers);
+                this.setBaseURL(baseURL);
+            if(initialHeaders !== undefined)
+                this.headers(initialHeaders);
         }
         //--Default Setters--//
-        public addBaseURL(baseURL:string){
-            this.defaultBaseURL = baseURL;
-            return this;
-        }
-        public addDefaultHeaders(defaultHeaders:AllHeaders){
-            this.defaultHeaders = defaultHeaders;
-            return this;
-        }
-        public updateDefaultHeaders(defaultHeaders:AllHeaders){
-            this.defaultHeaders = {...defaultHeaders, ...this.defaultHeaders}
-            return this;
-        }
-        public reset(baseURL?:undefined|string, headers?:undefined|AllHeaders){
-            this.Config = {
-                baseURL: baseURL || ( this.defaultBaseURL ? this.defaultBaseURL : "" ),
-                headers: headers || ( this.defaultHeaders ? this.defaultHeaders : {} ),
-                signal: abortion.signal,
-            };
+        public setBaseURL(baseURL:string){
+            this.baseURL = baseURL;
             return this;
         }
         //--Default Setters--//
     
         //--Modifiers--//
-        public data(data:string|null|ReadableStream){
+        public data(data:string|null|ReadableStream|ArrayBuffer|DataView|Blob|File|FormData){
             this.Config["body"] = data;
             return this;
         }
@@ -272,6 +253,14 @@ interface AllHeaders{
         }
         public path(path: string){
             this.pathURL = path;
+            return this;
+        }
+        public params(object:{[key: string|number]: string}, update= false){
+            if(update){
+                this.paramObject = {...this.paramObject, ...object};
+            }else{
+                this.paramObject = object;
+            }
             return this;
         }
         public method(method:"get"|"post"|"put"|"patch"|"delete"){
@@ -293,31 +282,28 @@ interface AllHeaders{
         public delete(){
             return this.method("delete");
         }
-    
         //--Modifiers--//
     
+        //--Functionalities--//
+        public reset(){
+            this.Config = {  ...this.Config, body: undefined };
     
-        //--Fetch Function--//
-        async request(withErrorLog:boolean = false){
-            try{
-                return await fetch(this.defaultBaseURL+this.pathURL, this.Config);
-            }catch(e){
-                if(withErrorLog)
-                    console.error(e);
-                return new Promise<Response>((resolve)=>{
-                    new Response("Not Found", {status:404});
-                })
-            }
-            
+            this.signal = new AbortController;
+            return this;
+        }
+        public getSignal(){
+            return this.signal;
+        }
+        async request(){
+            return await fetch(this.baseURL+this.pathURL+(Object.keys(this.paramObject).length > 0? "?"+(new URLSearchParams(this.paramObject).toString()): ""), this.Config as RequestInit);
         }
     }
     
     
-    type BodyData = (data: ReadableStream<any>|string, ...others:any)=>{};
-    type ResponseData = (data: typeof Response)=>{};
+    export type RESPONSE_DATA<T> = (data:string|Response|object|T, ...others:any)=>void;
     
     //This class, in conjunction with HttpPlate objects, Data and Error from its response will be resolve here using this class;
-    export class Resolve{
+    export class Resolve<JSON_BODY_TYPE>{
         promiseResponse:Promise<Response>|undefined;
         excludeStatus:number[] = []; //If use already use the s200, then when you use sOthers it will not trigger the s200. In simple terms none will trigger if you already trigger it.
         acceptJSON:boolean = true; //If the result must be in json
@@ -343,26 +329,26 @@ interface AllHeaders{
         private async checkStatus(status:number){
             return (await this.promiseResponse)?.status == status;
         }
-        private parseData(callback:BodyData|ResponseData|any, raw = false){
+        private parseData<OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|OTHER>, raw = false){
             (async(THIS, callback, raw)=>{
-                const response:any = await THIS.promiseResponse;
-                if(!response){
+                const response = await THIS.promiseResponse;
+                if(!response || response === undefined){
                     return;
                 }
                 if(raw){
                     return callback(response)
                 }
-                const {body, headers, ok, status, type, url}:any = response;
+                const {body, headers, ok, status, type, url} = response;
                 return callback(await (THIS.acceptJSON ? response.json() : response.text()), headers, ok, status, type, url);
             })(this, callback, raw);
             return this;
         }
         //Normally you should just use parseData to get the resolve but we need to exclude some status code once the callback is already use
-        private checkParseExclude(status:number, callback:BodyData|ResponseData|any){
+        private checkParseExclude<OTHER>(status:number, callback:RESPONSE_DATA<JSON_BODY_TYPE|OTHER>){
             const THIS = this;//To prevent from invalid Self Referencing
             THIS.checkStatus(status).then(match=>{
                 if(match){
-                    THIS.parseData(callback);
+                    THIS.parseData<OTHER>(callback);
                 }
             })
             THIS.excludeStatus.push(status);
@@ -371,151 +357,156 @@ interface AllHeaders{
         //--In House helpers--//
     
         //HTTP Code
-        default(callback:BodyData|ResponseData|any){
-            return this.parseData(callback, true);
+        default<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){
+            return this.parseData<JSON_BODY_TYPE_OTHER>(callback, true);
         }
         //Success
         //200
-        s200(callback:BodyData|ResponseData|any){ //OK
-            return this.checkParseExclude(200, callback);
+        s200<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //OK
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(200, callback);
         }
-        s201(callback:BodyData|ResponseData|any){ //Created
-            return this.checkParseExclude(201, callback);
+        s201<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Created
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(201, callback);
         }
-        s202(callback:BodyData|ResponseData|any){ //Accepted
-            return this.checkParseExclude(202, callback);
+        s202<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Accepted
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(202, callback);
         }
-        s203(callback:BodyData|ResponseData|any){ //Non-Authoritative Information
-            return this.checkParseExclude(203, callback);
+        s203<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Non-Authoritative Information
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(203, callback);
         }
-        s204(callback:BodyData|ResponseData|any){ //No Content
-            return this.checkParseExclude(204, callback);
+        s204<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //No Content
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(204, callback);
         }
-        s205(callback:BodyData|ResponseData|any){ //Reset Content
-            return this.checkParseExclude(205, callback);
+        s205<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Reset Content
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(205, callback);
         }
         //300
-        s300(callback:BodyData|ResponseData|any){ //Multiple Choices
-            return this.checkParseExclude(300, callback);
+        s300<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Multiple Choices
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(300, callback);
         }
-        s301(callback:BodyData|ResponseData|any){ //Moved Permanently
-            return this.checkParseExclude(301, callback);
+        s301<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Moved Permanently
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(301, callback);
+        }
+        s303<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Redirect to a GET request
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(303, callback);
         }
         //Error
         //400
-        s400(callback:BodyData|ResponseData|any){ //Bad Request
-            return this.checkParseExclude(400, callback);
+        s400<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Bad Request
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(400, callback);
         }
-        s401(callback:BodyData|ResponseData|any){ //Unauthorized
-            return this.checkParseExclude(401, callback);
+        s401<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Unauthorized
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(401, callback);
         }
-        s402(callback:BodyData|ResponseData|any){ //Payment Required
-            return this.checkParseExclude(402, callback);
+        s402<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Payment Required
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(402, callback);
         }
-        s403(callback:BodyData|ResponseData|any){ //Forbidden
-            return this.checkParseExclude(403, callback);
+        s403<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Forbidden
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(403, callback);
         }
-        s404(callback:BodyData|ResponseData|any){ //Not Found
-            return this.checkParseExclude(404, callback);
+        s404<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Not Found
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(404, callback);
         }
-        s408(callback:BodyData|ResponseData|any){ //Request Timeout
-            return this.checkParseExclude(405, callback);
+        s408<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Request Timeout
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(405, callback);
         }
-        s410(callback:BodyData|ResponseData|any){ //Gone
-            return this.checkParseExclude(410, callback);
+        s410<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Gone
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(410, callback);
         }
-        s413(callback:BodyData|ResponseData|any){ //Payload Too Large
-            return this.checkParseExclude(413, callback);
+        s413<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Payload Too Large
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(413, callback);
         }
-        s414(callback:BodyData|ResponseData|any){ //URI Too Long
-            return this.checkParseExclude(414, callback);
+        s414<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //URI Too Long
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(414, callback);
         }
-        s415(callback:BodyData|ResponseData|any){ //Unsupported Media Type
-            return this.checkParseExclude(415, callback);
+        s415<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Unsupported Media Type
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(415, callback);
         }
-        s416(callback:BodyData|ResponseData|any){ //Range Not Satisfiable
-            return this.checkParseExclude(416, callback);
+        s416<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Range Not Satisfiable
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(416, callback);
         }
-        s417(callback:BodyData|ResponseData|any){ //Expectation Failed
-            return this.checkParseExclude(417, callback);
+        s417<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Expectation Failed
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(417, callback);
         }
-        s418(callback:BodyData|ResponseData|any){ //I'm a teapot
-            return this.checkParseExclude(418, callback);
+        s418<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //I'm a teapot
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(418, callback);
         }
-        s421(callback:BodyData|ResponseData|any){ //Misdirected Request
-            return this.checkParseExclude(421, callback);
+        s421<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Misdirected Request
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(421, callback);
         }
-        s422(callback:BodyData|ResponseData|any){ //Unprocessable Content
-            return this.checkParseExclude(422, callback);
+        s422<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Unprocessable Content
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(422, callback);
         }
-        s431(callback:BodyData|ResponseData|any){ //Request Header Fields Too Large
-            return this.checkParseExclude(431, callback);
+        s425<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Too Early
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(425, callback);
         }
-        s451(callback:BodyData|ResponseData|any){ //Unavailable For Legal Reasons
-            return this.checkParseExclude(451, callback);
+        s431<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Request Header Fields Too Large
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(431, callback);
+        }
+        s451<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Unavailable For Legal Reasons
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(451, callback);
         }
         //Server Error
         //500
-        s500(callback:BodyData|ResponseData|any){ //Internal Server Error
-            return this.checkParseExclude(500, callback);
+        s500<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Internal Server Error
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(500, callback);
         }
-        s501(callback:BodyData|ResponseData|any){ //Not Implemented
-            return this.checkParseExclude(501, callback);
+        s501<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Not Implemented
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(501, callback);
         }
-        s502(callback:BodyData|ResponseData|any){ //Bad Gateway
-            return this.checkParseExclude(502, callback);
+        s502<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Bad Gateway
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(502, callback);
         }
-        s503(callback:BodyData|ResponseData|any){ //Service Unavailable
-            return this.checkParseExclude(503, callback);
+        s503<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Service Unavailable
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(503, callback);
         }
-        s504(callback:BodyData|ResponseData|any){ //Gateway Timeout
-            return this.checkParseExclude(504, callback);
+        s504<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Gateway Timeout
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(504, callback);
         }
-        s505(callback:BodyData|ResponseData|any){ //HTTP Version Not Supported
-            return this.checkParseExclude(505, callback);
+        s505<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //HTTP Version Not Supported
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(505, callback);
         }
-        s506(callback:BodyData|ResponseData|any){ //Variant Also Negotiates
-            return this.checkParseExclude(506, callback);
+        s506<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Variant Also Negotiates
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(506, callback);
         }
-        s507(callback:BodyData|ResponseData|any){ //Insufficient Storage
-            return this.checkParseExclude(507, callback);
+        s507<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){ //Insufficient Storage
+            return this.checkParseExclude<JSON_BODY_TYPE_OTHER>(507, callback);
         }
         //If somehow you already specify all the status code and you need to get the unpredictable one then use this.
-        sOthers(callback:BodyData|ResponseData|any){
+        sOthers<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){
             (async(THIS)=>{
-                const {status}:any = await THIS.promiseResponse;
+                const {status}:Response = await THIS.promiseResponse as Response;
                 if( THIS.excludeStatus.some(x=>x==status) )
                     return THIS;
                 
                 THIS.excludeStatus.push(status);
-                THIS.parseData(callback);
+                THIS.parseData<JSON_BODY_TYPE_OTHER>(callback);
             })(this);
             return this;
         }
         //This is same with default but it doesn't return raw response but instead works like status codes method. However this one works regardless of status code, and it may trigger both twice like you call the method 200 and chain this one then those two will run together. Maybe use this as an after-effect once everything is finish.
-        sAfter(callback:BodyData|ResponseData|any){
-            return this.parseData(callback);
+        sAfter<JSON_BODY_TYPE_OTHER>(callback:RESPONSE_DATA<JSON_BODY_TYPE|JSON_BODY_TYPE_OTHER>){
+            return this.parseData<JSON_BODY_TYPE_OTHER>(callback);
         }
     }
     
     /*|---------------------------------------------------------------------------------------|*/
     /*|----------This one is for vanilla JS Form Request--------------------------------------|*/
     /*|---------------------------------------------------------------------------------------|*/
-    interface DOMRequestConfig{
+    interface DOM_REQUEST_CONFIG{
         method:undefined|"POST"|"GET",
         action:undefined|string,
         target?:undefined|string,
         enctype?:undefined|string,
     }
-    interface DOMRequestData{
+    interface DOM_REQUEST_DATA{
         key:string,
-        value:string|any,
-        type?:string,
+        value:string,
     }
     
     class DOMRequest{
-        private config:DOMRequestConfig = {method:undefined, action:undefined, target:undefined};
-        private dataContainer:any[] = [];
+        private config:DOM_REQUEST_CONFIG = {method:undefined, action:undefined, target:undefined};
+        private dataContainer:HTMLElement[] = [];
     
         constructor(method?:undefined|"POST"|"GET", action?:undefined|string, target?:undefined|string){
             if(method)
@@ -551,12 +542,10 @@ interface AllHeaders{
         //--Setter--//
     
         //--In House--//
-        protected pushDataToStack(data:DOMRequestData){
-            const newElement = document.createElement("input");
+        protected pushDataToStack(data:DOM_REQUEST_DATA){
+            const newElement:HTMLInputElement = document.createElement("input");
             newElement.name = data.key;
             newElement.value = data.value;
-            if(data.type)
-                newElement.type = data.type;
             
             this.dataContainer.push( newElement );
         }
@@ -564,7 +553,7 @@ interface AllHeaders{
     
     
         //--Functionalities--//
-        public data(data:DOMRequestData|DOMRequestData[]){
+        public data(data:DOM_REQUEST_DATA|DOM_REQUEST_DATA[]){
             const THIS = this;
     
             if(!Array.isArray(data)){
@@ -572,7 +561,7 @@ interface AllHeaders{
                 return this;
             }
     
-            data.forEach((e:DOMRequestData)=>{
+            data.forEach((e:DOM_REQUEST_DATA)=>{
                 THIS.pushDataToStack(e);
             })
             
@@ -582,10 +571,14 @@ interface AllHeaders{
             if(this.config.action === undefined || this.config.method === undefined)
                 return;
             const formContainer = document.createElement("form");
+            formContainer.style.opacity = "0";
+            formContainer.style.position = "absolute";
+            formContainer.style.pointerEvents = "none";
+            formContainer.style.visibility = "hidden";
             formContainer.action = this.config.action;
             formContainer.method = this.config.method;
     
-            this.dataContainer.forEach((e:any)=>{
+            this.dataContainer.forEach(e=>{
                 formContainer.appendChild(e);
             });
     

@@ -84,9 +84,9 @@ class CryptTemplate{
 
 
 
-/*|---------------------------------------------------------*/
-/*|               Public Class Starts Here                 |*/
-/*|---------------------------------------------------------*/
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Public Class Starts Here                                                   |*/
+/*|------------------------------------------------------------------------------------------|*/
 
 export class Hash extends CryptTemplate{//One-way encryption, meaning once converted you can never convert it back again, unlike divorce where lovers can be unfaithful to each other.
     algorithm:HASH_ALGORITHM = "sha256"; 

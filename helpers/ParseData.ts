@@ -112,6 +112,17 @@ export function removeSpace(text: string):string{
 export function capitalFirst(text: string){
     return  text.length ? (text[0].toUpperCase() + (text.length > 1 ? text.slice(1): "") ) : "";
 }
+export function stron(string:string) {
+    if (string.length == 0) return 0;
+
+    let hash = 0;
+    for (let i = 0; i < string.length; i++) {
+        let char = string.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash;
+}
 
 //<<< String Manipulation
 //====================================================================================================================================//

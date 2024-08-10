@@ -1,36 +1,75 @@
+/**
+ * Welcome to Validation Helper. The purpose of this helper is to streamline validation of forms coming from client-side or server-side (Which you may extends this on another directory to add server-side validation.).
+ *  
+ * Helper that you may use
+ * For Extending
+ * - ValidationErrorMessage
+ * - Validation - The use case of extending this one is to separate general validation from server-side validation
+ * 
+ * General Use
+ * - Validation
+ *      - ValidationResult
+ * - validationFactory() - use for creating multiple instance of validation
+ * - validationRunner() - use for multiple processing of validation
+ */
+
 import { anyToArr, capitalFirst, toRegex, type AnyObject } from "./ParseData.ts";
 
-/*****************TEMPLATE //Do not touch *********************/
-interface ValidationProps{
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Interface or Variable Definition                                           |*/
+/*|------------------------------------------------------------------------------------------|*/
+interface VALIDATION_PROPS{
     input:any;
     field:string;
     display?:string|undefined;
 }
 interface RejectArgument{
     validator: string,
-    arg?:(string|any)[],
+    args?:(string|any)[],
 }
 
-type ValidatorResponse = (thisClass: any)=>Promise<true|RejectArgument>|true|RejectArgument;
-
-export class ValidationErrorMessage{
-    required= '%field% is required.';
-    string= '%field% is an invalid string.';
-    number= '%field% is an invalid number.';
-    date= '%field% contains invalid date.';
-    regex= '%field% is invalid.';
-    notRegex= '%field% is invalid.';
-    max= '%field% a maximum limit of %arg1% is reached.';
-    min= '%field% a minimum limit of %arg1% is reached.';
-    same= '%field% didn\'t match with %arg1%.';
-    match= '%field% only accepts the following: %arg1%.';
+type VALIDATION_RESPONSE = (thisClass: any)=>Promise<true|RejectArgument>|true|RejectArgument;
+export interface VALIDATION_ERROR_MESSAGE{
+    required:string,
+    string:string,
+    number:string,
+    date:string,
+    regex:string,
+    notRegex:string,
+    max:string,
+    min:string,
+    same:string,
+    match:string,
+    custom:string,
+    [key: string|number]: string,
+}
+export const validationErrorMessage:VALIDATION_ERROR_MESSAGE = { //feel free to extend this one too and change the content of erroMessages in Validation Class;
+    required:'%field% is required.',
+    string:'%field% is an invalid string.',
+    number:'%field% is an invalid number.',
+    date:'%field% contains invalid date.',
+    regex:'%field% is invalid.',
+    notRegex:'%field% is invalid.',
+    max:'%field% a maximum limit of %arg1% is reached.',
+    min:'%field% a minimum limit of %arg1% is reached.',
+    same:'%field% didn\'t match with %arg1%.',
+    match:'%field% only accepts the following: %arg1%.',
+    custom: '%field% is invalid.',
 }
 
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Validation Abstraction                                                     |*/
+/*|------------------------------------------------------------------------------------------|*/
+interface Validation_Interface{
+    props:VALIDATION_PROPS,
+    action:VALIDATION_RESPONSE[],
+    errorMessages:VALIDATION_ERROR_MESSAGE,
+}
 
 export class Validation{
-    props:ValidationProps = { input: "", field: "" }
-    action:ValidatorResponse[] = [];
-    errorMessages:AnyObject = new ValidationErrorMessage;
+    props:VALIDATION_PROPS = { input: "", field: "" }
+    action:VALIDATION_RESPONSE[] = [];
+    errorMessages:VALIDATION_ERROR_MESSAGE = {...validationErrorMessage};
 
     constructor(input:any = undefined, field:string|undefined = undefined, display:string|undefined = undefined ){
         if(input)
@@ -42,7 +81,7 @@ export class Validation{
     }
 
     //--Setter--//
-    public input(d:any){
+    public input<INPUT_TYPE>(d:INPUT_TYPE){
         this.props.input = d;
         return this;
     }
@@ -69,7 +108,7 @@ export class Validation{
     //--Getter--//
 
     //--Internal--//
-    private validationStackPush(process: ValidatorResponse){
+    private validationStackPush(process: VALIDATION_RESPONSE){
         this.action[this.action.length] = process;
         return this;
     }
@@ -177,7 +216,7 @@ export class Validation{
                 return true;
             }
 
-            return {validator:"max", arg:[argument]};
+            return {validator:"max", args:[argument]};
         })
         return this;
     }
@@ -194,7 +233,7 @@ export class Validation{
                 return true;
             }
 
-            return {validator:"min", arg:[argument]};
+            return {validator:"min", args:[argument]};
         })
         return this;
     }
@@ -205,18 +244,24 @@ export class Validation{
                 return true
             }
 
-            return {validator:"same", arg:[argument.getField()]};
+            return {validator:"same", args:[argument.getField()]};
         })
         return this;
     }
-    match(argument:any[]|string|number){//Match the given Array
+    match(argument:Array<string|number>|string|number){//Match the given Array
         this.validationStackPush((THIS)=>{
             const { input } = THIS.props;
             argument = anyToArr(argument, ",");
             if( argument.some(x=>(x).toString()===input.toString()) ){
                 return true
             }
-            return {validator:"same", arg:argument};
+            return {validator:"same", args:argument};
+        })
+        return this;
+    }
+    custom(argument:(props: VALIDATION_PROPS)=>true|{validator:"string", args:Array<string|number>}|Promise<true|{validator:"string", args:Array<string|number>}> ){
+        this.validationStackPush((THIS)=>{
+            return argument(THIS.props);
         })
         return this;
     }
@@ -225,17 +270,18 @@ export class Validation{
     //--Processing Methods--//
     public messages(customMessages: AnyObject){
         const THIS = this;
-        Object.keys(customMessages).forEach(key=>{
+    
+        Object.keys(customMessages).forEach((key:keyof VALIDATION_ERROR_MESSAGE)=>{
             THIS.errorMessages[key] = customMessages[key];
         })
         return this;
     }
-    public validate(){
+    public validate(raw=false, stringOnly=false):ValidationResult|Promise<string|true>|any{ //String only works on raw
         const THIS = this;
         const { action } = THIS;
         const { field, display } = THIS.props;
 
-        async function iterateValidation(validator: any[] = action, current = 0){
+        async function iterateValidation(validator: VALIDATION_RESPONSE[] = action, current = 0){
             if(action.length <= current){//It means that it reaches the validation stack limit and there is no error found.
                 return true;
             }
@@ -247,9 +293,12 @@ export class Validation{
             if(result === true){ //Validate again when true
                 return await iterateValidation(validator, current+1);
             }else{ //else return an error message;
+                if(THIS.errorMessages[result.validator] === undefined){
+                    THIS.errorMessages[result.validator] = "%field% is invalid.";
+                }
                 let errorMessage:string = THIS.errorMessages[result.validator].replace("%field%", display?display:capitalFirst(field));
-                if(result.arg){
-                    result.arg.forEach((element:string, index:number) => {
+                if(result.args){
+                    result.args.forEach((element:string, index:number) => {
                         errorMessage = errorMessage.replace(`%arg${index+1}%`, element);
                     });
                 }
@@ -258,13 +307,25 @@ export class Validation{
         }
 
         //Return a promise for ValidationResult Class
+        if(raw){
+            return new Promise((resolve)=>{
+                iterateValidation().then(x=>{
+                    if(x===true)
+                        resolve("");
+                    resolve(x);
+                });
+            })
+        }
         return new ValidationResult(iterateValidation());
+        
     }
     //--Processing Methods--//
 
 }
 
-
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Validation Result Container                                                |*/
+/*|------------------------------------------------------------------------------------------|*/
 export class ValidationResult{
     validationPromise: Promise<string|true|undefined> = new Promise(()=>{});//String means error message and boolean means true if there is no error
 
@@ -293,41 +354,56 @@ export class ValidationResult{
         })
         return this;
     }
-    promise(callback?: Function|undefined): Promise<string|true|undefined|void>{
-        if(callback){
-            return this.validationPromise.then(x=>{
-                callback(x)
-                return x;
-            })
-        }
-        return this.validationPromise;
+    async promise(callback?: Function|undefined): Promise<string|true|undefined|void>{
+        const data = await this.validationPromise;
+        if(callback)
+            callback(data);
+        
+        return data;
     }
 }
 
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Validation Construction or Factory                                         |*/
+/*|------------------------------------------------------------------------------------------|*/
+export interface ValidationFactoryList<Type>{
+    [key: string|number]: Type,
+}
+export function validationFactory<Type>(total:number|(string|number)[], ValidationClass: new(...args:any[])=>Type|Validation = Validation, ...args:any ): ValidationFactoryList<Type|Validation>{ //total string array is for FieldName
+    const result:ValidationFactoryList<Type|Validation> = {};
 
+    if(typeof total === "number")
+        total = [...Array(total)];
+    
+    total.forEach((x:string|number)=>{
+        const newConstruct = new ValidationClass(...args);
+        if(newConstruct instanceof  Validation)
+            newConstruct.field(String(x));
+        
+        result[x] = newConstruct ;
+    });
 
-// //InstanceGenerator
-// export function generateValidateInstance(total){
-//     return [...Array(total)].map(x=>new Validation);
-// }
-// //Validate Multiple Instance
-// export async function multiValidate(valInst){
-//     const errorData = {};
+    return result;
+}
+export interface ValidationRunnerList{
+    [key: string|number]: ValidationResult|string|true,
+}
+//Run all validation in the object and return in object as well containing true or error message
+export async function validationRunner<Type>(validatorList:ValidationFactoryList<Type>, resultOnly = false):Promise<ValidationRunnerList>{
+    const result:ValidationRunnerList = {}
+    for(const i in validatorList){
+        const ValConstruct = validatorList[i] as Type;
+        if(!(ValConstruct instanceof Validation) || (ValConstruct).validate === undefined)
+            continue;
 
-//     for(const v of valInst){
-//         const result = await v.validate();
+        if(resultOnly){
+            const promiseData = await ValConstruct.validate().promise();
+            if(promiseData === undefined) continue;
+            result[i] = promiseData;
+        }else{
+            result[i] = ValConstruct.validate();
+        }
+    }
 
-//         if(result !== true){
-//             errorData[v.fieldName] = result;
-//         }
-//     }
-
-//     return errorData;
-// }
-// //Check the error payload from 422
-// export function isThereError(errorData){
-//     //Format would be {key:message} for the object
-//     return Object.keys(errorData).every(key=>{
-//         return !errorData[key];
-//     })
-// }
+    return result;
+}

@@ -56,12 +56,12 @@ interface ANIMATION_KEYING_OBJECT{
 }
 interface ANIMATION_TIMER_OBJECT{
     duration: string|number,
-    direction?: "normal"|"reverse"|"alternate"|"alternate-reverse",
-    easing?: "ease"|"ease-in"|"ease-out"|"ease-in-out"|"linear"|"step-start"|"step-end"|string|"cubic-bezier()"|"steps()"|
+    direction?: string|"normal"|"reverse"|"alternate"|"alternate-reverse",
+    easing?: string|"ease"|"ease-in"|"ease-out"|"ease-in-out"|"linear"|"step-start"|"step-end"|"cubic-bezier()"|"steps()"|
     "easeInQuad"|"easeOutQuad"|"easeInCubic"|"easeOutCubic"|"easeInQuart"|"easeOutQuart"|"easeInQuint"|"easeOutQuint"|
     "easeInSine"|"easeOutSine"|"easeInExpo"|"easeOutExpo"|"easeInCirc"|"easeOutCirc"|"easeInBack"|"easeOutBack",
     iterations?: string|typeof Infinity|"Infinity",
-    fill?: "none"|"forwards"|"backwards"|"both"
+    fill?: string|"none"|"forwards"|"backwards"|"both"
     
 }
 export function animate(element:KeyframeEffect|HTMLElement|any, keying: ANIMATION_KEYING_OBJECT[], time:ANIMATION_TIMER_OBJECT|KeyframeEffectOptions|string|number ){
@@ -100,6 +100,11 @@ export class AnimeTroupe{ //It means as long as the configuration is the same yo
     private currentAnimation:Animation = new Animation;
     
     constructor(element:KeyframeEffect|HTMLElement|any = null, keying:ANIMATION_KEYING_OBJECT[]|null = null, time:ANIMATION_TIMER_OBJECT|KeyframeEffectOptions|string|number|any = 0){
+        this.renew(element, keying, time);
+    }
+
+    //-- Setter --//
+    renew(element:KeyframeEffect|HTMLElement|any = null, keying:ANIMATION_KEYING_OBJECT[]|null = null, time:ANIMATION_TIMER_OBJECT|KeyframeEffectOptions|string|number|any = 0){
         if(element)
             element = this.element(element).config.element;
         if(keying)
@@ -108,8 +113,6 @@ export class AnimeTroupe{ //It means as long as the configuration is the same yo
             time = this.time(time).config.time;
         this.currentAnimation = new Animation(new KeyframeEffect( element, keying, time ));
     }
-
-    //-- Setter --//
     element(element:KeyframeEffect|HTMLElement|any){
         this.config.element = element;
         return this;
@@ -157,8 +160,15 @@ export class AnimeTroupe{ //It means as long as the configuration is the same yo
         this.currentAnimation.pause();
         return this;
     }
-    commitStyle(){
-        this.currentAnimation.commitStyles();
+    commitStyle(waitToFinish = false){
+        if(!waitToFinish){
+            this.currentAnimation.commitStyles();
+            return this;
+        }
+        const THIS = this;
+        this.currentAnimation.addEventListener("finish", ()=>{
+            THIS.currentAnimation.commitStyles();
+        })
         return this;
     }
 
