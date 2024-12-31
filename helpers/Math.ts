@@ -1,8 +1,14 @@
 interface AnyObject{
     [key: number|string|symbol]:any
 }
-
-export function randomizer(min:number=0, max:number=Number.MAX_SAFE_INTEGER, allowDecimal:boolean|number= false):number{
+/**
+ * @info Use this to generate random number base on selected range
+ * @param min Number should be the lowest range it can select on random
+ * @param max Maximum allowable range of number
+ * @param allowDecimal In case you want to include decimals instead of just whole number. It accepts false and number which is the length of decimal digits
+ * @returns Random number between min and max params
+ */
+export function randomizer(min:number=0, max:number=Number.MAX_SAFE_INTEGER, allowDecimal:boolean|number= false){
     const randData = Math.random();
     const minMaxRand:number = randData * (max-min) + min;
 
@@ -16,40 +22,46 @@ export function randomizer(min:number=0, max:number=Number.MAX_SAFE_INTEGER, all
     }
 }
 
-
-export function removeDecimal(number:number):number{
-    return (number) - (number % 1); //By using module, the orig number minus the remainder of absolute 1 number. With this we remove the decimal
+/**
+ * @info Function that will remove a decimal to a number. If you pass a whole number it will just return that number;
+ * @param number Value that will be use to remove decimal
+ * @returns Whole number without decimal Value
+ */
+export function removeDecimal(number:number){
+    return number >> 0; //By using module, the orig number minus the remainder of absolute 1 number. With this we remove the decimal
 }
 
-export function ceil(number:number, decimalLimit:boolean|number = false): number{
-    if(decimalLimit){
-        number = adjustDecimal(number, decimalLimit);
-    }
-
+/**
+ * @info This will transform a number like 1.68 to 2 basically any number that has decimal
+ * @param number Value that you want to transform
+ * @returns Transform value that is already CEIL
+ */
+export function ceil(number:number): number{
     if( number % 1 !== 0 ){
-        const ceilNumber = (1-(number % 1)) + number;
-        return ceilNumber - (ceilNumber % 1); //Just in case if there are still decimal remaining;
+        return (number | 0) + 1;
     }
     return number;
 }
 
-export function floor(number:number, decimalLimit:boolean|number = false): number{
-    if(decimalLimit){
-        number = adjustDecimal(number, decimalLimit);
-    }
-
+/**
+ * @info This will transform a number like 1.68 to 1 basically any number that has decimal
+ * @param number Value that you want to transform
+ * @returns Transform value that is already FLOOR
+ */
+export function floor(number:number): number{
     if( number % 1 !== 0  ){
-        const floorNumber =  number - (number % 1);
-        return floorNumber - (floorNumber % 1);
+        return number >> 0;
     }
-    return number % 1 !== 0 ? number - (number % 1) :number
+    return number;
 }
 
+/**
+ * @Info Transform a negative value or any value into a positive value
+ * @param number Value that you want to transform
+ * @returns Absolute number with no negative
+ */
 export function abs(number:number){
-    if( !(number < 0) || 0 <= number  ){
-        return number;
-    }
-    return number * -1;
+    return (0 < number ? number : -number);
 }
 
 export function adjustDecimal(number:number, addPlaceValue:boolean|number = true):number{
@@ -60,7 +72,7 @@ export function adjustDecimal(number:number, addPlaceValue:boolean|number = true
     if(precisionCheck !== placeValue && precisionCheck !== 0){//If the two number decimals didn't match, then further adjustments is needed.
         const precising = String(result).split(".");
         precising[1] = precising[1].slice(0, placeValue);
-        result = Number(precising.join())
+        result = Number(precising.join("."))
     }
 
     return result;
@@ -112,19 +124,43 @@ export function padNumber(number:number, length:number):string{
     if(length < 0)
         length = 0;
     const paddingValue = 10 ** length;
-    
     if(paddingValue > raw.whole){
         const padValue = (paddingValue + raw.whole).toString().substring(1);
         return `${raw.sign?"-":""}${padValue}${raw.decimal?"."+raw.decimal:""}`;
     }
-
     return String(combineNumber(raw, true));
 }
+/**
+ * @info Cut Only Whole Number, the decimal will be remove
+ * @param number
+ * @param cutWhere 
+ */
+export function fixedNumber(number:number, limit:number=2, cutWhere:"left"|"right" = "right"){
+    const raw = separateNumber(number);
+    switch(cutWhere){
+        case "left":
+            return Number((raw.sign ? "-" :"")+String(raw.whole).substring(0, limit));
 
+        case "right":
+            return Number((raw.sign ? "-" :"")+String(raw.whole).substring( String(raw.whole).length > limit ? String(raw.whole).length - limit : 0));
+   
+    }
+}
 
-//------------ Date Transformer ------------//
-export function transformDate(date: Date|string|number, format:string|"simple"|"yyyy-md=dd"|"iso"|"simple-named"|"time-24-seconds"="simple"){
-    date = new Date(date);
+export function numberAddComma(number:number) {
+    const splittedNumber = separateNumber(number);
+    return (splittedNumber.sign ? "-":"") + (splittedNumber.whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")) + (splittedNumber.decimal !== 0 ? "."+splittedNumber.decimal : "");
+}
+
+/*|------------------------------------------------------------------------------------------|*/
+/*|                Date Transformer                                                          |*/
+/*|------------------------------------------------------------------------------------------|*/
+export function transformDate(date: Date|string|number, format:string|"simple"|"yyyy-mm-dd"|"iso"|"simple-named"|"time-12h"|"time-24-seconds"|"mnt, dd yyyy"="simple", utc=false){
+    if(utc){
+        date = new DateUTC(date);
+    }else{
+        date = new Date(date);
+    }
     switch(format){
         case "simple":{
             return `${date.getFullYear()}, ${date.getMonth()+1}-${date.getDate()} | ${date.getHours()}:${date.getMinutes()}`;
@@ -136,11 +172,46 @@ export function transformDate(date: Date|string|number, format:string|"simple"|"
             return `${date.getFullYear()}-${padNumber(date.getMonth()+1, 2)}-${padNumber(date.getDate(), 2)}T${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}`
         }
         case "simple-named":{
-            return `${date.getFullYear()}, ${ monthName(date.getMonth()+1) } ${date.getDate()} ${dayName(date.getDay()+1)} | ${hour12(date.getHours())}:${padNumber(date.getMinutes(), 2)}${ date.getHours() >=13 ? "pm":"am"  }`;
+            return `${date.getFullYear()}, ${ monthName(date.getMonth()+1) } ${date.getDate()} ${dayName(date.getDay()+1)} | ${hour12(date.getHours())}:${padNumber(date.getMinutes(), 2)}${ date.getHours() >=12 ? "pm":"am"  }`;
+        }
+        case "time-12h":{
+            return `${hour12(date.getHours())}:${padNumber(date.getMinutes(), 2)} ${ date.getHours() >=12 ? "pm":"am"  }`;
         }
         case "time-24-seconds":{
             return `${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}:${padNumber(date.getSeconds(), 2)}`
         }
+        case "mnt, dd yyyy":{
+            return `${monthName(date.getMonth()+1)} ${padNumber(date.getDate(), 2)}, ${padNumber(date.getFullYear(), 4)}`;
+        }
+        default:{
+            return "TRANSFORMATION KEY FOR DATE NOT AVAILABLE";
+        }
+    }
+}
+export class DateUTC extends Date{
+    getFullYear() {
+        return this.getUTCFullYear();
+    }
+    getMonth(): number {
+        return this.getUTCMonth();
+    }
+    getDate(): number {
+        return this.getUTCDate();
+    }
+    getHours(): number {
+        return this.getUTCHours();
+    }
+    getMinutes(): number {
+        return this.getUTCMinutes();
+    }
+    getSeconds(): number {
+        return this.getUTCSeconds();
+    }
+    getMilliseconds(): number {
+        return this.getUTCMilliseconds();
+    }
+    getDay(): number {
+        return this.getUTCDay();
     }
 }
 
@@ -203,7 +274,7 @@ export function numberOfDays(month:string|NUMBER_OF_MONTHS, year = new Date().ge
         case "december":
             return 31;
         default:
-            return undefined
+            throw new Error("Invalid Number of Months")
     }
 }
 export function monthName(number:NUMBER_OF_MONTHS, format="short"){ //Short or Full
@@ -279,6 +350,7 @@ export class DateNavigator extends Date{
         hour: hour,
         day: day,
     }
+    private timezone?:string;
 
     constructor(date:undefined|string|number|Date = undefined){
         if(date === undefined){
@@ -286,10 +358,27 @@ export class DateNavigator extends Date{
         }else
             super(date);
     }
-    changeDate(date:string|number|Date){
-        // TO BE CONTINUE
+    // changeDate(date:string|number|Date){
+    //     // TO BE CONTINUE
+    //     return this;
+    // }
+    //---- Time Zone ----//
+    setTimezone(custom?:string|"Asia/Manila"|"+08:00"){//Sample timezone, empty means browser timezone *be careful with vpn users
+        if(custom == null){
+            const timeZoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const timeSplit = Intl.DateTimeFormat("en-us", {
+                timeZone: timeZoneName,
+                timeZoneName: "longOffset",
+            }).formatToParts();
+            const timeZoneFormat = timeSplit[timeSplit.findIndex(x=>x.type === "timeZoneName")].value;
+            const timeZoneCut = timeZoneFormat.replace("GMT", "");
+            this.timezone = timeZoneCut;
+        }
         return this;
     }
+    //---- Time Zone----//
+
+    //Stabilizer of Date
     normalize(whatTime:string, type:"min"|"max" = "min"){//@whatTime = Year(2037 or 1970), Month(0 or 11), Day(0, 28,29,30,31), Hour(0, 23), Minute(0, 59), Seconds(0, 59), Milliseconds(0,999)
         const {day} = this.reference;
         const translate:AnyObject = {
@@ -354,6 +443,11 @@ export class DateNavigator extends Date{
     }
 
     //---- PREV----//
+    prevMillisecond(n=1){
+        // const millisecond = 1000;
+        super.setTime( super.getTime() - n );
+        return this;
+    }
     prevSecond(n=1){
         const {second} = this.reference;
         super.setTime( super.getTime() - (second*n) );
@@ -379,13 +473,25 @@ export class DateNavigator extends Date{
         super.setTime( super.getTime() - (day*7*n) );
         return this;
     }
-    prevMonth(n=1, type="min"){
+    prevMonth(n=1, type:"min"|"max"|"same"="min"){
+        const refDay = super.getDate();
         while(n>0){
             super.setDate(0);
             --n;
         }
         if(type=="min")
-                super.setDate(1);
+            super.setDate(1);
+        else if(type == "max"){
+
+        }
+        else if(type == "same"){
+            const checkIfOffsetDate = numberOfDays( (super.getMonth()+1), super.getFullYear() ) as number;
+            if(checkIfOffsetDate < refDay){
+                super.setDate(checkIfOffsetDate);
+            }else{
+                super.setDate(refDay);
+            }
+        }
         return this;
     }
     prevYear(n=1){
@@ -402,6 +508,11 @@ export class DateNavigator extends Date{
     }
 
     //---- NEXT----//
+    nextMillisecond(n=1){
+        // const millisecond = 1000;
+        super.setTime( super.getTime() + n );
+        return this;
+    }
     nextSecond(n=1){
         const {second} = this.reference;
         super.setTime( super.getTime() + second*n );
@@ -454,6 +565,9 @@ export class DateNavigator extends Date{
     }
 
     //---- GAP----//
+    gapMillisecond(dateRef:Date){
+        return super.getTime() - dateRef.getTime();
+    }
     gapSecond(dateRef:Date){
         const {second} = this.reference;
         const gap = super.getTime() - dateRef.getTime();
@@ -502,5 +616,33 @@ export class DateNavigator extends Date{
         return removeDecimal(annualGap/100);
     }
 
+    //---- Advance----//
+    toISOStringRevise(){
+        const original = `${padNumber(this.getFullYear(), 4)}-${padNumber(this.getMonth()+1, 2)}-${padNumber(this.getDate(), 2)}T${padNumber(this.getHours(), 2)}:${padNumber(this.getMinutes(), 2)}:${padNumber(this.getSeconds(), 2)}`;
+        //Format Sample 2024-10-10T03:10:00+08:00
+        //** This revise is a must since the old is following the UTC Format */
+        // let modified = original.substring(0, original.length-5);
+        let modified = original;
+        if(this.timezone){
+            modified = modified+this.timezone;
+        }
+        return modified;
+    }   
+    //---- Advance----//
 }
 
+
+//------------ Phone Number Transformer ------------//
+export const countryPhoneMap = {
+    "ph":"+63",   
+}
+
+export function convertLocalPhone(country:keyof typeof countryPhoneMap, mobileNumber:string|number){
+    if( typeof mobileNumber === "number"){
+        return countryPhoneMap[country] + String(mobileNumber);
+    }
+    if( mobileNumber.charAt(0) === "0"){
+        return countryPhoneMap[country] + mobileNumber.substring(1);;
+    }
+    return countryPhoneMap[country] + mobileNumber;
+}

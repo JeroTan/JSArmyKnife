@@ -5,7 +5,7 @@
  * - targetElement - the element that will be change or move
  */
 
-import { ceil, floor, removeDecimal, timeToMilliseconds } from "./Math";
+import { removeDecimal, timeToMilliseconds } from "./Math";
 import { binarySearchIndex } from "./ParseData";
 
 
@@ -161,26 +161,41 @@ export class AnimeTroupe{ //It means as long as the configuration is the same yo
         return this;
     }
     commitStyle(waitToFinish = false){
+        if(this.currentAnimation)
         if(!waitToFinish){
-            this.currentAnimation.commitStyles();
+            try{
+                this.currentAnimation.commitStyles();
+            }catch(e){
+                console.log("Animation is Stopped before committing");
+            }
             return this;
         }
         const THIS = this;
         this.currentAnimation.addEventListener("finish", ()=>{
-            THIS.currentAnimation.commitStyles();
+            try{
+                THIS.currentAnimation.commitStyles();
+            }catch(e){
+                console.log("Animation is Stopped before committing");
+            }
         })
         return this;
+    }
+    isStop(callback: (THIS: AnimeTroupe, e: AnimationPlaybackEvent)=>void){
+        const THIS = this;
+        this.currentAnimation.addEventListener("finish", (e)=>{
+            callback(THIS, e);
+        })
     }
 
     
 }
 
 //--- USe this for grouping animation just like nesting in After Effects ---//
-interface ANIMATION_GROUP_OBJECT{
-    [key: (number|string)]: Animation
-}
+// interface ANIMATION_GROUP_OBJECT{
+//     [key: (number|string)]: Animation
+// }
 export class AnimationGroup{
-    private animationList:ANIMATION_GROUP_OBJECT = {};
+    // private animationList:ANIMATION_GROUP_OBJECT = {};
     
     constructor(){
     }
@@ -209,7 +224,7 @@ class TurnItem{
     public duration:number = 0;
     public repeat:undefined|null|number|typeof Infinity = undefined;
     public iterationCount:number = 0;
-    public do:Function = (thisItem:TurnItem)=>{};
+    public do:(thisItem:TurnItem)=>void = (thisItem:TurnItem)=>{thisItem};
 }
 
 class TurnOrder{
@@ -277,7 +292,7 @@ class TurnOrder{
     
 }
 
-class TimelineFrame{
+export class TimelineFrame{
     private turnOrder:TurnOrder|undefined;
     private timeInterval:number = 100; //The lower is accurate. Do not use 0 or below;
     private runningMilliseconds:number = 0;
@@ -375,10 +390,10 @@ class TimelineFrame{
 
 }
 
-class TimeTrigger{
+// class TimeTrigger{
     
-}
+// }
 
-class Canvas{
+// class Canvas{
 
-}
+// }

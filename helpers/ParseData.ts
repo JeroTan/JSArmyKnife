@@ -83,13 +83,16 @@ export function objToString(object: any[] | object, splitter: string = " "){
 export function toRegex(input: string|RegExp): RegExp{
     return new RegExp(input);
 }
+export function escapeToRegex(string:string) {
+    return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
 //<<< Convert to Other Types
 //====================================================================================================================================//
 //>>> Variable/Value Checking
 export function isInstance(object: any, classCopy: Function): boolean{
     return object instanceof classCopy;
 }
-export function isJSON(data:any) {
+export function isJSON(data:any|string) {
     if (typeof data !== 'string') return false;
     try {
         const result = JSON.parse(data);
@@ -122,6 +125,9 @@ export function stron(string:string) {
         hash = hash & hash;
     }
     return hash;
+}
+export function stringTrail(string:string, limit=20){
+    return string.length > limit ? string.substring(0,limit)+"..." : string
 }
 
 //<<< String Manipulation
@@ -186,7 +192,7 @@ export class Debouncer {
 //====================================================================================================================================//
 //>>> For React Utilities | But can stand alone as vanilla JS
 export class DataDispatch{// Get the value of state changer
-    private dispatch: Function = (param:any)=>{};
+    private dispatch: Function = ()=>{};
     constructor( dispatch: boolean|Function=false){
         //Dispatch callback must have a parameter that also accepts a callback. That callback must have a parameter about the old data;
         if(dispatch && typeof dispatch === "function")
@@ -196,10 +202,14 @@ export class DataDispatch{// Get the value of state changer
         this.dispatch = dispatch;
         return this;
     }
-    store(key:string|number, val: any){
+    store(key:string|number, val: any|((key:any)=>any)){
         this.dispatch( (old:object)=>{
             const newData:AnyObject = {...old};
-            newData[String(key)] = val;
+            if(typeof val === "function"){
+                newData[String(key)] = val(structuredClone(newData[String(key)]));
+            }else{
+                newData[String(key)] = val;
+            }
             return newData;
         });
         return this;
@@ -213,10 +223,10 @@ export class DataDispatch{// Get the value of state changer
         return this;
     }
     batch(objects:AnyObject, refresh = false){
-        if(!refresh){
-            this.dispatch(objects);
-            return this;
-        }
+        // if(!refresh){
+        //     this.dispatch(objects);
+        //     return this;
+        // }
 
         this.dispatch((old:object)=>{
             const newData:AnyObject = {...old};
@@ -243,7 +253,7 @@ export function parseLarevelError( errors:AnyObject ): object{
 //<<< For Laravel Utilities | But can stand alone as vanilla JS
 //====================================================================================================================================//
 //>>> Advance Algorithm
-export function binarySearchIndex(list:any[], callback:Function, indexPoint = 0): (number|-1){//For the callback you must use x <= y where x is the thing you need to search and y is reference
+export function binarySearchIndex<T>(list:T[], callback:(MiddleElement:T, FirstElement:T, LastElement:T)=>-1|0|1|number, indexPoint = 0): (number|-1){//For the callback you must use x <= y where x is the thing you need to search and y is reference
     const halfPoint = ceil(list.length/2)-1;
     const direction = callback( list[halfPoint], list[0], list[list.length-1] );//Returns -1 means direction; 0 means found; 1 means goRight;
     if(direction === 0)
@@ -256,3 +266,104 @@ export function binarySearchIndex(list:any[], callback:Function, indexPoint = 0)
     else
         return binarySearchIndex( list.slice((halfPoint+1)), callback, indexPoint+(halfPoint+1));
 };
+//<<< Advance Algorithm
+//====================================================================================================================================//
+//>>> JSON MANIPULATION
+export function objectReplacer(censor:any) {
+    var i = 0;
+    
+    return function(_:any, value:any) {
+      if(i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value) 
+        return '[Circular]'; 
+      
+      if(i >= 29) // seems to be a harded maximum of 30 serialized objects?
+        return '[Unknown]';
+      
+      ++i; // so we know we aren't using the original object anymore
+      
+      return value;
+    }
+  }
+//<<< JSON MANIPULATION
+//====================================================================================================================================//
+//>>> ENVIRONEMENT VARIABLES
+export function getENV(envName:string , defaultValue:string = "DEFAULT"){
+    try{
+        // console.log("ENV Helper use: Current Accessing", envName, "List Of all ENV", import.meta.env);
+        if(!import.meta.env[envName] || import.meta.env[envName] == undefined || import.meta.env[envName] === ""){
+            if(!process.env[envName] || process.env[envName] == undefined || process.env[envName] === ""){
+                return defaultValue;
+            }
+            return process.env[envName];
+        }
+        return import.meta.env[envName]
+    }catch(e){
+        try{
+            if(!process.env[envName] || process.env[envName] == undefined || process.env[envName] === ""){
+                return defaultValue;
+            }
+            return process.env[envName];
+        }catch(e){
+            return defaultValue;
+        }
+    }
+}
+//====================================================================================================================================//
+//<<< ENVIRONEMENT VARIABLES
+//====================================================================================================================================//
+//                                                                                                                                    //
+//====================================================================================================================================//
+//>>> CHAIN LINKER
+//====================================================================================================================================//
+// export interface SHARED_DATA{
+//     [key:string|number]:any
+// }
+/**
+ * @info Kizuna Means Bind
+ */
+export class Kizuna<RETURN_TYPE, SHARED_DATA extends object>{
+    private returnValue:RETURN_TYPE|undefined = undefined;
+    private sharedValues:SHARED_DATA = {} as SHARED_DATA;
+    private chainStack: Array< ((sharedValues:SHARED_DATA)=>Promise<void|RETURN_TYPE>) | ((sharedValues:SHARED_DATA)=>void|RETURN_TYPE) > = [];
+
+    constructor(shared?:SHARED_DATA){
+        if(shared){
+            this.sharedValues = shared;
+        }
+    }
+
+    //-- Setter --//
+    public defaultReturn(returnValue:RETURN_TYPE|undefined){
+        this.returnValue = returnValue;
+    }
+    //-- Setter --//
+
+    //-- Functionalities --//
+    public link(callback: ((sharedValues:SHARED_DATA)=>Promise<void|RETURN_TYPE>) | ((sharedValues:SHARED_DATA)=>void|RETURN_TYPE) ){
+        this.chainStack.push(callback);
+        return this;
+    }
+
+    public async run(){
+        if(this.chainStack.length < 1)
+            return this.returnValue;
+
+        const THIS = this;//Create in-house THIS;
+        async function runner(current=0, stack = THIS.chainStack){
+            if(current >= THIS.chainStack.length){
+                return THIS.returnValue;
+            }
+            let value = THIS.chainStack[current](THIS.sharedValues);
+            if(value instanceof Promise){
+                value = await value;
+            }
+            if(value === undefined){
+                return await runner(current+1, stack);
+            }else{
+                THIS.returnValue = value;
+                return THIS.returnValue;
+            }//They must wait for every await in that function
+        }
+        return await runner();
+    }
+}
