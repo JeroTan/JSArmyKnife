@@ -1,30 +1,28 @@
 {
-  "name": "templatejs",
-  "version": "1.0.0",
-  "description": "Template For Building an App using JS",
-  "main": "index.js",
-  "type": "module",
+  "name": "@JSArmyKnife",
+  "private": true,
+  "description": "All of the tools that you (might) need for Building an App, Server, Web using JS",
+  "workspaces": [
+    "packages/*"
+  ],
+  "main": "dist/index.js",
+  "type": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JeroTan/TemplateJS.git"
+    "url": "git+https://github.com/JeroTan/JSArmyKnife.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Jerowe Tan",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/JeroTan/TemplateJS/issues"
+    "url": "https://github.com/JeroTan/JSArmyKnife/issues"
   },
-  "homepage": "https://github.com/JeroTan/TemplateJS#readme",
+  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "dependencies": {
-    "@types/node": "^20.14.11",
-    "axios": "^1.6.8",
-    "dotenv": "^16.4.5",
-    "jsonwebtoken": "^9.0.2",
-    "knex": "^3.1.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "typescript": "^5.5.3"
   }
 }
