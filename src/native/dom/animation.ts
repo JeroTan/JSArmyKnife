@@ -1,6 +1,6 @@
 //---> Imports
 import { E } from "./utility";
-import { AnimeTroupe } from "../animation/anime";1
+import { AnimeTroupe } from "native--animation";
 
 
 /*|------------------------------------------------------------------------------------------|*/

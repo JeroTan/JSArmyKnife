@@ -5,9 +5,8 @@
  * - targetElement - the element that will be change or move
  */
 
-import { binarySearchIndex } from "../advance/search";
-import { removeDecimal } from "../math/basic";
-import { timeToMilliseconds } from "../math/time";
+import { binarySearchIndex } from "native--advance";
+import { removeDecimal, timeToMilliseconds } from "native--math";
 
 
 export const Second = 1000;

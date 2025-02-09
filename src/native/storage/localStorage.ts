@@ -1,4 +1,4 @@
-import { anyToStr } from "../parse/conversion";
+import { anyToStr } from "native--parse";
 
 /**
  * @description - This one will do the trick to store multiple keys or array or object using json and conversely convert it back to back. It uses local storage
@@ -21,8 +21,8 @@ export class Storage<Type>{
   public key: string = "1";
 
   constructor(key?:string|number|undefined){
-      if(key)
-          this.setKey(key);
+	  if(key)
+		  this.setKey(key);
   }
   //methods
   /**
@@ -30,30 +30,30 @@ export class Storage<Type>{
    * @returns 
    */
   setKey(key:string|number){
-      this.key = String(key);
-      return this;
+	  this.key = String(key);
+	  return this;
   }
   /**
    * @returns - Returns true if the storage with the current key exists in the local storage
    */
   isExist():boolean{
-      return localStorage.getItem(this.key) !== null
+	  return localStorage.getItem(this.key) !== null
   }
   /**
    * @param value - The value that you want to store in the local storage
    * @returns 
    */
   store(value: Type){
-      localStorage.setItem(this.key, anyToStr(value as any));
-      return this;
+	  localStorage.setItem(this.key, anyToStr(value as any));
+	  return this;
   }
   /**
    * 
    * @returns - Remove the current data along with its key in the local storage
    */
   remove(){
-      localStorage.removeItem(this.key);
-      return this;
+	  localStorage.removeItem(this.key);
+	  return this;
   }
 
   /**
@@ -64,12 +64,12 @@ export class Storage<Type>{
   get( parseJSON: true ): Type;
   get( parseJSON: false ): string;
   get(parseJSON = true):Type|string{ 
-      let value:string | null = localStorage.getItem(this.key);
-      if(value === null)
-          return "";
-      if(parseJSON ){
-          return JSON.parse(value) as Type;
-      }
-      return value as string;
+	  let value:string | null = localStorage.getItem(this.key);
+	  if(value === null)
+		  return "";
+	  if(parseJSON ){
+		  return JSON.parse(value) as Type;
+	  }
+	  return value as string;
   }
 }

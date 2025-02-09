@@ -13,8 +13,7 @@
  * - validationRunner() - use for multiple processing of validation
  */
 
-import { anyToArr, toRegex } from "../parse/conversion";
-import { capitalFirst } from "../parse/string";
+import { anyToArr, toRegex, capitalFirst } from "native--parse";
 
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Interface or Variable Definition                                           |*/

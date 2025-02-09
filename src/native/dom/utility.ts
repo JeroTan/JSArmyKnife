@@ -1,5 +1,5 @@
-import { AnimeTroupe } from "../animation/anime";
-import { popDispatch } from "../pop/modal";
+import { AnimeTroupe } from "native--animation";
+import { popDispatch } from "native--pop";
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Swapclass                                                                  |*/
 /*|------------------------------------------------------------------------------------------|*/

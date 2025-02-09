@@ -4,7 +4,7 @@
  * 
  */
 
-import { parseQueryToString } from "../parse/conversion";
+import { parseQueryToString } from "native--parse";
 
 //------------------------ Interface/Type definition
 export type RESPONSE_TYPE = "basic" | "cors" | "default" | "error" | "opaque" | "opaqueredirect";

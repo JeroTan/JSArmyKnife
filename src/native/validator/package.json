@@ -3,8 +3,8 @@
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "All tools for validating your data.",
-  "main": "dist/validator/index.js",
-  "types": "dist/validator/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc"
   },
@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/JeroTan/JSArmyKnife/issues"
   },
-  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme"
+  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
+  "dependencies": {
+    "native--parse": "latest"
+  }
 }

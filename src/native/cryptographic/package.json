@@ -2,7 +2,7 @@
   "name": "native--cryptographic",
   "version": "0.1.0-beta.1",
   "public": true,
-  "description": "Cryptographic functions for your project.",
+  "description": "Cryptographic functions for your project. Includes simple, advance and more secured functions(soon...). Disclaimer some of it are not practical for production, use at your own risk.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -17,5 +17,6 @@
   "bugs": {
     "url": "https://github.com/JeroTan/JSArmyKnife/issues"
   },
-  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme"
+  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
+  "keywords": []
 }

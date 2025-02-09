@@ -17,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/JeroTan/JSArmyKnife/issues"
   },
-  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme"
+  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
+  "dependencies": {
+    "native--animation": "latest",
+    "native--dom": "latest"
+  }
 }

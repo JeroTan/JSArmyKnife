@@ -1,6 +1,6 @@
 
-import { AnimeTroupe } from "../animation/anime";
-import { swapClass } from "../dom/utility";
+import { AnimeTroupe } from "native--animation";
+import { swapClass } from "native--dom";
 
 
 interface POP_OVER_DATA{
