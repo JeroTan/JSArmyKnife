@@ -1,0 +1,21 @@
+{
+  "name": "native--pop",
+  "version": "0.1.0-beta.1",
+  "public": true,
+  "description": "All Screen Pop-ups and Modals that you can include separately.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeroTan/JSArmyKnife.git"
+  },
+  "author": "Jerowe Tan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JeroTan/JSArmyKnife/issues"
+  },
+  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme"
+}

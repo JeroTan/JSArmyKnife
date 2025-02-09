@@ -1,1 +1,1 @@
-export * as Native from './native/index.ts';
+export * as Native from './native/index';

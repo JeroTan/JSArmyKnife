@@ -1,12 +1,13 @@
 {
-  "name": "@JSArmyKnife",
-  "private": true,
+  "name": "all",
+  "version": "0.1.0-beta.1",
+  "public": true,
   "description": "All of the tools that you (might) need for Building an App, Server, Web using JS",
   "workspaces": [
-    "packages/*"
+    "src/native/*"
   ],
   "main": "dist/index.js",
-  "type": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
@@ -24,5 +25,9 @@
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "dependencies": {
     "typescript": "^5.5.3"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {}
 }
