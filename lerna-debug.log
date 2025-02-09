@@ -1,0 +1,15 @@
+79 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
+79 error npm ERR! code E404
+79 error npm ERR! 404 Not Found - GET https://registry.npmjs.org/@jsarmyknife%2fmath - Not found
+79 error npm ERR! 404
+79 error npm ERR! 404  '@jsarmyknife/math@latest' is not in this registry.
+79 error npm ERR! 404
+79 error npm ERR! 404 Note that you can also install from a
+79 error npm ERR! 404 tarball, folder, http url, or git url.
+79 error
+79 error npm ERR! A complete log of this run can be found in: C:\Users\OnlyMeChanics\AppData\Local\npm-cache\_logs\2025-02-09T05_01_18_759Z-debug-0.log
+79 error     at makeError (C:\dev\jsarmyknfie\node_modules\execa\lib\error.js:59:11)
+79 error     at handlePromise (C:\dev\jsarmyknfie\node_modules\execa\index.js:114:26)
+79 error     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+79 error     at async VersionCommand.updatePackageVersions (C:\dev\jsarmyknfie\node_modules\lerna\dist\index.js:9899:13)
+79 error     at async Promise.all (index 0)

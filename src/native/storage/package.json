@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--storage",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.1-beta.0",
   "public": true,
   "description": "All state and storage related tools that you can include separately.",
   "main": "dist/index.js",
@@ -19,6 +19,6 @@
   },
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "dependencies": {
-    "@jsarmyknife/native--parse":"latest"
+    "@jsarmyknife/native--parse": "latest"
   }
 }

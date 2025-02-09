@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--validator",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.1-beta.0",
   "public": true,
   "description": "All tools for validating your data.",
   "main": "dist/index.js",
@@ -19,6 +19,6 @@
   },
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "dependencies": {
-    "@jsarmyknife/native--parse":"latest"
+    "@jsarmyknife/native--parse": "latest"
   }
 }
