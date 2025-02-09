@@ -4,7 +4,7 @@
  * 
  */
 
-import { parseQueryToString } from "native--parse";
+import { parseQueryToString } from "@jsarmyknife/native--parse";
 
 //------------------------ Interface/Type definition
 export type RESPONSE_TYPE = "basic" | "cors" | "default" | "error" | "opaque" | "opaqueredirect";

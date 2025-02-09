@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------------------------------------------//
 //     NotifPop                                                                                                    //
 //-----------------------------------------------------------------------------------------------------------------//
-import { AnimeTroupe } from "native--animation";
-import { swapClass } from "native--dom";
+import { AnimeTroupe } from "@jsarmyknife/native--animation";
+import { swapClass } from "@jsarmyknife/native--dom";
 
 interface NOTIF_POP_CONFIG{
   location: "top"|"top-right"|"right"|"bottom-right"|"bottom"|"bottom-left"|"left"|"top-left",

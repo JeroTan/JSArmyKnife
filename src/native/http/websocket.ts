@@ -1,4 +1,4 @@
-import { parseQueryToString } from "native--parse";
+import { parseQueryToString } from "@jsarmyknife/native--parse";
 
 export class WebSocketNative{
   private socket:undefined|WebSocket = undefined;

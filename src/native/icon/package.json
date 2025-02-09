@@ -1,5 +1,5 @@
 {
-  "name": "native--icon",
+  "name": "@jsarmyknife/native--icon",
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "SVG or image Icons for your project.",

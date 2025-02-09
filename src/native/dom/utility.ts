@@ -1,5 +1,5 @@
-import { AnimeTroupe } from "native--animation";
-import { popDispatch } from "native--pop";
+import { AnimeTroupe } from "@jsarmyknife/native--animation";
+import { popDispatch } from "@jsarmyknife/native--pop";
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Swapclass                                                                  |*/
 /*|------------------------------------------------------------------------------------------|*/

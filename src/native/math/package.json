@@ -1,5 +1,5 @@
 {
-  "name": "native--math",
+  "name": "@jsarmyknife/native--math",
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "All Computational logic and anything that works with number.",

@@ -3,5 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
   },
-  "include": ["index.ts"]
+  "include": ["index.ts"],
+  "dependencies": {
+    "@jsarmyknife/dom":"latest",
+    "@jsarmyknife/animation":"latest"
+  }
 }

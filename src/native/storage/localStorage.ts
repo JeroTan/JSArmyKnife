@@ -1,4 +1,4 @@
-import { anyToStr } from "native--parse";
+import { anyToStr } from "@jsarmyknife/native--parse";
 
 /**
  * @description - This one will do the trick to store multiple keys or array or object using json and conversely convert it back to back. It uses local storage

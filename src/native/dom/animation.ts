@@ -1,6 +1,6 @@
 //---> Imports
 import { E } from "./utility";
-import { AnimeTroupe } from "native--animation";
+import { AnimeTroupe } from "@jsarmyknife/native--animation";
 
 
 /*|------------------------------------------------------------------------------------------|*/

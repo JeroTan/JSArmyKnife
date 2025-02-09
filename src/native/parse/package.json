@@ -1,5 +1,5 @@
 {
-  "name": "native--parse",
+  "name": "@jsarmyknife/native--parse",
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "All Kinds of Parsing Tools that you can include separately.",

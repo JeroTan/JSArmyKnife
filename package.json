@@ -1,6 +1,6 @@
 {
-  "name": "all",
-  "version": "0.1.0-beta.1",
+  "name": "@jsarmyknife/all",
+  "version": "0.1.0-beta.2",
   "public": true,
   "description": "All of the tools that you (might) need for Building an App, Server, Web using JS",
   "workspaces": [
@@ -23,11 +23,12 @@
     "url": "https://github.com/JeroTan/JSArmyKnife/issues"
   },
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
-  "dependencies": {
-    "typescript": "^5.5.3"
-  },
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "lerna": "^8.1.9",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {}
 }

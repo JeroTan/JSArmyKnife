@@ -1,5 +1,5 @@
 {
-  "name": "native--cryptographic",
+  "name": "@jsarmyknife/native--cryptographic",
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "Cryptographic functions for your project. Includes simple, advance and more secured functions(soon...). Disclaimer some of it are not practical for production, use at your own risk.",

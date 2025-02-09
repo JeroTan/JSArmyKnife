@@ -1,5 +1,5 @@
 {
-  "name": "native--dom",
+  "name": "@jsarmyknife/native--dom",
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "All Utilities you need for manipulating DOM.",
@@ -20,7 +20,7 @@
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "keywords": [],
   "dependencies": {
-    "native--animation": "latest",
-    "native--pop": "latest"
+    "@jsarmyknife/animation":"latest",
+    "@jsarmyknife/pop":"latest"
   }
 }

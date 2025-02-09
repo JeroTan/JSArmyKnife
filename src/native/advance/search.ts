@@ -1,4 +1,4 @@
-import { ceil } from "native--math";
+import { ceil } from "@jsarmyknife/native--math";
 
 export function binarySearchIndex<T>(list:T[], callback:(MiddleElement:T, FirstElement:T, LastElement:T)=>-1|0|1|number, indexPoint = 0): (number|-1){//For the callback you must use x <= y where x is the thing you need to search and y is reference
 	const halfPoint = ceil(list.length/2)-1;

@@ -1,5 +1,5 @@
 {
-  "name": "native--friction",
+  "name": "@jsarmyknife/native--friction",
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "All things you need to add delay or little slow down to your project.",

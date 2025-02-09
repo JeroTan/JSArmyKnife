@@ -1,5 +1,5 @@
 {
-  "name": "native--advance",
+  "name": "@jsarmyknife/native--advance",
   "version": "0.1.0-beta.1",
   "public": true,
   "description": "All kinds of advance algorithm in a single helper.",
@@ -20,6 +20,6 @@
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "keywords": [],
   "dependencies": {
-    "native--math": "latest"
+    "@jsarmyknife/math":"latest"
   }
 }

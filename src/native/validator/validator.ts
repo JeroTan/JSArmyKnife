@@ -13,7 +13,7 @@
  * - validationRunner() - use for multiple processing of validation
  */
 
-import { anyToArr, toRegex, capitalFirst } from "native--parse";
+import { anyToArr, toRegex, capitalFirst } from "@jsarmyknife/native--parse";
 
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Interface or Variable Definition                                           |*/
