@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--animation",
-  "version": "0.1.1-beta.2",
+  "version": "0.1.2-beta.0",
   "public": true,
   "description": "Animation using Javascript",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "keywords": [],
   "dependencies": {
-    "@jsarmyknife/native--math": "latest",
-    "@jsarmyknife/native--advance": "latest"
+    "@jsarmyknife/native--advance": "latest",
+    "@jsarmyknife/native--math": "latest"
   }
 }

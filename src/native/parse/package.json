@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--parse",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.2-beta.0",
   "public": true,
   "description": "All Kinds of Parsing Tools that you can include separately.",
   "main": "dist/index.js",

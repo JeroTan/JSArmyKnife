@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--validator",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.2-beta.0",
   "public": true,
   "description": "All tools for validating your data.",
   "main": "dist/index.js",

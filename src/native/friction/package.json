@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--friction",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.2-beta.0",
   "public": true,
   "description": "All things you need to add delay or little slow down to your project.",
   "main": "dist/index.js",

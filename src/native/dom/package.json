@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--dom",
-  "version": "0.1.1-beta.4",
+  "version": "0.1.2-beta.0",
   "public": true,
   "description": "All Utilities you need for manipulating DOM.",
   "main": "dist/index.js",

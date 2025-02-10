@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--advance",
-  "version": "0.1.1-beta.1",
+  "version": "0.1.2-beta.0",
   "public": true,
   "description": "All kinds of advance algorithm in a single helper.",
   "main": "dist/index.js",
