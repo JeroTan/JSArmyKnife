@@ -4,14 +4,13 @@
   "public": true,
   "description": "All of the tools that you (might) need for Building an App, Server, Web using JS",
   "workspaces": [
-    "src/native/*"
+    "src/native/**/*"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "prepare": "npm run build"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
