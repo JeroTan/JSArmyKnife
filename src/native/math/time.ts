@@ -1,10 +1,19 @@
-/*|------------------------------------------------------------------------------------------|*/
-/*|                Date Transformer                                                          |*/
-
 import { padNumber, removeDecimal } from "./basic";
 
 /*|------------------------------------------------------------------------------------------|*/
-export function transformDate(date: Date|string|number, format:string|"simple"|"yyyy-mm-dd"|"iso"|"simple-named"|"time-12h"|"time-24-seconds"|"mnt, dd yyyy"="simple", utc=false){
+/*|                Date Transformer                                                          |*/
+/*|------------------------------------------------------------------------------------------|*/
+export type TRANSFORM_FORMAT = 
+"simple"|
+"yyyy-mm-dd"|
+"iso"|
+"simple-named"|
+"time-12h"|
+"time-24-seconds"|
+"mnt, dd yyyy"|
+"dxx mnt, yyyy"
+;
+export function transformDate(date: Date|string|number, format:TRANSFORM_FORMAT="simple", utc=false){
   if(utc){
 	  date = new DateUTC(date);
   }else{
@@ -32,7 +41,20 @@ export function transformDate(date: Date|string|number, format:string|"simple"|"
 	  case "mnt, dd yyyy":{
 		  return `${monthName(date.getMonth()+1)} ${padNumber(date.getDate(), 2)}, ${padNumber(date.getFullYear(), 4)}`;
 	  }
+		case "dxx mnt, yyyy":{
+			//Sample 9th April, 2024
+			const day = date.getDate();
+			const suffix = (day % 10 === 1 && day !== 11)
+				? "st"
+				: (day % 10 === 2 && day !== 12)
+				? "nd"
+				: (day % 10 === 3 && day !== 13)
+				? "rd"
+				: "th";
+			return `${day}${suffix} ${monthName(date.getMonth()+1, "long")}, ${padNumber(date.getFullYear(), 4)}`;
+		}
 	  default:{
+			throw new Error("TRANSFORMATION KEY FOR DATE NOT AVAILABLE");
 		  return "TRANSFORMATION KEY FOR DATE NOT AVAILABLE";
 	  }
   }
@@ -64,7 +86,7 @@ export class DateUTC extends Date{
   }
 }
 
-export function getToday(format:string = "simple"){
+export function getToday(format:TRANSFORM_FORMAT = "simple"){
   return transformDate(Date.now(), format);
 }
 export type NUMBER_OF_MONTHS = number|1|2|3|4|5|6|7|8|9|10|11|12;
@@ -126,7 +148,7 @@ export function numberOfDays(month:string|NUMBER_OF_MONTHS, year = new Date().ge
 		  throw new Error("Invalid Number of Months")
   }
 }
-export function monthName(number:NUMBER_OF_MONTHS, format="short"){ //Short or Full
+export function monthName(number:NUMBER_OF_MONTHS, format:"short"|"long"="short"){ //Short or Long
   switch(number){
 	  case 1:
 		  return format=="short"?"Jan":"January";

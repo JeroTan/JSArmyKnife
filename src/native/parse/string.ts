@@ -62,3 +62,11 @@ export function stron(string:string) {
 export function stringTrail(string:string, limit=20){
 	return string.length > limit ? string.substring(0,limit)+"..." : string
 }
+
+/**
+ * @description convert a string into list of asterisk
+ * @param string - the string you want to convert
+ */
+export function toAsterisk(string:string){
+	return "*".repeat(string.length);
+}

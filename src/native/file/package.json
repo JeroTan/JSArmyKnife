@@ -1,8 +1,8 @@
 {
-  "name": "@jsarmyknife/native--math",
-  "version": "0.1.4-beta.0",
+  "name": "@jsarmyknife/native--file",
+  "version": "0.0.1-beta.0",
   "public": true,
-  "description": "All Computational logic and anything that works with number.",
+  "description": "All Utilities you need for manipulating files.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
