@@ -3,12 +3,20 @@ import { popDispatch } from "@jsarmyknife/native--pop";
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Swapclass                                                                  |*/
 /*|------------------------------------------------------------------------------------------|*/
-interface Swapper{
+interface SWAPPER{
   id: string|HTMLElement;
   mk?: string|string[];
   rm?: string|string[];
+  tg?: string|string[];
+  sw?: string|[string, string];
 }
-export function swapClass(query:Swapper|Swapper[], recalculate:boolean = false){
+/**
+ * @description This function is used to swap class of an element. It can be used to swap multiple elements at once.
+ * @param query 
+ * @param recalculate 
+ * @returns 
+ */
+export function swapClass(query:SWAPPER|SWAPPER[], recalculate:boolean = false){
   /* //This is the nostalgic JQuery
     $(keys).removeClass(query[keys][0]);
     $(keys).addClass(query[keys][1]);
@@ -16,24 +24,38 @@ export function swapClass(query:Swapper|Swapper[], recalculate:boolean = false){
   */
 
   //This function contains logic to swap class
-  function swap(id:string|HTMLElement, mk?:string|string[], rm?:string|string[]){
-    const element = id instanceof HTMLElement ? id :  document.querySelector<HTMLElement>(id);
+  function swap(id:string|HTMLElement, mk?:string|string[], rm?:string|string[], tg?:string|string[], sw?: string|[string, string]){
+    const element = (id instanceof HTMLElement ? id :  document.querySelector<HTMLElement>(id)) as HTMLElement;
     if(rm){
       if(typeof rm === "string"){
-        rm = rm.trim().split(" ");
+        rm = rm.trim().split(/\s+/);
       }
-      element?.classList.remove(...rm);
+      element.classList.remove(...rm);
     }
     if(mk){
       if(typeof mk === "string"){
-        mk = mk.trim().split(" ");
+        mk = mk.trim().split(/\s+/);
       }
-      element?.classList.add(...mk);
+      element.classList.add(...mk);
+    }
+    if(tg){
+      if(typeof tg === "string"){
+        tg = tg.trim().split(/\s+/);
+      }
+      tg.forEach((x)=>{
+        element.classList.toggle(x);
+      })
+    }
+    if(sw){
+      if(typeof sw === "string"){
+        sw = sw.trim().split(/\s+/).slice(0, 2) as [string, string];
+      }
+      element.classList.replace(sw[0], sw[1]);
     }
 
     //dom re-calculate
     if(recalculate)
-      element?.offsetHeight;
+      element.offsetHeight;
   }
   
   //Either list of swapping or normal swap
@@ -51,12 +73,18 @@ export function swapClass(query:Swapper|Swapper[], recalculate:boolean = false){
 /*|               Elements                                                                   |*/
 /*|------------------------------------------------------------------------------------------|*/
 //Use this to create new element
+/**
+ * @description This function is used to create new element. It can be used to create any element with any attributes and children.
+ * @param tag 
+ * @param props 
+ * @param children 
+ * @returns 
+ */
 export function E<T extends keyof HTMLElementTagNameMap>(
   tag: T,
-  props: Partial<HTMLElementTagNameMap[T]> & { 
-    style?: Partial<CSSStyleDeclaration>; 
-    [key: string]: any; 
-  } = {},
+  props: { 
+    style?: Partial<CSSStyleDeclaration>,
+  } & Partial<Omit<HTMLElementTagNameMap[T], "style">> = {},
   ...children: (string | Node)[]
 ): HTMLElementTagNameMap[T] {
   const el = document.createElement(tag);
@@ -65,22 +93,22 @@ export function E<T extends keyof HTMLElementTagNameMap>(
     if (key === "style" && typeof props.style === "object") {
       // Apply inline styles
       Object.assign(el.style, props.style);
-    } else if (key.startsWith("on") && typeof props[key] === "function") {
+    } else if (key.startsWith("on") && typeof (props as {[key:string]:any})[key] === "function") {
       // Add event listeners (e.g., onClick => click)
       const eventName = key.slice(2).toLowerCase();
-      el.addEventListener(eventName, props[key]);
+      el.addEventListener(eventName, (props as {[key:string]:any})[key]);
     } else if (key in el) {
       // Set DOM properties (e.g., id, className)
 
       try{
-        (el as any)[key] = props[key];
+        (el as any)[key] = (props as {[key:string]:any})[key];
       }catch{
         // el.setAttribute(key, String(props[key]));
       }
       
     } else {
       // Set attributes for everything else
-      el.setAttribute(key, String(props[key]));
+      el.setAttribute(key, String((props as {[key:string]:any})[key]));
     }
   }
 
@@ -95,13 +123,146 @@ export function E<T extends keyof HTMLElementTagNameMap>(
 
   return el;
 }
+/**
+ * @description This function creates document fragment. It can be used to create multiple elements at once.
+ */
+export function F(...children: (string | Node)[]): DocumentFragment {
+  const fragment = document.createDocumentFragment();
+  children.forEach(child => {
+    if (typeof child === "string") {
+      const template = document.createElement("template");
+      template.innerHTML = child;
+      fragment.appendChild(template.content);
+    } else if (child instanceof Node) {
+      fragment.appendChild(child);
+    }
+  });
+  return fragment;
+}
+
+
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Custom Elementals                                                          |*/
+/*|------------------------------------------------------------------------------------------|*/
+/**
+ * @description This function is used to create custom elements that you can reuse in the page. meaning once created, you can use it multiple times. i.e. <sample-element></sample-element> will be always available and it retain its functionality every time you use document.createElement("sample-element")
+ * @param componentName 
+ * @param callback 
+ * @param appendToRoot Here you may add the required styles or scripts since the API custom element will not have access to the main document.
+ */
+
+export interface HTMLElementsWithProps<T> extends HTMLElement{
+  props: T;
+  slotData: (content: (string|HTMLElement|HTMLElementsWithProps<any>|Node)|{[slotname:string|number]:(string|HTMLElement|HTMLElementsWithProps<any>|Node)} )=>void;
+}
+
+export function ElementMaker<T extends object>(componentName:string, callback:(element:HTMLElementsWithProps<T>)=>void){
+	const customElementSample = (document.querySelector(componentName) as HTMLElement).cloneNode(true) as HTMLElement;
+
+	class AstroElement extends HTMLElement{
+    _props: T = {} as T;
+    private isOpened:boolean = false;
+    private openingStackCalls:Function[] = [];
+    private callStackRunner(callback:Function){
+      if(this.isOpened){
+        callback();
+      }else{
+        this.openingStackCalls.push(callback);
+      }
+    }
+    private runStackCalls(){
+      for(let i = 0; i < this.openingStackCalls.length; i++){
+        this.openingStackCalls[i]();
+      };
+      this.openingStackCalls = [];
+    }
+    
+		constructor(){
+			super();
+			callback(this);
+		}
+		connectedCallback(){
+      //1. Check first if the content of customElementSample is the same as the content of "this"
+      if (this.innerHTML.trim() === customElementSample.innerHTML.trim()) {
+        return;
+      }
+      //2. If it is not then pre filled the "this" with the customElementSample
+      const newChild = customElementSample.cloneNode(true) as HTMLElement;
+      this.append(...(newChild).children); // while (this.firstChild) {
+      this.isOpened = true;
+      this.runStackCalls();
+		}
+    disconnectedCallback(){
+      this.isOpened = false;
+    }
+    get props(){
+      return this._props;
+    }
+    set props(props:T){
+      this._props = props;
+    }
+    slotData(slots:  (string|HTMLElement|HTMLElementsWithProps<any>|Node)|{[slotname:string|number]:(string|HTMLElement|HTMLElementsWithProps<any>|Node)} ){
+      const THIS = this;
+      this.callStackRunner(()=>{
+        const target = [...Array.from(THIS.querySelectorAll("slot"))];
+        if(target.length === 0){
+          return;
+        }
+        
+        //For named slots
+        if(typeof slots === "object"){
+          for(let slot in slots){  
+            const slotContent = (slots as {[slotname:string|number]:(string|HTMLElement|HTMLElementsWithProps<any>|Node)})[slot] as string|HTMLElement|HTMLElementsWithProps<any>|Node;
+          
+            //Search for slot element with name tag slot
+            const thisSlotTarget = target.find((slotElement)=>{
+              return slotElement.getAttribute("name") === slot;
+            })
+            if(thisSlotTarget === undefined){
+              break;
+            }
+  
+            //Replace the <slot> with the content on the given slot data
+            if(typeof slotContent === "string"){
+              thisSlotTarget.outerHTML = slotContent;
+            }else{
+              thisSlotTarget.replaceWith(slotContent);
+            }
+          }
+        }
+        
+        //Find the unnamed slot
+        const thisSlotTarget = target.find((slotElement)=>{
+          return slotElement.getAttribute("name") === null;
+        });
+        if(thisSlotTarget === undefined){
+          return;
+        }
+
+        //Replace the <slot> with the content on the given slot data
+        if(typeof slots === "string"){
+          thisSlotTarget.outerHTML = slots;
+        }else{
+          thisSlotTarget.replaceWith(slots as HTMLElement|HTMLElementsWithProps<any>|Node);
+
+        }
+      });
+      return this;
+    }
+	}
+	//This will wrap your component to make it independent on its own. i.e. make same components in the same page.
+	customElements.define(componentName, AstroElement);
+}
+
 
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Load LIstener Control                                                      |*/
 /*|------------------------------------------------------------------------------------------|*/
-//Use this to control load order of event listener onload
 type LOAD_CALLBACK = ((()=>void)|(()=>Promise<any>));
 type LOAD_FALLBACK = ()=>void;
+/**
+ * @description This class is used to control the load order of the page. It can be used to control the load order of the page.
+ */
 export class LoadOrder{
   private orderStack:LOAD_CALLBACK[] = [];
   private fallbackStack: LOAD_FALLBACK[] = [];
@@ -190,9 +351,15 @@ export class LoadOrder{
   }
 }
 
-
-//Clone and destroy the copy after it's usage on callback. It will have a hidden copy in the document body.
-export function shadowClone<T extends HTMLElement>(element:T, callback:(e:T)=>void){
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Completely Random                                                      |*/
+/*|------------------------------------------------------------------------------------------|*/
+/**
+ * @description - Clone and destroy the copy after it's usage on callback. It will have a hidden copy in the document body.
+ * @param element 
+ * @param callback 
+ */
+export function partialClone<T extends HTMLElement>(element:T, callback:(e:T)=>void){
   const clonedElement = element.cloneNode(true) as HTMLElement;
   document.body.appendChild(clonedElement);
   clonedElement.style.opacity = "0";
@@ -203,414 +370,14 @@ export function shadowClone<T extends HTMLElement>(element:T, callback:(e:T)=>vo
   clonedElement.remove();
 }
 
-//Trigger event manually
+/**
+ * @description - Trigger event manually
+ * @returns 
+ */
 export function elementTrigger(eventName:string, element:HTMLElement){
   element.dispatchEvent(new Event(eventName));
 }
 
-
-/*|------------------------------------------------------------------------------------------|*/
-/*|               FIELD BINDING                                                              |*/
-/*|------------------------------------------------------------------------------------------|*/
-type INPUT_FIELD = HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
-
-export class FieldBinding{
-  private inputDOM:{[key:string|number]:INPUT_FIELD} = {};
-  private errorDOM:{[key:string|number]:INPUT_FIELD} = {};
-  private oldInputValue:{[key:string|number]:string} = {};
-  private oldErrorValue:{[key:string|number]:string} = {};
-
-  private inputOffsetName:string = "";
-  private errorOffsetName:string = "";
-
-  private listenerElement:HTMLButtonElement = document.createElement("button");
-
-  private listenersStack:Function[] = [];
-
-  constructor(inputOffsetName?:string, errorOffsetName?:string){
-    if(inputOffsetName){
-      this.setInputOffsetName(inputOffsetName);
-    }
-    if(errorOffsetName){
-      this.setErrorOffsetName(errorOffsetName);
-    }
-
-    const THIS = this;
-    this.listenerElement.addEventListener("click", ()=>{
-      const input = THIS.getInput() as {[key:string|number]:string};
-      const error = THIS.getError() as {[key:string|number]:string};
-      for(const listenFunction of THIS.listenersStack){
-        listenFunction(input, error);
-      }
-    });
-  }
-
-  //--Setter--//
-  public setInputOffsetName(offset:string){
-    this.inputOffsetName = offset;
-    return this;
-  }
-  public setErrorOffsetName(offset:string){
-    this.errorOffsetName = offset;
-    return this;
-  }
-  //--Setter--//
-
-  //--In House--//
-  private addField(name:string|number, offsetName:string, fieldList:{[key:string|number]:INPUT_FIELD},  field?:INPUT_FIELD|string|undefined){
-    fieldList[name] = (field !== undefined && typeof field !== "string") ? field : (document.getElementById(typeof field === "string" && field !== undefined ? field : offsetName+name) as INPUT_FIELD);
-    return this;
-  }
-  private listenTrigger(field: INPUT_FIELD|string|number, offsetName:string, triggerUpdate = false, callback?:Function){
-    field = typeof field === "string" || typeof field === "number" ? (document.getElementById(offsetName+String(field)) as INPUT_FIELD) : field;
-    if(field === null)
-      return;
-    //const whatEvent = field instanceof HTMLSelectElement ? "change" : "input";
-    let inputIsTriggered = false; //Check if input is triggered already so that change event will not follow up
-    let changeIsTriggered = false;
-    const THIS = this;
-    field.addEventListener("input", (e)=>{//Trigger this when input change.
-      inputIsTriggered = true;
-      changeIsTriggered = false;
-      if(callback)
-        callback(e);
-      if(triggerUpdate)
-        THIS.listenerElement.click();
-    })
-
-    field.addEventListener("change", (e)=>{//Trigger this when input change.
-      if(inputIsTriggered && !changeIsTriggered){
-        inputIsTriggered = false;
-        return;
-      }
-
-      if(callback)
-        callback(e);
-      if(triggerUpdate)
-        THIS.listenerElement.click();
-      changeIsTriggered = true;
-      inputIsTriggered = false;
-    })
-  }
-  private removeField( name:string|number|Array<string|number>, oldField:{[key:string|number]:INPUT_FIELD} ){
-    const THIS = this;
-    const newField:{[key:string|number]:INPUT_FIELD} = {}
-    Object.keys(oldField).forEach((i)=>{
-      if(Array.isArray(name) ){
-        let removeIndex = 0;
-        if(name.length > 0 && name.some((x, thisI)=>{
-          if(x === i){
-            removeIndex = thisI;
-            return true;
-          }
-        })){
-          name.splice(removeIndex, 1);
-          return;
-        }
-      }else{
-        if(name === i)
-          return;
-      }
-      newField[i] = THIS.inputDOM[i];
-    })
-    return newField;
-  }
-  private getValue(list:{[key:string|number]:INPUT_FIELD}, name:string|number|undefined|Array<string|number> = undefined):{[key:string|number]:string}|string{
-    if(name === undefined){//Return all if undefined
-      const newData:{[key:string|number]:string} = {};
-      Object.keys(list).forEach(i => {
-        if(!list[i] || list[i].value === null){
-          newData[i] = "";
-          return;
-        }
-        newData[i] = list[i].value;
-      });
-      return newData;
-    }
-    if(typeof name === "string" || typeof name === "number"){//Return only the string value if not
-      if(!list[name] || list[name].value === null)
-        return "";
-      return list[name].value;
-    }
-    const newData:{[key:string|number]:string} = {};
-    name.forEach((thisName)=>{
-      if(!list[thisName] || list[thisName].value === null){
-        newData[thisName] = "";
-        return;
-      }
-      newData[thisName] = list[thisName].value;
-    });
-    return newData;
-  }
-  private setValue(field:{[key:string|number]:INPUT_FIELD}, name:string|number|Array<string|number>|{[name:string|number]:string}, value?:string, silent:boolean = false, useChange = false){
-    if(typeof name === "string" || typeof name === "number"){
-      field[name].value = value === undefined ? "" : value;
-      if(!silent){
-        // elementTrigger('change', field[name]);
-        elementTrigger(!useChange?'input':"change", field[name]);
-      }
-      return this;
-    }
-    if(Array.isArray(name)){
-      name.forEach(ei=>{
-        field[String(ei)].value = value === undefined ? "" : value;
-        if(!silent){
-          // elementTrigger('change', field[String(ei)]);
-          elementTrigger(!useChange?'input':"change", field[String(ei)]);
-        }
-      })
-    }
-    name = name as {[name:string|number]:string};
-    Object.keys(name).forEach((ei:string) => {
-      if(field[ ei ] === undefined)
-        return;
-      field[ ei ].value = name[ei];
-      if(!silent){
-        // elementTrigger('change', field[String(ei)]);
-        elementTrigger('input', field[String(ei)]);
-      }
-    });
-  }
-  //--In House--//
-
-  //--Functionalities--//
-  public addInputField(name:string|number|string[], field?:INPUT_FIELD|string|undefined|Array<INPUT_FIELD|string|undefined>, includeError = false){//Error will only get the names not the field so be careful
-    if( !Array.isArray(name) && !Array.isArray(field) ){
-      field = (field === undefined ? name : field) as string;
-      this.addField(name, this.inputOffsetName, this.inputDOM, field);
-      this.listenTrigger(name, this.inputOffsetName, true);
-      this.oldInputValue[name] = "";
-      if(includeError){
-        this.addField(name, this.errorOffsetName, this.errorDOM)
-        this.listenTrigger(name, this.errorOffsetName, true);
-        this.oldErrorValue[name] = "";
-      }
-      return this;
-    }
-    if( Array.isArray(name) ){
-      for(let i = 0; i < name.length; i++){
-        const thisField = Array.isArray(field) ? field[i] : ( field === undefined ? name[i] : field );
-        this.addField(name[i], this.inputOffsetName, this.inputDOM,  thisField);
-        this.listenTrigger(name[i], this.inputOffsetName, true);
-        this.oldInputValue[name[i]] = "";
-        if(includeError){
-          this.addField(name[i], this.errorOffsetName, this.errorDOM );
-          this.listenTrigger(name[i], this.errorOffsetName, true);
-          this.oldErrorValue[name[i]] = "";
-        }
-      }
-    }
-    return this;
-  }
-
-  public addErrorField(name:string|number|string[], field?:INPUT_FIELD|string|undefined|Array<INPUT_FIELD|string|undefined>){
-    if( !Array.isArray(name) && !Array.isArray(field) ){
-      field = (field === undefined ? name : field) as string;
-      this.addField(name, this.errorOffsetName,  this.errorDOM, field);
-      this.listenTrigger(name, this.errorOffsetName, true);
-      this.oldErrorValue[name] = "";
-      return this;
-    }
-    if( Array.isArray(name) && Array.isArray(field) ){
-      for(let i = 0; i < name.length; i++){
-        const thisField = Array.isArray(field) ? field[i] : ( field === undefined ? name[i] : field );
-        this.addField( name[i], this.errorOffsetName, this.errorDOM, thisField);
-        this.listenTrigger(name[i], this.errorOffsetName, true);
-        this.oldErrorValue[name[i]] = "";
-      }
-    }
-    return this;
-  }
-
-  public removeInputField(name:string|string[]){
-    this.inputDOM = this.removeField(name, this.inputDOM );
-    return this;
-  }
-
-  public removeErrorField(name:string|string[]){
-    this.errorDOM = this.removeField(name, this.errorDOM );
-    return this;
-  }
-
-  public getInput(name:string|number|undefined|Array<string|number> = undefined){ //If not defined then return all, if define by string return one, if define by array return that array
-    return this.getValue(this.inputDOM, name);
-  }
-
-  public getError(name?:string|number|undefined|Array<string|number>){//same with value but error
-    return this.getValue(this.errorDOM, name);
-  }
-
-  public setInput(name:string|number|Array<string|number>|{[name:string|number]:string}, value?:string|undefined, silent:boolean = false, useChange = false){
-    this.setValue(this.inputDOM, name, value, silent, useChange);
-    return this;
-  }
-
-  public setError(name:string|number|Array<string|number>|{[name:string|number]:string}, value?:string|undefined, silent:boolean = false, useChange = false){
-    this.setValue(this.errorDOM, name, value, silent, useChange);
-    return this;
-  }
-
-  inputElement(name:string){
-    return this.inputDOM[name];
-  }
-  errorElement(name:string){
-    return this.errorDOM[name];
-  }
-
-  public validation( listToValidate:{[key:string|number]: (input:string)=>(string|true|Promise<string|true>)} ){
-    const THIS = this;
-    Object.keys(listToValidate).forEach(name=>{
-      //Get the validation result already. For oldErrorValue Reference
-      const validationResults = listToValidate[name]("");
-      if(validationResults instanceof Promise){
-        (validationResults as Promise<string>).then(x=>{
-          THIS.oldErrorValue[name] = x as string;
-        })
-      }else{
-        THIS.oldErrorValue[name] = validationResults as string;
-      }
-
-      THIS.listenTrigger(THIS.inputDOM[name], THIS.inputOffsetName, false, ()=>{
-        const validationResults = listToValidate[name](THIS.inputDOM[name].value);
-        if(validationResults instanceof Promise){
-          (validationResults as Promise<string>).then(x=>{
-            THIS.errorDOM[name].value = typeof x === "boolean" ? "" : x as string;
-            elementTrigger("input",THIS.errorDOM[name]);
-            elementTrigger("change",THIS.errorDOM[name]);
-          })
-        }else{
-          THIS.errorDOM[name].value = validationResults as string;
-          elementTrigger("input",THIS.errorDOM[name]);
-          elementTrigger("change",THIS.errorDOM[name]);
-        }
-        
-      })
-    })
-  }
-
-  public listen(callback:(input:{[key:string|number]:string}, error:{[key:string|number]:string})=>void){
-    this.listenersStack.push(callback);
-  }
-
-  public listenToInput(whatField:Array<string|number>, callback:(input:{[key:string|number]:string}, error:{[key:string|number]:string})=>void, returnAll = false){
-    const THIS = this;
-    const old:{[key:string|number]:string} = {};
-    whatField.forEach(x=>old[x]="");
-
-    this.listen((input, error)=>{
-      let isChange = false;
-      whatField.forEach((x)=>{
-        if(input[x] !== old[x] ){
-          isChange = true;
-          old[x] = input[x];
-          THIS.oldInputValue[x] = input[x];
-        }
-      });
-      if(isChange)
-        callback(returnAll ? input : (THIS.getInput(whatField) as {[key:string|number]:string}), returnAll ? error : (THIS.getError(whatField) as {[key:string|number]:string}) );
-    });
-
-  }
-  public listenToError(whatField:Array<string|number>, callback:(input:{[key:string|number]:string}, error:{[key:string|number]:string})=>void, returnAll = false){
-    const THIS = this;
-    const old:{[key:string|number]:string} = {};
-    whatField.forEach(x=>old[x]="");
-
-    this.listen((input, error)=>{
-      let isChange = false;
-      whatField.forEach((x)=>{
-        if((old[x] === undefined && error[x]!=="") ||  error[x] !== old[x] ){
-          isChange = true;
-          old[x] = error[x];
-          THIS.oldErrorValue[x] = error[x];
-        }
-      });
-      if(isChange)
-        callback(returnAll ? input : (THIS.getInput(whatField) as {[key:string|number]:string}), returnAll ? error : (THIS.getError(whatField) as {[key:string|number]:string}) );
-    });
-  }
-
-  public listenTo(inputField:Array<string|number>, errorField:Array<string|number>|true, callback:(input:{[key:string|number]:string}, error:{[key:string|number]:string})=>void, returnAll = false){
-    const THIS = this;
-    const old1:{[key:string|number]:string} = {};
-    const old2:{[key:string|number]:string} = {};
-    inputField.forEach(x=>old1[x]="");
-    (errorField === true ? inputField: errorField).forEach(x=>old2[x]="");
-
-    this.listen((input, error)=>{
-      let isChange = false;
-      inputField.forEach((x)=>{
-        if( (old1[x] === undefined && input[x] !== "") ||  input[x] !== old1[x] ){
-          isChange = true;
-          old1[x] = input[x];
-          THIS.oldInputValue[x] = input[x];
-        }
-      });
-
-      (errorField === true ? inputField: errorField).forEach((x)=>{
-        if( (old2[x] === undefined && error[x] !== "") || error[x] !== old2[x] ){
-          isChange = true;
-          old2[x] = error[x];
-          THIS.oldErrorValue[x] = error[x];
-        }
-      })
-      if(isChange)
-        callback(returnAll ? input : (THIS.getInput(inputField) as {[key:string|number]:string}), returnAll ? error : (THIS.getError((errorField === true ? inputField: errorField)) as {[key:string|number]:string}) );
-    });
-  }
-
-  public onBlur(inputField:Array<string|number>, errorField:Array<string|number>, callback:(input:{[key:string|number]:string}, error:{[key:string|number]:string})=>void){
-    const THIS = this;
-    const piston = document.createElement("button");
-    for(const x of inputField){
-      if(!THIS.inputDOM[x]){
-        console.warn(`Input Field with: ${x} does not exist. Method use in onBlur of FieldBinding Class`);
-        continue;
-      };
-      THIS.inputDOM[x].addEventListener("blur", ()=>{
-        piston.click(); 
-      });
-    };
-    piston.addEventListener("click", ()=>{
-      callback(THIS.getInput(inputField) as {[key:string|number]:string}, THIS.getError(errorField) as {[key:string|number]:string});
-    })
-  }
-
-  public fieldNoError(excluded:Array<string|number> = [],  reverse = false){
-    const THIS = this;
-    return Object.keys(this.errorDOM).every(index=>{
-      if( reverse ? !excluded.includes(index) : excluded.includes(index) ){
-        return true;
-      }
-      if(THIS.errorDOM[index].value === ""){
-        return true;
-      }
-      return false;
-    })
-  }
-
-  public checkEmptyField(name:string|number|undefined|Array<string|number> = undefined, combine = false):boolean|{[key:string|number]:boolean}{
-    if(typeof name == "string" || typeof name == "number"){
-      return this.getInput(String(name)) !== "" ? true : false;
-    }
-    const inputData = this.getInput() as {[key:string|number]:string};
-    const resultObject = {} as {[key:string|number]:boolean};
-    if(name == undefined){
-      if(combine){
-        return (Object.keys(inputData) as Array<string>).every(x=>inputData[x] !== "");
-      }
-      (Object.keys(inputData) as Array<string>).forEach(x=>{resultObject[x] = inputData[x] !== ""});
-      return resultObject;
-    }
-    if(combine){
-      return name.every(x=>inputData[x] !== "");
-    }
-    name.forEach(x=>{resultObject[x]= inputData[x] !== ""});
-    return resultObject;
-  }
-
-  //--Functionalities--//
-}
 
 /*|------------------------------------------------------------------------------------------|*/
 /*|               DOMPopTransformer                                                          |*/
@@ -961,15 +728,6 @@ export class Prefetch{
 }
 
 
-export function getFileLink(fileInput:HTMLInputElement, fileIndex = 0){
-  if(!fileInput.files){
-    return null;
-  }
-  let blobURL = URL.createObjectURL(fileInput.files[fileIndex]);
-  return blobURL;
-}
-
-
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Window Breakpoint                                                          |*/
 /*|------------------------------------------------------------------------------------------|*/
@@ -1006,7 +764,6 @@ export class Breakpoint{
     }
     return false;
   }
-
 }
 
 
