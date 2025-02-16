@@ -1,15 +1,49 @@
-interface Swapper {
+interface SWAPPER {
     id: string | HTMLElement;
     mk?: string | string[];
     rm?: string | string[];
+    tg?: string | string[];
+    sw?: string | [string, string];
 }
-export declare function swapClass(query: Swapper | Swapper[], recalculate?: boolean): void;
-export declare function E<T extends keyof HTMLElementTagNameMap>(tag: T, props?: Partial<HTMLElementTagNameMap[T]> & {
+/**
+ * @description This function is used to swap class of an element. It can be used to swap multiple elements at once.
+ * @param query
+ * @param recalculate
+ * @returns
+ */
+export declare function swapClass(query: SWAPPER | SWAPPER[], recalculate?: boolean): void;
+/**
+ * @description This function is used to create new element. It can be used to create any element with any attributes and children.
+ * @param tag
+ * @param props
+ * @param children
+ * @returns
+ */
+export declare function E<T extends keyof HTMLElementTagNameMap>(tag: T, props?: {
     style?: Partial<CSSStyleDeclaration>;
-    [key: string]: any;
-}, ...children: (string | Node)[]): HTMLElementTagNameMap[T];
+} & Partial<Omit<HTMLElementTagNameMap[T], "style">>, ...children: (string | Node)[]): HTMLElementTagNameMap[T];
+/**
+ * @description This function creates document fragment. It can be used to create multiple elements at once.
+ */
+export declare function F(...children: (string | Node)[]): DocumentFragment;
+/**
+ * @description This function is used to create custom elements that you can reuse in the page. meaning once created, you can use it multiple times. i.e. <sample-element></sample-element> will be always available and it retain its functionality every time you use document.createElement("sample-element")
+ * @param componentName
+ * @param callback
+ * @param appendToRoot Here you may add the required styles or scripts since the API custom element will not have access to the main document.
+ */
+export interface HTMLElementsWithProps<T> extends HTMLElement {
+    props: T;
+    slotData: (content: (string | HTMLElement | HTMLElementsWithProps<any> | Node) | {
+        [slotname: string | number]: (string | HTMLElement | HTMLElementsWithProps<any> | Node);
+    }) => void;
+}
+export declare function ElementMaker<T extends object>(componentName: string, callback: (element: HTMLElementsWithProps<T>) => void): void;
 type LOAD_CALLBACK = ((() => void) | (() => Promise<any>));
 type LOAD_FALLBACK = () => void;
+/**
+ * @description This class is used to control the load order of the page. It can be used to control the load order of the page.
+ */
 export declare class LoadOrder {
     private orderStack;
     private fallbackStack;
@@ -22,79 +56,17 @@ export declare class LoadOrder {
     insert(index: number, callback: LOAD_CALLBACK, fallback?: LOAD_FALLBACK): this;
     run(expectedStack?: number): void;
 }
-export declare function shadowClone<T extends HTMLElement>(element: T, callback: (e: T) => void): void;
+/**
+ * @description - Clone and destroy the copy after it's usage on callback. It will have a hidden copy in the document body.
+ * @param element
+ * @param callback
+ */
+export declare function partialClone<T extends HTMLElement>(element: T, callback: (e: T) => void): void;
+/**
+ * @description - Trigger event manually
+ * @returns
+ */
 export declare function elementTrigger(eventName: string, element: HTMLElement): void;
-type INPUT_FIELD = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-export declare class FieldBinding {
-    private inputDOM;
-    private errorDOM;
-    private oldInputValue;
-    private oldErrorValue;
-    private inputOffsetName;
-    private errorOffsetName;
-    private listenerElement;
-    private listenersStack;
-    constructor(inputOffsetName?: string, errorOffsetName?: string);
-    setInputOffsetName(offset: string): this;
-    setErrorOffsetName(offset: string): this;
-    private addField;
-    private listenTrigger;
-    private removeField;
-    private getValue;
-    private setValue;
-    addInputField(name: string | number | string[], field?: INPUT_FIELD | string | undefined | Array<INPUT_FIELD | string | undefined>, includeError?: boolean): this;
-    addErrorField(name: string | number | string[], field?: INPUT_FIELD | string | undefined | Array<INPUT_FIELD | string | undefined>): this;
-    removeInputField(name: string | string[]): this;
-    removeErrorField(name: string | string[]): this;
-    getInput(name?: string | number | undefined | Array<string | number>): string | {
-        [key: string]: string;
-        [key: number]: string;
-    };
-    getError(name?: string | number | undefined | Array<string | number>): string | {
-        [key: string]: string;
-        [key: number]: string;
-    };
-    setInput(name: string | number | Array<string | number> | {
-        [name: string | number]: string;
-    }, value?: string | undefined, silent?: boolean, useChange?: boolean): this;
-    setError(name: string | number | Array<string | number> | {
-        [name: string | number]: string;
-    }, value?: string | undefined, silent?: boolean, useChange?: boolean): this;
-    inputElement(name: string): INPUT_FIELD;
-    errorElement(name: string): INPUT_FIELD;
-    validation(listToValidate: {
-        [key: string | number]: (input: string) => (string | true | Promise<string | true>);
-    }): void;
-    listen(callback: (input: {
-        [key: string | number]: string;
-    }, error: {
-        [key: string | number]: string;
-    }) => void): void;
-    listenToInput(whatField: Array<string | number>, callback: (input: {
-        [key: string | number]: string;
-    }, error: {
-        [key: string | number]: string;
-    }) => void, returnAll?: boolean): void;
-    listenToError(whatField: Array<string | number>, callback: (input: {
-        [key: string | number]: string;
-    }, error: {
-        [key: string | number]: string;
-    }) => void, returnAll?: boolean): void;
-    listenTo(inputField: Array<string | number>, errorField: Array<string | number> | true, callback: (input: {
-        [key: string | number]: string;
-    }, error: {
-        [key: string | number]: string;
-    }) => void, returnAll?: boolean): void;
-    onBlur(inputField: Array<string | number>, errorField: Array<string | number>, callback: (input: {
-        [key: string | number]: string;
-    }, error: {
-        [key: string | number]: string;
-    }) => void): void;
-    fieldNoError(excluded?: Array<string | number>, reverse?: boolean): boolean;
-    checkEmptyField(name?: string | number | undefined | Array<string | number>, combine?: boolean): boolean | {
-        [key: string | number]: boolean;
-    };
-}
 export declare function DOMPopTransformer(instruction: {
     pop: string;
     [key: string | number]: any;
@@ -112,7 +84,6 @@ export declare class Prefetch {
     fetch(): this;
     swapFetched(success?: Function, fail?: Function): this;
 }
-export declare function getFileLink(fileInput: HTMLInputElement, fileIndex?: number): string | null;
 export declare class Breakpoint {
     private getWidth;
     private getHeight;

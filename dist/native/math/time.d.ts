@@ -1,4 +1,5 @@
-export declare function transformDate(date: Date | string | number, format?: string | "simple" | "yyyy-mm-dd" | "iso" | "simple-named" | "time-12h" | "time-24-seconds" | "mnt, dd yyyy", utc?: boolean): string;
+export type TRANSFORM_FORMAT = "simple" | "yyyy-mm-dd" | "iso" | "simple-named" | "time-12h" | "time-24-seconds" | "mnt, dd yyyy" | "dxx mnt, yyyy";
+export declare function transformDate(date: Date | string | number, format?: TRANSFORM_FORMAT, utc?: boolean): string;
 export declare class DateUTC extends Date {
     getFullYear(): number;
     getMonth(): number;
@@ -9,11 +10,11 @@ export declare class DateUTC extends Date {
     getMilliseconds(): number;
     getDay(): number;
 }
-export declare function getToday(format?: string): string;
+export declare function getToday(format?: TRANSFORM_FORMAT): string;
 export type NUMBER_OF_MONTHS = number | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type NUMBER_OF_DAYS = number | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export declare function numberOfDays(month: string | NUMBER_OF_MONTHS, year?: number, date?: undefined | string | number | Date): 30 | 31 | 29 | 28 | undefined;
-export declare function monthName(number: NUMBER_OF_MONTHS, format?: string): "Jan" | "January" | "Feb" | "February" | "Mar" | "March" | "Apr" | "April" | "May" | "Jun" | "June" | "Jul" | "July" | "Aug" | "August" | "Sep" | "September" | "Oct" | "October" | "Nov" | "November" | "Dec" | "December" | undefined;
+export declare function monthName(number: NUMBER_OF_MONTHS, format?: "short" | "long"): "Jan" | "January" | "Feb" | "February" | "Mar" | "March" | "Apr" | "April" | "May" | "Jun" | "June" | "Jul" | "July" | "Aug" | "August" | "Sep" | "September" | "Oct" | "October" | "Nov" | "November" | "Dec" | "December" | undefined;
 export declare function dayName(number: NUMBER_OF_DAYS, format?: string): "Sun" | "Sunday" | "Mon" | "Monday" | "Tue" | "Tuesday" | "Wed" | "Wednesday" | "Thu" | "Thursday" | "Fri" | "Friday" | "Sat" | "Saturday" | undefined;
 export declare function hour12(hour24: number): number;
 export declare function timeToMilliseconds(timeString: string): number;

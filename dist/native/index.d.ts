@@ -11,3 +11,4 @@ export * as DOM from "./dom/index";
 export * as Cryptographic from "./cryptographic/index";
 export * as Animation from "./animation/index";
 export * as Advance from "./advance/index";
+export * as File from "./file/index";

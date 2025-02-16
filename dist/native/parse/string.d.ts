@@ -32,3 +32,8 @@ export declare function stron(string: string): number;
  * @param limit If you want to have a specific limit
  */
 export declare function stringTrail(string: string, limit?: number): string;
+/**
+ * @description convert a string into list of asterisk
+ * @param string - the string you want to convert
+ */
+export declare function toAsterisk(string: string): string;
