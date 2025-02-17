@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--location",
-  "version": "0.0.1-beta.0",
+  "version": "0.0.2-beta.0",
   "public": true,
   "description": "All tools for you to map all fixed.",
   "main": "dist/index.js",
