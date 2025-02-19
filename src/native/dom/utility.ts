@@ -156,7 +156,7 @@ export interface HTMLElementsWithProps<T> extends HTMLElement{
   slotData: (content: (string|HTMLElement|HTMLElementsWithProps<any>|Node)|{[slotname:string|number]:(string|HTMLElement|HTMLElementsWithProps<any>|Node)} )=>void;
 }
 
-export function ElementMaker<T extends object>(componentName:string, callback:(element:HTMLElementsWithProps<T>)=>void){
+export function ElementMaker<T extends object>(componentName:string, callback:(element:HTMLElementsWithProps<T>)=>void, noBuild = false){
 	const customElementSample = (document.querySelector(componentName) as HTMLElement).cloneNode(true) as HTMLElement;
 
 	class AstroElement extends HTMLElement{
@@ -182,6 +182,9 @@ export function ElementMaker<T extends object>(componentName:string, callback:(e
 			callback(this);
 		}
 		connectedCallback(){
+      if(noBuild){
+        return;
+      }
       //1. Check first if the content of customElementSample is the same as the content of "this"
       if (this.innerHTML.trim() === customElementSample.innerHTML.trim()) {
         return;
