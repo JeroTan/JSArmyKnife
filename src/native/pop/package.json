@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--pop",
-  "version": "0.1.2-beta.0",
+  "version": "0.1.3-beta.0",
   "public": true,
   "description": "All Screen Pop-ups and Modals that you can include separately.",
   "main": "dist/index.js",
