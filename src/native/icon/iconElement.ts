@@ -6,7 +6,7 @@ export class IconElement<T>{
     this.referenceIconList = referenceIconList;
   }
 
-  getIcon(data:{name: keyof ((typeof IconList)|T), inClass:string, outClass:string}){
+  getIcon(data:{name: keyof ((typeof IconList)|T), inClass?:string, outClass?:string}){
     const { name, outClass, inClass } = data;
     const iconList = this.referenceIconList as any;
     const iconData = iconList[name];
