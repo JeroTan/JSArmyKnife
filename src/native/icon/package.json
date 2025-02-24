@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--icon",
-  "version": "0.1.4-beta.0",
+  "version": "0.1.5-beta.0",
   "public": true,
   "description": "SVG or image Icons for your project.",
   "main": "dist/index.js",
