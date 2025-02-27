@@ -244,7 +244,15 @@ export class DateNavigator extends Date{
 		  const timeZoneFormat = timeSplit[timeSplit.findIndex(x=>x.type === "timeZoneName")].value;
 		  const timeZoneCut = timeZoneFormat.replace("GMT", "");
 		  this.timezone = timeZoneCut;
-	  }
+	  }else{
+			const timeSplit = Intl.DateTimeFormat("en-us", {
+				timeZone: custom,
+				timeZoneName: "longOffset",
+			}).formatToParts();
+			const timeZoneFormat = timeSplit[timeSplit.findIndex(x=>x.type === "timeZoneName")].value;
+			const timeZoneCut = timeZoneFormat.replace("GMT", "");
+			this.timezone = timeZoneCut;
+		}
 	  return this;
   }
   //---- Time Zone----//
