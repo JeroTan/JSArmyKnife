@@ -831,3 +831,12 @@ export function elementInScreen(element: HTMLElement, callback: (result: boolean
   }, {rootMargin: offset + "px"});
   observer.observe(element);
 }
+
+
+
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Update URL                                                                 |*/
+/*|------------------------------------------------------------------------------------------|*/
+function updateURL(url:string){
+  window.history.pushState(document.title, document.title, url);
+}
