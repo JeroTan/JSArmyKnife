@@ -837,6 +837,6 @@ export function elementInScreen(element: HTMLElement, callback: (result: boolean
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Update URL                                                                 |*/
 /*|------------------------------------------------------------------------------------------|*/
-function updateURL(url:string){
+export function updateURL(url:string){
   window.history.pushState(document.title, document.title, url);
 }
