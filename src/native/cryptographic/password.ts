@@ -63,7 +63,7 @@ export function passwordCheckSimplify(password:string){
     case 3:
       return {
         rate:3,
-        color:"yellow",
+        color:"rgb(192, 141, 0)",
         name:"Strong",
       }
     case 4:
