@@ -840,3 +840,20 @@ export function elementInScreen(element: HTMLElement, callback: (result: boolean
 export function updateURL(url:string){
   window.history.pushState(document.title, document.title, url);
 }
+
+
+
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Scroll To URL                                                              |*/
+/*|------------------------------------------------------------------------------------------|*/
+export function goToElement(element:HTMLElement){
+  const viewport = new Breakpoint();
+  const isMobile = viewport.breakIn({width:1024});
+  if(isMobile){
+    element.scrollIntoView({behavior:"smooth", block:"start"});
+  }else{
+    //Smooth on desktop
+    element.scrollIntoView({behavior:"smooth", block:"center"});
+  }
+
+}
