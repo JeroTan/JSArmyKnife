@@ -123,7 +123,7 @@ export class NotifPop{
   public add(notif:NOTIF_MESSAGE){
     const notifElement = document.createElement("div");
     //Container Style
-    swapClass({id:notifElement, mk:"rounded w-96 bg-gray-50 shadow-lg border border-gray-500 relative pb-4 px-3"});
+    swapClass({id:notifElement, mk:"rounded w-96 bg-gray-50 shadow-lg border border-gray-300 relative pb-4 px-3"});
 
     //Close Button
     const closeButtonContainer = document.createElement("div");
@@ -133,6 +133,7 @@ export class NotifPop{
     closeButtonContainer.onclick = ()=>notifElement.remove();
     const closeButtonImage = document.createElement("div");
     closeButtonImage.textContent = "✖";
+    closeButtonImage.style.paddingRight = "2px";
     closeButtonContainer.appendChild(closeButtonImage);
     swapClass({id:closeButtonImage, mk:"object-contain w-full h-full"});
     

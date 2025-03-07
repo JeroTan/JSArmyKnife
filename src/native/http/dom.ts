@@ -99,3 +99,12 @@ export class DOMRequest{
 	}
 	//--Functionalities--//
 }
+
+
+/*|---------------------------------------------------------------------------------------|*/
+/*|          GET PARAMS ON CLIENT SIDE                                                    |*/
+/*|---------------------------------------------------------------------------------------|*/
+export function getParams(key:string){
+	const params = new URLSearchParams(window.location.search);
+	return params.get(key);
+}
