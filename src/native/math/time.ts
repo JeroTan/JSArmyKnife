@@ -8,11 +8,18 @@ export type TRANSFORM_FORMAT =
 "yyyy-mm-dd"|
 "iso"|
 "simple-named"|
+"simple-named-24h"|
 "time-12h"|
 "time-24-seconds"|
 "mnt, dd yyyy"|
-"dxx mnt, yyyy"
-;
+"dxx mnt, yyyy"|
+"full"|               // Full human-readable format including weekday, month, day, year, and time
+"verbose"|            // Verbose format with detailed day and month names
+"iso-extended"|       // Extended ISO format including seconds and timezone info
+"concise"|            // Concise ISO-like format without extra characters
+"rfc-2822"|           // RFC 2822 compliant format
+"iso-with-ms"|        // ISO format including milliseconds and timezone info
+"compact";           // Compact numeric format without delimiters
 export function transformDate(date: Date|string|number, format:TRANSFORM_FORMAT="simple", utc=false){
   if(utc){
 	  date = new DateUTC(date);
@@ -32,6 +39,9 @@ export function transformDate(date: Date|string|number, format:TRANSFORM_FORMAT=
 	  case "simple-named":{
 		  return `${date.getFullYear()}, ${ monthName(date.getMonth()+1) } ${date.getDate()} ${dayName(date.getDay()+1)} | ${hour12(date.getHours())}:${padNumber(date.getMinutes(), 2)}${ date.getHours() >=12 ? "pm":"am"  }`;
 	  }
+		case "simple-named-24h": {
+			return `${date.getFullYear()}, ${ monthName(date.getMonth()+1) } ${date.getDate()} ${dayName(date.getDay()+1)} | ${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}`;
+		}
 	  case "time-12h":{
 		  return `${hour12(date.getHours())}:${padNumber(date.getMinutes(), 2)} ${ date.getHours() >=12 ? "pm":"am"  }`;
 	  }
@@ -53,9 +63,29 @@ export function transformDate(date: Date|string|number, format:TRANSFORM_FORMAT=
 				: "th";
 			return `${day}${suffix} ${monthName(date.getMonth()+1, "long")}, ${padNumber(date.getFullYear(), 4)}`;
 		}
+		case "full": {
+			return `${dayName(date.getDay()+1)}, ${monthName(date.getMonth()+1)} ${date.getDate()}, ${date.getFullYear()} ${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}:${padNumber(date.getSeconds(), 2)}`;
+		}
+		case "verbose": {
+			return `${dayName(date.getDay()+1)}, ${monthName(date.getMonth()+1, "long")} ${date.getDate()}, ${date.getFullYear()} ${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}:${padNumber(date.getSeconds(), 2)}`;
+		}
+		case "iso-extended": {
+			return `${padNumber(date.getFullYear(), 4)}-${padNumber(date.getMonth()+1, 2)}-${padNumber(date.getDate(), 2)}T${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}:${padNumber(date.getSeconds(), 2)}Z`;
+		}
+		case "concise": {
+			return `${padNumber(date.getFullYear(), 4)}${padNumber(date.getMonth()+1, 2)}${padNumber(date.getDate(), 2)}T${padNumber(date.getHours(), 2)}${padNumber(date.getMinutes(), 2)}${padNumber(date.getSeconds(), 2)}`;
+		}
+		case "rfc-2822": {
+			return `${dayName(date.getDay()+1)}, ${date.getDate()} ${monthName(date.getMonth()+1, "short")} ${date.getFullYear()} ${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}:${padNumber(date.getSeconds(), 2)} GMT`;
+		}
+		case "iso-with-ms": {
+			return `${padNumber(date.getFullYear(), 4)}-${padNumber(date.getMonth()+1, 2)}-${padNumber(date.getDate(), 2)}T${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}:${padNumber(date.getSeconds(), 2)}.${padNumber(date.getMilliseconds(), 3)}Z`;
+		}
+		case "compact": {
+			return `${padNumber(date.getFullYear(), 4)}${padNumber(date.getMonth()+1, 2)}${padNumber(date.getDate(), 2)}${padNumber(date.getHours(), 2)}${padNumber(date.getMinutes(), 2)}${padNumber(date.getSeconds(), 2)}`;
+		}
 	  default:{
 			throw new Error("TRANSFORMATION KEY FOR DATE NOT AVAILABLE");
-		  return "TRANSFORMATION KEY FOR DATE NOT AVAILABLE";
 	  }
   }
 }
@@ -208,11 +238,18 @@ export function timeToMilliseconds(timeString:string){
   return splitTime[0]*hour + splitTime[1]*minute + splitTime[2]*second + splitTime[3];
 }
 
+/*|------------------------------------------------------------------------------------------|*/
+/*|                Date Navigator                                                            |*/
+/*|------------------------------------------------------------------------------------------|*/
 //Time in Milliseconds
 const second = 1000; //1000 milliseconds == 1 second;
 const minute = 60 * second;
 const hour = 60 * minute;
 const day = 24 * hour;
+//All Timezone name format
+export const timezoneNameList=["Africa/Abidjan","Africa/Accra","Africa/Addis_Ababa","Africa/Algiers","Africa/Asmara","Africa/Bamako","Africa/Bangui","Africa/Banjul","Africa/Bissau","Africa/Blantyre","Africa/Brazzaville","Africa/Bujumbura","Africa/Cairo","Africa/Casablanca","Africa/Ceuta","Africa/Conakry","Africa/Dakar","Africa/Dar_es_Salaam","Africa/Djibouti","Africa/Douala","Africa/El_Aaiun","Africa/Freetown","Africa/Gaborone","Africa/Harare","Africa/Johannesburg","Africa/Juba","Africa/Kampala","Africa/Khartoum","Africa/Kigali","Africa/Kinshasa","Africa/Lagos","Africa/Libreville","Africa/Lome","Africa/Luanda","Africa/Lubumbashi","Africa/Lusaka","Africa/Malabo","Africa/Maputo","Africa/Maseru","Africa/Mbabane","Africa/Mogadishu","Africa/Monrovia","Africa/Nairobi","Africa/Ndjamena","Africa/Niamey","Africa/Nouakchott","Africa/Ouagadougou","Africa/Porto-Novo","Africa/Sao_Tome","Africa/Tripoli","Africa/Tunis","Africa/Windhoek","America/Adak","America/Anchorage","America/Anguilla","America/Antigua","America/Araguaina","America/Argentina/Buenos_Aires","America/Argentina/Catamarca","America/Argentina/ComodRivadavia","America/Argentina/Cordoba","America/Argentina/Jujuy","America/Argentina/La_Rioja","America/Argentina/Mendoza","America/Argentina/Rio_Gallegos","America/Argentina/Salta","America/Argentina/San_Juan","America/Argentina/San_Luis","America/Argentina/Tucuman","America/Argentina/Ushuaia","America/Aruba","America/Asuncion","America/Atikokan","America/Bahia","America/Bahia_Banderas","America/Barbados","America/Belem","America/Belize","America/Blanc-Sablon","America/Boa_Vista","America/Bogota","America/Boise","America/Cambridge_Bay","America/Campo_Grande","America/Cancun","America/Caracas","America/Cayenne","America/Cayman","America/Chicago","America/Chihuahua","America/Costa_Rica","America/Creston","America/Cuiaba","America/Curacao","America/Danmarkshavn","America/Dawson","America/Dawson_Creek","America/Denver","America/Detroit","America/Dominica","America/Edmonton","America/Eirunepe","America/El_Salvador","America/Fort_Nelson","America/Fortaleza","America/Glace_Bay","America/Godthab","America/Goose_Bay","America/Grand_Turk","America/Grenada","America/Guadeloupe","America/Guatemala","America/Guayaquil","America/Guyana","America/Halifax","America/Havana","America/Hermosillo","America/Indiana/Indianapolis","America/Indiana/Knox","America/Indiana/Marengo","America/Indiana/Petersburg","America/Indiana/Vevay","America/Indiana/Vincennes","America/Indiana/Winamac","America/Inuvik","America/Iqaluit","America/Jamaica","America/Juneau","America/Kentucky/Louisville","America/Kentucky/Monticello","America/Kralendijk","America/La_Paz","America/Lima","America/Los_Angeles","America/Lower_Princes","America/Maceio","America/Managua","America/Manaus","America/Marigot","America/Martinique","America/Matamoros","America/Mazatlan","America/Menominee","America/Merida","America/Metlakatla","America/Mexico_City","America/Miquelon","America/Moncton","America/Monterrey","America/Montevideo","America/Montserrat","America/Nassau","America/New_York","America/Nipigon","America/Nome","America/Noronha","America/North_Dakota/Beulah","America/North_Dakota/Center","America/North_Dakota/New_Salem","America/Nuuk","America/Ojinaga","America/Panama","America/Pangnirtung","America/Paramaribo","America/Phoenix","America/Port-au-Prince","America/Port_of_Spain","America/Porto_Velho","America/Puerto_Rico","America/Punta_Arenas","America/Rainy_River","America/Rankin_Inlet","America/Recife","America/Regina","America/Resolute","America/Rio_Branco","America/Santarem","America/Santiago","America/Santo_Domingo","America/Sao_Paulo","America/Scoresbysund","America/Sitka","America/St_Barthelemy","America/St_Johns","America/St_Kitts","America/St_Lucia","America/St_Thomas","America/St_Vincent","America/Swift_Current","America/Tegucigalpa","America/Thule","America/Thunder_Bay","America/Tijuana","America/Toronto","America/Tortola","America/Vancouver","America/Whitehorse","America/Winnipeg","America/Yakutat","America/Yellowknife","Antarctica/Casey","Antarctica/Davis","Antarctica/DumontDUrville","Antarctica/Macquarie","Antarctica/Mawson","Antarctica/Palmer","Antarctica/Rothera","Antarctica/Syowa","Antarctica/Troll","Antarctica/Vostok","Asia/Almaty","Asia/Amman","Asia/Anadyr","Asia/Aqtau","Asia/Aqtobe","Asia/Ashgabat","Asia/Atyrau","Asia/Baghdad","Asia/Bahrain","Asia/Baku","Asia/Bangkok","Asia/Barnaul","Asia/Beirut","Asia/Bishkek","Asia/Brunei","Asia/Chita","Asia/Choibalsan","Asia/Colombo","Asia/Damascus","Asia/Dhaka","Asia/Dili","Asia/Dubai","Asia/Dushanbe","Asia/Famagusta","Asia/Gaza","Asia/Hebron","Asia/Hong_Kong","Asia/Hovd","Asia/Irkutsk","Asia/Jakarta","Asia/Jayapura","Asia/Jerusalem","Asia/Kabul","Asia/Kamchatka","Asia/Karachi","Asia/Kathmandu","Asia/Khandyga","Asia/Kolkata","Asia/Krasnoyarsk","Asia/Kuching","Asia/Macau","Asia/Magadan","Asia/Makassar","Asia/Manila","Asia/Muscat","Asia/Nicosia","Asia/Novokuznetsk","Asia/Novosibirsk","Asia/Omsk","Asia/Oral","Asia/Phnom_Penh","Asia/Pontianak","Asia/Pyongyang","Asia/Qatar","Asia/Qostanay","Asia/Qyzylorda","Asia/Riyadh","Asia/Sakhalin","Asia/Samarkand","Asia/Seoul","Asia/Shanghai","Asia/Singapore","Asia/Srednekolymsk","Asia/Taipei","Asia/Tashkent","Asia/Tbilisi","Asia/Tehran","Asia/Thimphu","Asia/Tokyo","Asia/Tomsk","Asia/Ulaanbaatar","Asia/Urumqi","Asia/Ust-Nera","Asia/Vladivostok","Asia/Yakutsk","Asia/Yangon","Asia/Yekaterinburg","Asia/Yerevan","Atlantic/Azores","Atlantic/Bermuda","Atlantic/Canary","Atlantic/Cape_Verde","Atlantic/Faroe","Atlantic/Madeira","Atlantic/Reykjavik","Atlantic/South_Georgia","Atlantic/St_Helena","Atlantic/Stanley","Australia/Adelaide","Australia/Brisbane","Australia/Broken_Hill","Australia/Currie","Australia/Darwin","Australia/Eucla","Australia/Hobart","Australia/Lindeman","Australia/Lord_Howe","Australia/Melbourne","Australia/Perth","Australia/Sydney","Europe/Amsterdam","Europe/Andorra","Europe/Astrakhan","Europe/Athens","Europe/Belgrade","Europe/Berlin","Europe/Brussels","Europe/Bucharest","Europe/Budapest","Europe/Chisinau","Europe/Copenhagen","Europe/Dublin","Europe/Gibraltar","Europe/Helsinki","Europe/Istanbul","Europe/Kaliningrad","Europe/Kiev","Europe/Kirov","Europe/Lisbon","Europe/Ljubljana","Europe/London","Europe/Luxembourg","Europe/Madrid","Europe/Malta","Europe/Moscow","Europe/Oslo","Europe/Paris","Europe/Prague","Europe/Riga","Europe/Rome","Europe/Samara","Europe/San_Marino","Europe/Sarajevo","Europe/Saratov","Europe/Simferopol","Europe/Skopje","Europe/Sofia","Europe/Stockholm","Europe/Tallinn","Europe/Tirane","Europe/Ulyanovsk","Europe/Uzhgorod","Europe/Vaduz","Europe/Vatican","Europe/Vienna","Europe/Vilnius","Europe/Volgograd","Europe/Warsaw","Europe/Zagreb","Europe/Zaporozhye","Europe/Zurich","Indian/Chagos","Indian/Christmas","Indian/Cocos","Indian/Comoro","Indian/Kerguelen","Indian/Mahe","Indian/Maldives","Indian/Mauritius","Indian/Reunion","Pacific/Apia","Pacific/Auckland","Pacific/Bougainville","Pacific/Chatham","Pacific/Chuuk","Pacific/Easter","Pacific/Efate","Pacific/Enderbury","Pacific/Fakaofo","Pacific/Fiji","Pacific/Funafuti","Pacific/Galapagos","Pacific/Gambier","Pacific/Guadalcanal","Pacific/Guam","Pacific/Honolulu","Pacific/Kanton","Pacific/Kiritimati","Pacific/Kosrae","Pacific/Kwajalein","Pacific/Majuro","Pacific/Marquesas","Pacific/Midway","Pacific/Nauru","Pacific/Niue","Pacific/Norfolk","Pacific/Noumea","Pacific/Pago_Pago","Pacific/Palau","Pacific/Pitcairn","Pacific/Pohnpei","Pacific/Port_Moresby","Pacific/Rarotonga","Pacific/Saipan","Pacific/Tahiti","Pacific/Tarawa","Pacific/Tongatapu","Pacific/Wake","Pacific/Wallis"];
+
+export type TIMEZONE_NAME = typeof timezoneNameList[number];
 
 export class DateNavigator extends Date{
   private reference = {
@@ -225,16 +262,23 @@ export class DateNavigator extends Date{
 
   constructor(date:undefined|string|number|Date = undefined){
 	  if(date === undefined){
+			//@ts-ignore
 		  super()
 	  }else
 		  super(date);
   }
-  // changeDate(date:string|number|Date){
-  //     // TO BE CONTINUE
-  //     return this;
-  // }
+  changeDate(date:string|number|Date){
+    if(typeof date == "string"){
+			this.setTime(Date.parse(date));
+		}else if(typeof date == "number"){
+			this.setTime(new Date(date).getTime());
+		}else{
+			this.setTime(date.getTime());
+		}
+    return this;
+  }
   //---- Time Zone ----//
-  setTimezone(custom?:string|"Asia/Manila"|"+08:00"){//Sample timezone, empty means browser timezone *be careful with vpn users
+  setTimezone(custom?:string|TIMEZONE_NAME|"+08:00" , updateTimeFormat:boolean = false){//Sample timezone, empty means browser timezone *be careful with vpn users
 	  if(custom == null){
 		  const timeZoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
 		  const timeSplit = Intl.DateTimeFormat("en-us", {
@@ -253,8 +297,48 @@ export class DateNavigator extends Date{
 			const timeZoneCut = timeZoneFormat.replace("GMT", "");
 			this.timezone = timeZoneCut;
 		}
+		if(updateTimeFormat){
+			this.useTimezoneFormat();
+		}
 	  return this;
   }
+	useTimezoneFormat(){
+		if(this.timezone == undefined) return this;
+
+		//Get the offset of current date timezone first
+		const offsetMilliseconds = this.getTimezoneOffset() * minute *-1;
+
+		//Now set the time to make it UTC Based
+		this.setTime( this.getTime() - offsetMilliseconds );
+
+		//Now get the offset of the new timezone
+		const newOffsetMilliseconds = (()=>{
+			const timeFormation = Intl.DateTimeFormat("en-us", {
+				timeZone: this.timezone,
+				timeZoneName: "longOffset",
+			}).formatToParts();
+	
+			const tzNamePart = timeFormation.find(part => part.type === "timeZoneName");
+			if(tzNamePart) {
+				// Remove "GMT" to get the offset in the format "+08:00" or "-05:00"
+				const offsetString = tzNamePart.value.replace("GMT", "");
+				const match = offsetString.match(/([+-]\d{2}):(\d{2})/);
+				if(match) {
+					const offsetHours = Number(match[1]);
+					const offsetMinutes = Number(match[2]);
+					const hourOffset = offsetHours + offsetMinutes / 60;
+					return hourOffset * hour;
+				}
+			}
+		})();
+		if(newOffsetMilliseconds == undefined) return this;
+
+		//Now set the time to the new timezone
+		this.setTime( this.getTime() + newOffsetMilliseconds );
+
+		//Return the new Date
+		return this;
+	}
   //---- Time Zone----//
 
   //Stabilizer of Date
