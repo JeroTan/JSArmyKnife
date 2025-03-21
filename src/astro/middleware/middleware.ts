@@ -1,7 +1,6 @@
 import type { APIContext, MiddlewareNext } from "astro";
 import { escapeToRegex } from "@jsarmyknife/native--parse";
 
-
 /*|---------------------------------------------------------------------------------------|*/
 /*|  For Astro Middleware                                                                 |*/
 /*|---------------------------------------------------------------------------------------|*/
@@ -114,7 +113,7 @@ export class Path {
     return result;
   }
 
-  async do(callback: (context: ASTRO_CONTEXT) => Promise<undefined | Response> | (undefined | Response)) {
+  async do(callback: (context: APIContext<Record<string, any>, Record<string, string | undefined>>) => Promise<undefined | Response> | (undefined | Response)) {
     if (!this.checkMatch()) {
       this.response = undefined;
       return undefined;
@@ -133,5 +132,3 @@ export class Path {
     return this.response;
   }
 }
-
-export type ASTRO_CONTEXT = APIContext<Record<string, any>, Record<string, string | undefined>>;

@@ -1,10 +1,11 @@
 {
   "name": "@jsarmyknife/astro--middleware",
- "version": "0.0.1-beta.0",
+ "version": "0.0.11-beta.0",
   "public": true,
-  "description": "All things improve middleware of astro",
+  "description": "More tools for middleware of astro",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc"
   },
@@ -20,7 +21,7 @@
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "keywords": [],
   "peerDependencies": {
-    "astro": ">=4.0.0"
+    "astro": ">=5.0.0"
   },
   "dependencies": {
     "@jsarmyknife/native--parse": "latest"
