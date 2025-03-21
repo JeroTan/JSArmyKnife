@@ -855,5 +855,16 @@ export function goToElement(element:HTMLElement){
     //Smooth on desktop
     element.scrollIntoView({behavior:"smooth", block:"center"});
   }
+}
 
+
+/*|------------------------------------------------------------------------------------------|*/
+/*|               Check When Bottom Reached                                                  |*/
+/*|------------------------------------------------------------------------------------------|*/
+export function scrollToBottom(callback:Function, offset = 0){
+  window.addEventListener("scroll", ()=>{
+    if((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - offset)){
+      callback();
+    }
+  })
 }
