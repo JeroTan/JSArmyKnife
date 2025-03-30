@@ -248,9 +248,13 @@ export class Resolve{
 								const { value, done } = await reader.read();
 								if (value) {
 									if (decode) {
-										callback2(
-											new TextDecoder().decode(value).replace("data: ", "")
-										);
+										const decoder = new TextDecoder("utf-8", { fatal: true });
+										const decoded = decoder.decode(value, { stream: true });
+										const cleaned = decoded
+											.replace(/^data:\s*/, '')
+											.replace(/data: \[DONE\]/g, '')
+											.trim();
+										callback2(cleaned);
 									} else {
 										callback2(value as Uint8Array);
 									}
