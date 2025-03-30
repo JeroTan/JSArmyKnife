@@ -250,11 +250,17 @@ export class Resolve{
 									if (decode) {
 										const decoder = new TextDecoder("utf-8", { fatal: true });
 										const decoded = decoder.decode(value, { stream: true });
-										const cleaned = decoded
-											.replace(/^data:\s*/, '')
-											.replace(/data: \[DONE\]/g, '')
-											.trim();
-										callback2(cleaned);
+
+										const splitDecoded = decoded.split("data: ").filter((d)=>{
+											return d != "" && d != "\n" && d != "\r" && !d.includes("[DONE]");
+										}).map((data) => {
+											data = data.replace(/^\s+|\s+$/g, "").replace(/\[DONE\]/g, '').trim();
+											return data;
+										});
+										for(let i = 0; i < splitDecoded.length; i++) {
+											if(splitDecoded[i] == "") continue;
+											callback2(splitDecoded[i]);
+										}
 									} else {
 										callback2(value as Uint8Array);
 									}
