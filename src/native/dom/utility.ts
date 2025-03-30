@@ -863,7 +863,9 @@ export function goToElement(element:HTMLElement){
 /*|------------------------------------------------------------------------------------------|*/
 export function scrollToBottom(callback:Function, offset = 0){
   window.addEventListener("scroll", ()=>{
-    if((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - offset)){
+    const documentHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - offset;
+    const totalScroll = window.scrollY + window.innerHeight;
+    if( documentHeight <= totalScroll ){
       callback();
     }
   })
