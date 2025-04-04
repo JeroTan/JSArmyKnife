@@ -1,8 +1,8 @@
 {
-  "name": "@jsarmyknife/native--http",
-  "version": "0.1.7-beta.0",
+  "name": "@jsarmyknife/react--customhooks",
+  "version": "0.0.5-beta.0",
   "public": true,
-  "description": "Simplify your http and other network related tasks.",
+  "description": "All things you need to add delay or little slow down to your project.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
   "keywords": [],
-  "dependencies": {
-    "@jsarmyknife/native--parse": "latest"
+  "peerDependencies": {
+    "@types/react": ">=16.8.0",
+    "react": ">=16.8.0"
   }
 }

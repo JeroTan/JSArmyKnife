@@ -227,35 +227,55 @@ export class Resolve{
 	sAfter<OTHER>(callback:STRING_ONLY_RESPONSE|PURE_RESPONSE|OBJECT_READY_RESPONSE<OTHER>){
 		return this.parseData<OTHER>(callback);
 	}
-	//This
-	stream(callback:(eventTrigger:(callback2:(data:Uint8Array)=>void)=>void)=>void){
-		this.promiseResponse.then(async (response)=>{
-			if(response.ok){
-				const res = response.clone().body?.getReader();
-				if(!res){
-					throw new Error("can't reade the stream");
+	// This
+
+	stream(callback: (eventTrigger: (callback2: (data: string) => void) => void) => void, decode: true): Promise<Response>;
+	stream(callback: (eventTrigger: (callback2: (data: Uint8Array) => void) => void) => void, decode?: false): Promise<Response>;
+	stream(
+		callback: (eventTrigger: (callback2: (data: (Uint8Array|string|any)) => void) => void) => void,
+		decode: boolean = false
+	): Promise<Response> {
+		this.promiseResponse.then(async (response) => {
+			if (response.ok) {
+				const reader = response.clone().body?.getReader();
+				if (!reader) {
+					throw new Error("can't read the stream");
 				}
-				callback(( callback2:(data:Uint8Array)=>void)=>{
-					(async ()=>{
-						while(true){
-							try{
-								const { value, done} = await res?.read();
-								if(value){
-									callback2(value);	
+				callback((callback2: (data: string | Uint8Array) => void) => {
+					(async () => {
+						while (true) {
+							try {
+								const { value, done } = await reader.read();
+								if (value) {
+									if (decode) {
+										const decoder = new TextDecoder("utf-8", { fatal: true });
+										const decoded = decoder.decode(value, { stream: true });
+
+										const splitDecoded = decoded.split("data: ").filter((d)=>{
+											return d != "" && d != "\n" && d != "\r" && !d.includes("[DONE]");
+										}).map((data) => {
+											data = data.replace(/^\s+|\s+$/g, "").replace(/\[DONE\]/g, '').trim();
+											return data;
+										});
+										for(let i = 0; i < splitDecoded.length; i++) {
+											if(splitDecoded[i] == "") continue;
+											callback2(splitDecoded[i]);
+										}
+									} else {
+										callback2(value as Uint8Array);
+									}
 								}
-								if(done){
+								if (done) {
 									break;
 								}
-							}catch{
+							} catch {
 								break;
 							}
 						}
-					})()
-				})
-				
-
+					})();
+				});
 			}
-		})
-		return this.promiseResponse
+		});
+		return this.promiseResponse;
 	}
 }
