@@ -259,6 +259,7 @@ export class DateNavigator extends Date{
 	  day: day,
   }
   private timezone?:string;
+	private timezoneName?:string;
 
   constructor(date:undefined|string|number|Date = undefined){
 	  if(date === undefined){
@@ -278,7 +279,7 @@ export class DateNavigator extends Date{
     return this;
   }
   //---- Time Zone ----//
-  setTimezone(custom?:string|TIMEZONE_NAME|"+08:00" , updateTimeFormat:boolean = false){//Sample timezone, empty means browser timezone *be careful with vpn users
+  setTimezone(custom?:string|TIMEZONE_NAME , updateTimeFormat:boolean = false){//Sample timezone, empty means browser timezone *be careful with vpn users
 	  if(custom == null){
 		  const timeZoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
 		  const timeSplit = Intl.DateTimeFormat("en-us", {
@@ -288,6 +289,7 @@ export class DateNavigator extends Date{
 		  const timeZoneFormat = timeSplit[timeSplit.findIndex(x=>x.type === "timeZoneName")].value;
 		  const timeZoneCut = timeZoneFormat.replace("GMT", "");
 		  this.timezone = timeZoneCut;
+			this.timezoneName = timeZoneName;
 	  }else{
 			const timeSplit = Intl.DateTimeFormat("en-us", {
 				timeZone: custom,
@@ -296,6 +298,7 @@ export class DateNavigator extends Date{
 			const timeZoneFormat = timeSplit[timeSplit.findIndex(x=>x.type === "timeZoneName")].value;
 			const timeZoneCut = timeZoneFormat.replace("GMT", "");
 			this.timezone = timeZoneCut;
+			this.timezoneName = custom;
 		}
 		if(updateTimeFormat){
 			this.useTimezoneFormat();
@@ -303,7 +306,7 @@ export class DateNavigator extends Date{
 	  return this;
   }
 	useTimezoneFormat(){
-		if(this.timezone == undefined) return this;
+		if(this.timezone == undefined || this.timezoneName == undefined) return this;
 
 		//Get the offset of current date timezone first
 		const offsetMilliseconds = this.getTimezoneOffset() * minute *-1;
@@ -314,7 +317,7 @@ export class DateNavigator extends Date{
 		//Now get the offset of the new timezone
 		const newOffsetMilliseconds = (()=>{
 			const timeFormation = Intl.DateTimeFormat("en-us", {
-				timeZone: this.timezone,
+				timeZone: this.timezoneName,
 				timeZoneName: "longOffset",
 			}).formatToParts();
 	
