@@ -26,6 +26,29 @@ export function capitalFirstOnly(text:string){
 	return capitalFirst(text.toLowerCase());
 }
 
+
+export function capitalEachWord(text:string){
+	// List of Prepositions
+	const prepositions = ["a", "an", "the", "and", "but", "or", "for", "nor", "on", "at", "to", "by", "with"];
+	// Articles
+	const articles = ["a", "an", "the"];
+
+	return text.split(" ").map((word, i) =>{
+		if (prepositions.includes(word.toLowerCase())) {
+			return word.toLowerCase();
+		} else if(word.toLocaleLowerCase() === "i"){
+			return word.toUpperCase();
+		} else if(articles.includes(word.toLowerCase())){
+			if(i === 0){
+				return word.toUpperCase();
+			}
+			return word.toLowerCase();
+		} else {
+			return capitalFirst(word);
+		}
+	}).join(" ");
+}
+
 /**
  * @description remove the underscore from the string or replace it with space
  * @param text
