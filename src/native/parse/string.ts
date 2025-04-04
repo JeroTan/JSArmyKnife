@@ -26,7 +26,14 @@ export function capitalFirstOnly(text:string){
 	return capitalFirst(text.toLowerCase());
 }
 
-
+/**
+ * 
+ * @param text - The string you want to capitalize the first letter of each word
+ * @description Capitalize each word in the string but the prepositions will be lowercase. This can be used for title case.
+ * @example capitalEachWord("the quick brown fox jumps over the lazy dog") => "The Quick Brown Fox Jumps Over the Lazy Dog"
+ * 
+ * @returns 
+ */
 export function capitalEachWord(text:string){
 	// List of Prepositions
 	const prepositions = ["a", "an", "the", "and", "but", "or", "for", "nor", "on", "at", "to", "by", "with"];
