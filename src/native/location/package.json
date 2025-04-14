@@ -1,8 +1,8 @@
 {
   "name": "@jsarmyknife/native--location",
-  "version": "0.0.2-beta.0",
+  "version": "0.0.3-beta.0",
   "public": true,
-  "description": "All tools for you to map all fixed.",
+  "description": "Tools you might be using when dealing with maps",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
