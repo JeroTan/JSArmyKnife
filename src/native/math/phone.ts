@@ -1,3 +1,5 @@
+import { ceil } from ".";
+
 export type COUNTRY_CODE = "AF"|"AX"|"AL"|"DZ"|"AS"|"AD"|"AO"|"AI"|"AQ"|"AG"|"AR"|"AM"|"AW"|"AU"|"AT"|"AZ"|"BS"|"BH"|"BD"|"BB"|"BY"|"BE"|"BZ"|"BJ"|"BM"|"BT"|"BO"|"BA"|"BW"|"BR"|"IO"|"BN"|"BG"|"BF"|"BI"|"KH"|"CM"|"CA"|"CV"|"KY"|"CF"|"TD"|"CL"|"CN"|"CX"|"CC"|"CO"|"KM"|"CG"|"CD"|"CK"|"CR"|"CI"|"HR"|"CU"|"CY"|"CZ"|"DK"|"DJ"|"DM"|"DO"|"EC"|"EG"|"SV"|"GQ"|"ER"|"EE"|"ET"|"FK"|"FO"|"FJ"|"FI"|"FR"|"GF"|"PF"|"GA"|"GM"|"GE"|"DE"|"GH"|"GI"|"GR"|"GL"|"GD"|"GP"|"GU"|"GT"|"GG"|"GN"|"GW"|"GY"|"HT"|"VA"|"HN"|"HK"|"HU"|"IS"|"IN"|"ID"|"IR"|"IQ"|"IE"|"IM"|"IL"|"IT"|"JM"|"JP"|"JE"|"JO"|"KZ"|"KE"|"KI"|"KP"|"KR"|"KW"|"KG"|"LA"|"LV"|"LB"|"LS"|"LR"|"LY"|"LI"|"LT"|"LU"|"MO"|"MK"|"MG"|"MW"|"MY"|"MV"|"ML"|"MT"|"MH"|"MQ"|"MR"|"MU"|"YT"|"MX"|"FM"|"MD"|"MC"|"MN"|"ME"|"MS"|"MA"|"MZ"|"MM"|"NA"|"NR"|"NP"|"NL"|"AN"|"NC"|"NZ"|"NI"|"NE"|"NG"|"NU"|"NF"|"MP"|"NO"|"OM"|"PK"|"PW"|"PS"|"PA"|"PG"|"PY"|"PE"|"PH"|"PN"|"PL"|"PT"|"PR"|"QA"|"RO"|"RU"|"RW"|"RE"|"BL"|"SH"|"KN"|"LC"|"MF"|"PM"|"VC"|"WS"|"SM"|"ST"|"SA"|"SN"|"RS"|"SC"|"SL"|"SG"|"SK"|"SI"|"SB"|"SO"|"ZA"|"SS"|"GS"|"ES"|"LK"|"SD"|"SR"|"SJ"|"SZ"|"SE"|"CH"|"SY"|"TW"|"TJ"|"TZ"|"TH"|"TL"|"TG"|"TK"|"TO"|"TT"|"TN"|"TR"|"TM"|"TC"|"TV"|"UG"|"UA"|"AE"|"GB"|"US"|"UY"|"UZ"|"VU"|"VE"|"VN"|"VG"|"VI"|"WF"|"YE"|"ZM"|"ZW";
 
 export interface COUNTRY_CODE_DATA{
@@ -1123,7 +1125,7 @@ export const countryCodeList:COUNTRY_CODE_DATA[] = [
   },
   {
     "name": "Cayman Islands",
-    "dialCode": "+ 345",
+    "dialCode": "+345",
     "code": "KY",
     "notes": null,
     "numberFormat": {
@@ -7738,7 +7740,14 @@ export const countryCodeList:COUNTRY_CODE_DATA[] = [
       }
     ]
   }
-]
+];
+
+export const sortedCodeList = countryCodeList.sort((a, b)=>{
+  if(a.dialCode == b.dialCode){
+    return 0;
+  }
+  return a.dialCode > b.dialCode ? 1 : -1;
+});
 
 export function getFlagEmoji(countryCode: COUNTRY_CODE) {
   const codePoints = countryCode
@@ -7754,3 +7763,33 @@ export function getCountryCode(code:string):COUNTRY_CODE_DATA{
     throw new Error("Country Code Data is Invalid");
   return countryCodeList[index];
 }
+
+
+export function splitMobileNumber(mobileNumber:string):COUNTRY_CODE_DATA & {number:string, numberWithZero:string}{
+  const index = binarySearchIndex(countryCodeList, (midItem)=>{
+    if(mobileNumber.includes(midItem.dialCode)){
+      return 0;
+    }
+    return mobileNumber <= midItem.dialCode ? -1 : 1;
+  });
+  if(index < 0){
+    throw new Error("Mobile Number provided for the function \"splitMobileNumber\" is not valid country coded number");
+  }
+  const countryCodeData = sortedCodeList[index];
+  const removeCountryFromMobileNumber = mobileNumber.replaceAll(countryCodeData.dialCode, "");
+  return {...countryCodeData, number:removeCountryFromMobileNumber, numberWithZero:"0"+removeCountryFromMobileNumber};
+}
+
+function binarySearchIndex<T>(list:T[], callback:(MiddleElement:T, FirstElement:T, LastElement:T)=>-1|0|1|number, indexPoint = 0): (number|-1){//For the callback you must use x <= y where x is the thing you need to search and y is reference
+	const halfPoint = ceil(list.length/2)-1;
+	const direction = callback( list[halfPoint], list[0], list[list.length-1] );//Returns -1 means direction; 0 means found; 1 means goRight;
+	if(direction === 0)
+		return indexPoint+halfPoint;
+	else if(direction !==0 && list.length <= 1)
+		return -1;
+
+	if(direction < 0)
+		return binarySearchIndex( list.slice(0, (halfPoint+1)), callback, indexPoint+0);
+	else
+		return binarySearchIndex( list.slice((halfPoint+1)), callback, indexPoint+(halfPoint+1));
+};
