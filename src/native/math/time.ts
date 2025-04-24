@@ -12,9 +12,9 @@ export type TRANSFORM_FORMAT =
 "time-12h"|
 "time-24-seconds"|
 "mnt, dd yyyy"|
-"month, dd yyyy"|
-"month, dd yyyy | 12h"|
-"month, dd yyyy | 24h"|
+"month dd, yyyy"|
+"month dd, yyyy | 12h"|
+"month dd, yyyy | 24h"|
 "dxx mnt, yyyy"|
 "full"|               // Full human-readable format including weekday, month, day, year, and time
 "verbose"|            // Verbose format with detailed day and month names
@@ -54,17 +54,17 @@ export function transformDate(date: Date|string|number, format:TRANSFORM_FORMAT=
 	  case "mnt, dd yyyy":{
 		  return `${monthName(date.getMonth()+1)} ${padNumber(date.getDate(), 2)}, ${padNumber(date.getFullYear(), 4)}`;
 	  }
-		case "month, dd yyyy":{
+		case "month dd, yyyy":{
 			//Sample April, 9 2024
-			return `${monthName(date.getMonth()+1, "long")}, ${padNumber(date.getDate(), 2)} ${padNumber(date.getFullYear(), 4)}`;
+			return `${monthName(date.getMonth()+1, "long")} ${padNumber(date.getDate(), 2)}, ${padNumber(date.getFullYear(), 4)}`;
 		}
-		case "month, dd yyyy | 12h":{
+		case "month dd, yyyy | 12h":{
 			// Sample April, 9 2024 | 12:05pm 
-			return `${monthName(date.getMonth()+1, "long")}, ${padNumber(date.getDate(), 2)} ${padNumber(date.getFullYear(), 4)} | ${hour12(date.getHours())}:${padNumber(date.getMinutes(), 2)}${ date.getHours() >=12 ? "pm":"am"  }`;
+			return `${monthName(date.getMonth()+1, "long")} ${padNumber(date.getDate(), 2)}, ${padNumber(date.getFullYear(), 4)} | ${hour12(date.getHours())}:${padNumber(date.getMinutes(), 2)}${ date.getHours() >=12 ? "pm":"am"  }`;
 		}
-		case "month, dd yyyy | 24h":{
+		case "month dd, yyyy | 24h":{
 			// Sample April, 9 2024 | 17:00
-			return `${monthName(date.getMonth()+1, "long")}, ${padNumber(date.getDate(), 2)} ${padNumber(date.getFullYear(), 4)} | ${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}`;
+			return `${monthName(date.getMonth()+1, "long")} ${padNumber(date.getDate(), 2)}, ${padNumber(date.getFullYear(), 4)} | ${padNumber(date.getHours(), 2)}:${padNumber(date.getMinutes(), 2)}`;
 		}
 		case "dxx mnt, yyyy":{
 			//Sample 9th April, 2024
