@@ -16,4 +16,5 @@ export declare class DOMRequest {
     data(data: DOM_REQUEST_DATA | DOM_REQUEST_DATA[]): this;
     request(): void;
 }
+export declare function getParams(key: string): string | null;
 export {};

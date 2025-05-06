@@ -15,5 +15,10 @@ export interface COUNTRY_CODE_DATA {
     }>;
 }
 export declare const countryCodeList: COUNTRY_CODE_DATA[];
+export declare const sortedCodeList: COUNTRY_CODE_DATA[];
 export declare function getFlagEmoji(countryCode: COUNTRY_CODE): string;
 export declare function getCountryCode(code: string): COUNTRY_CODE_DATA;
+export declare function splitMobileNumber(mobileNumber: string): COUNTRY_CODE_DATA & {
+    number: string;
+    numberWithZero: string;
+};

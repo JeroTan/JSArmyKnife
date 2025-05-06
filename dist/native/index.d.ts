@@ -12,3 +12,4 @@ export * as Cryptographic from "./cryptographic/index";
 export * as Animation from "./animation/index";
 export * as Advance from "./advance/index";
 export * as File from "./file/index";
+export * as Location from "./location/index";

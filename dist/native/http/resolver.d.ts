@@ -62,5 +62,6 @@ export declare class Resolve {
     s507<OTHER>(callback: STRING_ONLY_RESPONSE | PURE_RESPONSE | OBJECT_READY_RESPONSE<OTHER>): this;
     sOthers<OTHER>(callback: STRING_ONLY_RESPONSE | PURE_RESPONSE | OBJECT_READY_RESPONSE<OTHER>): this;
     sAfter<OTHER>(callback: STRING_ONLY_RESPONSE | PURE_RESPONSE | OBJECT_READY_RESPONSE<OTHER>): this;
-    stream(callback: (eventTrigger: (callback2: (data: Uint8Array) => void) => void) => void): Promise<Response>;
+    stream(callback: (eventTrigger: (callback2: (data: string) => void) => void) => void, decode: true): Promise<Response>;
+    stream(callback: (eventTrigger: (callback2: (data: Uint8Array) => void) => void) => void, decode?: false): Promise<Response>;
 }

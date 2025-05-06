@@ -15,6 +15,15 @@ export declare function capitalFirst(text: string): string;
  */
 export declare function capitalFirstOnly(text: string): string;
 /**
+ *
+ * @param text - The string you want to capitalize the first letter of each word
+ * @description Capitalize each word in the string but the prepositions will be lowercase. This can be used for title case.
+ * @example capitalEachWord("the quick brown fox jumps over the lazy dog") => "The Quick Brown Fox Jumps Over the Lazy Dog"
+ *
+ * @returns
+ */
+export declare function capitalEachWord(text: string): string;
+/**
  * @description remove the underscore from the string or replace it with space
  * @param text
  * @param swapToSpace If you want to replace the underscore with space

@@ -83,13 +83,27 @@ export function escapeToRegex(string:string) {
 export function parseQueryToString(object:{[key:string|number]:Array<string|number>|string|number}){
 	return Object.keys(object).length > 0 ? Object.keys(object).map((key)=>{
 		if(!Array.isArray(object[key])){
-			return `${key}=${String(object[key]).replaceAll("&","%26").replaceAll("?","%3F").replaceAll("=","%3D").replaceAll("+","%2B")}`
+			return `${key}=${String(object[key])
+				.replaceAll("&", "%26")
+				.replaceAll("?", "%3F")
+				.replaceAll("=", "%3D")
+				.replaceAll(",","%2C")
+				.replaceAll("+", "%2B")
+				.replaceAll("/", "%2F")
+				.replaceAll("@", "%40")}`
 		}
 		if( (object[key] as Array<string|number>).length < 1 )
 			return `${key}=null`
 
 		return `${key}=${(object[key] as Array<string|number>).map((e:string|number)=>{
-			return String(e).replaceAll("&","%26").replaceAll("?","%3F").replaceAll("=","%3D").replace(",","%2C").replaceAll("+","%2B")
+			return String(e)
+				.replaceAll("&","%26")
+				.replaceAll("?","%3F")
+				.replaceAll("=","%3D")
+				.replaceAll(",","%2C")
+				.replaceAll("+","%2B")
+				.replaceAll("/", "%2F")
+				.replaceAll("@", "%40")
 		}).join(",")}`
 	}).join("&"):"";
 

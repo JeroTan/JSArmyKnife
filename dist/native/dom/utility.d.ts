@@ -38,7 +38,7 @@ export interface HTMLElementsWithProps<T> extends HTMLElement {
         [slotname: string | number]: (string | HTMLElement | HTMLElementsWithProps<any> | Node);
     }) => void;
 }
-export declare function ElementMaker<T extends object>(componentName: string, callback: (element: HTMLElementsWithProps<T>) => void): void;
+export declare function ElementMaker<T extends object>(componentName: string, callback: (element: HTMLElementsWithProps<T>) => void, noBuild?: boolean): void;
 type LOAD_CALLBACK = ((() => void) | (() => Promise<any>));
 type LOAD_FALLBACK = () => void;
 /**
@@ -105,4 +105,7 @@ export declare class Observer {
     disconnect(): void;
 }
 export declare function elementInScreen(element: HTMLElement, callback: (result: boolean) => void, offset?: number): void;
+export declare function updateURL(url: string): void;
+export declare function goToElement(element: HTMLElement): void;
+export declare function scrollToBottom(callback: Function, offset?: number): void;
 export {};
