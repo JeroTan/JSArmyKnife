@@ -121,4 +121,45 @@ export function objectReplacer(censor:any) {
 	  
 	  return value;
 	}
-  }
+}
+
+/**
+ * 
+ * @param jsonString 
+ * @description Convert JSON String Containing functions into an actual object
+ * @returns 
+ */
+export function JSONparseEx<T>(jsonString: string) {
+  return JSON.parse(jsonString, (_, value) => {
+
+    if (
+      value != undefined && 
+      value.startsWith && 
+      typeof value === 'string' && 
+      ( 
+        value.startsWith('function') || 
+        value.startsWith('class') || 
+        value.startsWith('async function') || 
+        value.startsWith('() =>') || 
+        value.startsWith('async () =>')
+      )
+      ) {
+      return eval(`(${value})`);
+    }
+    return value;
+  }) as T;
+
+}
+
+/**
+ * 
+ * @param data 
+ * @description convert JSON object containing things like function and convert it to string
+ * @returns 
+ */
+export function JSONstringifyEx(data:{[key: string]: any}){
+  return JSON.stringify(
+    data,
+    (_, value) => typeof value === 'function' ? value.toString() : value
+  );
+}
