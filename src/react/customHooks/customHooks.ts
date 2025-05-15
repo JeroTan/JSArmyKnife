@@ -27,14 +27,12 @@ export function useStateEx<T>(
   // }
   function setterValue(value: T|((prev: T) => T), internalOnly:boolean = false): void{
     if(typeof value === "function"){
-      setInternalValue((old)=>{
-        const newValue = (value as Function)(old);
-        if(externalSetter !== undefined && !internalOnly){
-          externalSetter(newValue);
-        }
-        
-        return newValue;
-      })
+      const newValue = (value as Function)(internalValue);
+      setInternalValue(newValue);
+      if(externalSetter !== undefined && !internalOnly){
+        externalSetter(newValue);
+      }
+     
     }else{
       setInternalValue(value);
       if(externalSetter !== undefined && !internalOnly){
