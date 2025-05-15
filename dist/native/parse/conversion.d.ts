@@ -43,4 +43,21 @@ export declare function escapeToRegex(string: string): string;
 export declare function parseQueryToString(object: {
     [key: string | number]: Array<string | number> | string | number;
 }): string;
+export declare function parseQuery(queryString: string): string;
 export declare function objectReplacer(censor: any): (_: any, value: any) => any;
+/**
+ *
+ * @param jsonString
+ * @description Convert JSON String Containing functions into an actual object
+ * @returns
+ */
+export declare function JSONparseEx<T>(jsonString: string): T;
+/**
+ *
+ * @param data
+ * @description convert JSON object containing things like function and convert it to string
+ * @returns
+ */
+export declare function JSONstringifyEx(data: {
+    [key: string]: any;
+}): string;

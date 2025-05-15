@@ -1,45 +1,30 @@
-import {useEffect, useState} from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function useStateEx<T>(
-  initialValue: T,
-  externalSetter?: (value: T) => void
-): [T, (value: T) => void]{
-  const [internalValue, setInternalValue] = useState<T>(initialValue);
+  propValue: T,
+  onChange?: (value: T) => void
+): [T, (value: T) => void] {
+  const [internal, setInternal] = useState(propValue);
+  const prevPropRef = useRef(propValue);
 
-  //Set the state when things change
+  // Sync from parent -> internal state
   useEffect(() => {
-    if(initialValue !== internalValue){
-      setInternalValue(initialValue);
+    if (prevPropRef.current !== propValue) {
+      setInternal(propValue);
+      prevPropRef.current = propValue;
     }
-  }, [initialValue]);
+  }, [propValue]);
 
-  function setterValue(value: T, internalOnly?:boolean):void;
-  function setterValue(value: (prev: T) => T, internalOnly?:boolean): void;
-  // function setterValue(value: T|((prev: T) => T)): void{
-  //   setInternalValue(value);
-  //   if(externalSetter !== undefined){
-  //     if(typeof value === "function"){
-  //       externalSetter( (value as Function)(internalValue) );
-  //     }else{
-  //       externalSetter(value);
-  //     }
-  //   }
-  // }
-  function setterValue(value: T|((prev: T) => T), internalOnly:boolean = false): void{
-    if(typeof value === "function"){
-      const newValue = (value as Function)(internalValue);
-      setInternalValue(newValue);
-      if(externalSetter !== undefined && !internalOnly){
-        externalSetter(newValue);
+  const setEx = (value: T) => {
+    setInternal((prev) => {
+      if (prev !== value) {
+        onChange?.(value); // send update to parent
+        prevPropRef.current = value;
+        return value;
       }
-     
-    }else{
-      setInternalValue(value);
-      if(externalSetter !== undefined && !internalOnly){
-        externalSetter(value);
-      }
-    }
-  }
-  
-  return [internalValue, setterValue];
+      return prev;
+    });
+  };
+
+  return [internal, setEx];
 }

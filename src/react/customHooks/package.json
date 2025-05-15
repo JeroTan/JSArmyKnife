@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/react--customhooks",
-  "version": "0.0.6-beta.0",
+  "version": "0.0.11-beta.0",
   "public": true,
   "description": "All things you need to add delay or little slow down to your project.",
   "main": "dist/index.js",
