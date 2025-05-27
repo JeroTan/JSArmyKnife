@@ -156,7 +156,10 @@ export interface HTMLElementsWithProps<T> extends HTMLElement{
   slotData: (content: (string|HTMLElement|HTMLElementsWithProps<any>|Node)|{[slotname:string|number]:(string|HTMLElement|HTMLElementsWithProps<any>|Node)} )=>void;
 }
 
+const elementMakerStack:string[] = [];
 export function ElementMaker<T extends object>(componentName:string, callback:(element:HTMLElementsWithProps<T>)=>void, noBuild = false){
+  if(elementMakerStack.includes(componentName)) return;
+  elementMakerStack.push(componentName);
 	const customElementSample = (document.querySelector(componentName) as HTMLElement).cloneNode(true) as HTMLElement;
 
 	class AstroElement extends HTMLElement{
@@ -202,7 +205,7 @@ export function ElementMaker<T extends object>(componentName:string, callback:(e
       return this._props;
     }
     set props(props:T){
-      this._props = props;
+      this._props = {...props};
     }
     slotData(slots:  (string|HTMLElement|HTMLElementsWithProps<any>|Node)|{[slotname:string|number]:(string|HTMLElement|HTMLElementsWithProps<any>|Node)} ){
       const THIS = this;
@@ -257,6 +260,19 @@ export function ElementMaker<T extends object>(componentName:string, callback:(e
 	customElements.define(componentName, AstroElement);
 }
 
+/**
+ * @description This function will regenerate a certain element like how you use a querySelector
+ * @param selectorString 
+ * @param refElement 
+ * @returns 
+ */
+export function specialComponentSelector<T extends HTMLElement>(selectorString:string, refElement:HTMLElement|Document = document):T{
+  const element = refElement.querySelector(selectorString) as T;
+  if(!element) throw new Error(`Element with selector ${selectorString} not found`);
+  const elementToClone = element.cloneNode(true) as T;
+  element.replaceWith(elementToClone);
+  return elementToClone;
+}
 
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Load LIstener Control                                                      |*/
