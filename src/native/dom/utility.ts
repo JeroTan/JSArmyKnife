@@ -162,7 +162,7 @@ export function ElementMaker<T extends object>(componentName:string, callback:(e
   elementMakerStack.push(componentName);
 	const customElementSample = (document.querySelector(componentName) as HTMLElement).cloneNode(true) as HTMLElement;
 
-	class AstroElement extends HTMLElement{
+	class CustomElement extends HTMLElement{
     _props: T = {} as T;
     private isOpened:boolean = false;
     private openingStackCalls:Function[] = [];
@@ -182,7 +182,9 @@ export function ElementMaker<T extends object>(componentName:string, callback:(e
     
 		constructor(){
 			super();
-			callback(this);
+      if(this != null){
+        callback(this);
+      }
 		}
 		connectedCallback(){
       if(noBuild){
@@ -257,7 +259,7 @@ export function ElementMaker<T extends object>(componentName:string, callback:(e
     }
 	}
 	//This will wrap your component to make it independent on its own. i.e. make same components in the same page.
-	customElements.define(componentName, AstroElement);
+	customElements.define(componentName, CustomElement);
 }
 
 /**
