@@ -230,6 +230,22 @@ export class Modal{
 		})
 		return this;
 	}
+	noIcon(){
+		this.cacheData({
+			icon: "",
+			iconColor: "",
+			iconAnimate: "",
+		});
+		return this;
+	}
+	noTitle(){
+		this.cacheData({title: ""});
+		return this;
+	}
+	noMessage(){
+		this.cacheData({message: ""});
+		return this;
+	}
 	close(){
 		this.cacheData({isOpen: false });
 		return this;
