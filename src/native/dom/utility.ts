@@ -453,7 +453,9 @@ export function DOMPopTransformer(instruction:{pop:string, [key:string|number]: 
       }
     }
     popIcons.textContent = "";
-    popIcons.appendChild(clonedIcon as Node);
+    if(clonedIcon){
+      popIcons.appendChild(clonedIcon as Node);
+    }
   }
 
   if(structure.title){
