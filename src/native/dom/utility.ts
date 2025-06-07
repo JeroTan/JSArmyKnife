@@ -458,6 +458,8 @@ export function DOMPopTransformer(instruction:{pop:string, [key:string|number]: 
     if(clonedIcon){
       popIcons.appendChild(clonedIcon as Node);
     }
+  }else{
+    popIcons.remove();
   }
 
   if(structure.title){
