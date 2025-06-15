@@ -98,3 +98,40 @@ export class Subscription<DATA_TYPE>{
 	  })
   }
 }
+
+export class StateSync<T>{
+	private states: Subscription<T>[] = [];
+
+	constructor(...states: Subscription<T>[]) {
+		this.states = states || [];
+	}
+
+	addStates(states: Subscription<T>[] | Subscription<T>) {
+		if (Array.isArray(states)) {
+			this.states.push(...states);
+		} else {
+			this.states.push(states);
+		}
+	}
+
+	private toString(data:T){
+		if(typeof data === "object" && data !== null){
+			return JSON.stringify(data);
+		} else {
+			return String(data);
+		}
+	}
+
+	sync(){
+		for(const state of this.states){
+			state.subscribe((value)=>{
+				for(const otherState of this.states){
+					if(this.toString(otherState.get()) !== this.toString(value)){
+						otherState.update(value);
+					}
+				}
+			});
+		}
+	}
+
+}
