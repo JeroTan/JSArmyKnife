@@ -126,7 +126,7 @@ export class NotifPop{
 
   public add(notif:NOTIF_MESSAGE){
     const template = document.querySelector<HTMLTemplateElement>("#notif-pop-content-template")
-    let notifElement = template?.content.cloneNode(true) as HTMLElement;
+    let notifElement = (template?.content.cloneNode(true) as HTMLElement).children[0] as HTMLElement;
     
     if(template == null){
       notifElement = document.createElement("div");
