@@ -367,3 +367,22 @@ export function atobEx(encrypted:string){
 	const binString = atob(encrypted);
   return new TextDecoder().decode(Uint8Array.from<string>(binString, (m) => m.codePointAt(0) || 0));
 }
+
+
+export function xorEnrypt(data: string, key: string): string {
+  const dataBytes = new TextEncoder().encode(data);
+  const keyBytes = new TextEncoder().encode(key);
+
+  const encrypted = dataBytes.map((byte, i) => byte ^ keyBytes[i % keyBytes.length]);
+
+  return btoa(String.fromCharCode(...encrypted));
+}
+
+export function xorDecrypt(encrypted: string, key: string): string {
+  const encryptedBytes = Uint8Array.from(atob(encrypted), char => char.charCodeAt(0));
+  const keyBytes = new TextEncoder().encode(key);
+
+  const decrypted = encryptedBytes.map((byte, i) => byte ^ keyBytes[i % keyBytes.length]);
+
+  return new TextDecoder().decode(decrypted);
+}

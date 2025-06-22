@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--cryptographic",
-  "version": "0.1.4-beta.0",
+  "version": "0.1.5-beta.0",
   "public": true,
   "description": "Cryptographic functions for your project. Includes simple, advance and more secured functions(soon...). Disclaimer some of it are not practical for production, use at your own risk.",
   "main": "dist/index.js",
