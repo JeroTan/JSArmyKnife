@@ -20,6 +20,10 @@ interface NOTIF_MESSAGE{
   autoClose?:number, //Milliseconds
 }
 
+/**
+ * @description - NotifPop is a notification pop-up system that allows you to create and manage notifications in a web application.
+ * @description - If you want custom notification design, please provide ids such as #notif-pop-container, #notif-pop-content-template, #notif-close, #notif-title, and #notif-message. 
+ */
 export class NotifPop{
   private container = document.createElement("aside");
   private containerName = "notif-pop-container";
@@ -121,42 +125,64 @@ export class NotifPop{
   //--Setter--//
 
   public add(notif:NOTIF_MESSAGE){
-    const notifElement = document.createElement("div");
-    //Container Style
-    swapClass({id:notifElement, mk:"rounded w-96 bg-gray-50 shadow-lg border border-gray-300 relative pb-4 px-3"});
-
-    //Close Button
-    const closeButtonContainer = document.createElement("div");
-    notifElement.appendChild(closeButtonContainer);
-    closeButtonContainer.style.left = "98%";
-    swapClass({id:closeButtonContainer, mk:"relative size-3 mr-2 mt-2 cursor-pointer"});
-    closeButtonContainer.onclick = ()=>notifElement.remove();
-    const closeButtonImage = document.createElement("div");
-    closeButtonImage.textContent = "✖";
-    closeButtonImage.style.paddingRight = "2px";
-    closeButtonContainer.appendChild(closeButtonImage);
-    swapClass({id:closeButtonImage, mk:"object-contain w-full h-full"});
+    const template = document.querySelector<HTMLTemplateElement>("#notif-pop-content-template")
+    let notifElement = template?.content.cloneNode(true) as HTMLElement;
     
+    if(template == null){
+      notifElement = document.createElement("div");
+      //Container Style
+      swapClass({id:notifElement, mk:"rounded w-96 bg-gray-50 shadow-lg border border-gray-300 relative pb-4 px-3"});
 
-    if(notif.title){
-      notifElement.title = notif.title;
-      const titleElement = document.createElement("div");
-      titleElement.innerHTML = notif.title;
-      swapClass({id:titleElement, mk:" text-lg font-normal"});
-      notifElement.appendChild(titleElement); 
-    }
+      //Close Button
+      const closeButtonContainer = document.createElement("div");
+      notifElement.appendChild(closeButtonContainer);
+      closeButtonContainer.style.left = "98%";
+      swapClass({id:closeButtonContainer, mk:"relative size-3 mr-2 mt-2 cursor-pointer"});
+      closeButtonContainer.onclick = ()=>notifElement.remove();
+      const closeButtonImage = document.createElement("div");
+      closeButtonImage.textContent = "✖";
+      closeButtonImage.style.paddingRight = "2px";
+      closeButtonContainer.appendChild(closeButtonImage);
+      swapClass({id:closeButtonImage, mk:"object-contain w-full h-full"});
+      
 
-    if(notif.message){
-      const messageElement = document.createElement("div");
-      messageElement.innerHTML = notif.message;
-      swapClass({id:messageElement, mk:"text-gray-600 font-light"});
-      notifElement.appendChild(messageElement); 
-    }
+      if(notif.title){
+        notifElement.title = notif.title;
+        const titleElement = document.createElement("div");
+        titleElement.innerHTML = notif.title;
+        swapClass({id:titleElement, mk:" text-lg font-normal"});
+        notifElement.appendChild(titleElement); 
+      }
 
-    if(notif.autoClose){
-      setTimeout(()=>{
-        notifElement.remove();
-      }, notif.autoClose);
+      if(notif.message){
+        const messageElement = document.createElement("div");
+        messageElement.innerHTML = notif.message;
+        swapClass({id:messageElement, mk:"text-gray-600 font-light"});
+        notifElement.appendChild(messageElement); 
+      }
+
+      if(notif.autoClose){
+        setTimeout(()=>{
+          notifElement.remove();
+        }, notif.autoClose);
+      }
+    }else{
+      const buttonElement = notifElement.querySelector("#notif-close") as HTMLButtonElement;
+      const titleElement = notifElement.querySelector("#notif-title") as HTMLDivElement;
+      const messageElement = notifElement.querySelector("#notif-message") as HTMLDivElement;
+
+      buttonElement.onclick = () => notifElement.remove(); 
+      if(notif.title){
+        titleElement.innerHTML = notif.title;
+      }
+      if(notif.message){
+        messageElement.innerHTML = notif.message;
+      }
+      if(notif.autoClose){
+        setTimeout(()=>{
+          notifElement.remove();
+        }, notif.autoClose);
+      }
     }
     
     const animation = new AnimeTroupe(notifElement, [
