@@ -183,7 +183,7 @@ export class Modal{
 		this.cacheData({message: message});
 		return this;
 	}
-	addtional(addon:string|HTMLElement){
+	additional(addon:string|HTMLElement){
 		this.cacheData({additionalBody:addon});
 		return this;
 	}
