@@ -403,12 +403,12 @@ export class NumberCrypt {
 }
 
 
-function numberEncode(number: number){
+export function numberEncode(number: number){
 	const numberCrypt = new NumberCrypt(123);
 	return numberCrypt.encrypt(number);
 }
 
-function numberDecode(encoded: number){
+export function numberDecode(encoded: number){
 	const numberCrypt = new NumberCrypt(123);
 	return numberCrypt.decrypt(encoded);
 }
