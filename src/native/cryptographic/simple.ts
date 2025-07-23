@@ -386,3 +386,29 @@ export function xorDecrypt(encrypted: string, key: string): string {
 
   return new TextDecoder().decode(decrypted);
 }
+
+export class NumberCrypt {
+	private key: number;
+
+	constructor(key: number) {
+		this.key = key;
+	}
+
+	encrypt(number: number): number {
+		return number ^ this.key; // XOR encryption
+	}
+	decrypt(encryptedNumber: number): number {
+		return encryptedNumber ^ this.key; // XOR decryption
+	}
+}
+
+
+function numberEncode(number: number){
+	const numberCrypt = new NumberCrypt(123);
+	return numberCrypt.encrypt(number);
+}
+
+function numberDecode(encoded: number){
+	const numberCrypt = new NumberCrypt(123);
+	return numberCrypt.decrypt(encoded);
+}
