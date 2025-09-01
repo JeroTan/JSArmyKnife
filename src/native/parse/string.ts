@@ -68,6 +68,17 @@ export function noUnderscore(text:string, swapToSpace = false){
 }
 
 /**
+ * @description remove the dash from the string or replace it with space
+ * @param text
+ * @param swapToSpace If you want to replace the dash with space
+ */
+export function noDash(text:string, swapToSpace = false){
+	if(swapToSpace)
+		return text.replace(/-/g, " ");
+	return text.replace(/-/g, "");
+}
+
+/**
  * @description convert a string into a fixed number randomly to shorten the string. Good for hashing or mapping something.
  * @param string 
  * @returns 
