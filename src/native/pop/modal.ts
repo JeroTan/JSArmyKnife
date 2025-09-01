@@ -183,7 +183,12 @@ export class Modal{
 		this.cacheData({message: message});
 		return this;
 	}
+	// @description - Fallback for old user since it is published with wrong spelling
 	addtional(addon:string|HTMLElement){
+		this.cacheData({additionalBody:addon});
+		return this;
+	}
+	additional(addon:string|HTMLElement){
 		this.cacheData({additionalBody:addon});
 		return this;
 	}

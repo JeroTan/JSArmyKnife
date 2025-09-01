@@ -28,3 +28,7 @@ export function useStateEx<T>(
 
   return [internal, setEx];
 }
+ 
+export function useStateRe<T>(value?:T, setter?:(old:T)=>void, fallbackValue?: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  return ( (value !== undefined && setter !== undefined) ? [value, setter as React.Dispatch<React.SetStateAction<T>>] : useState(fallbackValue as T) ) 
+}
