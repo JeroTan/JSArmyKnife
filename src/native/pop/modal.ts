@@ -8,27 +8,26 @@ export interface MODAL_STRUCTURE{
 	title: string|number,
 	message: string|number,
 	additionalBody: string|HTMLElement|undefined,
-	acceptButton: true,
-	rejectButton: true,
+	acceptButton: boolean|undefined,
+	rejectButton: boolean|undefined,
 	acceptButtonText: string,
 	rejectButtonText: string
 	acceptButtonCallback: undefined|((closeModal:Function)=>void),
 	rejectButtonCallback: undefined|((closeModal:Function)=>void),
-	closeButton: true,
+	closeButton: boolean|undefined,
 	closeButtonCallback: undefined|((closeModal:Function)=>void),
-	backdropTrigger: true,
+	backdropTrigger: boolean|undefined,
 	backdropTriggerCallback: undefined|((closeModal:Function)=>void),
 	customDialog: undefined|string|HTMLElement|Node|((data:MODAL_STRUCTURE)=>string|HTMLElement|Node),
-	[key:string|number]: any,
 }
-export interface POP_COMMON_FRAME{
-	close?:MODAL_STRUCTURE|{[key:string|number]: any},
-	success?:MODAL_STRUCTURE|{[key:string|number]: any},
-	error?:MODAL_STRUCTURE|{[key:string|number]: any},
-	info?:MODAL_STRUCTURE|{[key:string|number]: any},
-	warning?:MODAL_STRUCTURE|{[key:string|number]: any},
-	loading?:MODAL_STRUCTURE|{[key:string|number]: any},
-	custom?:MODAL_STRUCTURE|{[key:string|number]: any},
+export interface MODAL_COMMON_FRAME{
+	close?:MODAL_STRUCTURE,
+	success?:MODAL_STRUCTURE,
+	error?:MODAL_STRUCTURE,
+	info?:MODAL_STRUCTURE,
+	warning?:MODAL_STRUCTURE,
+	loading?:MODAL_STRUCTURE,
+	custom?:MODAL_STRUCTURE,
 }
 
 // EXPORT OR COPY THIS ONE
@@ -57,34 +56,22 @@ export const popStructure:MODAL_STRUCTURE = {
 const originalStructureCopy = structuredClone(popStructure);
 
 // EXPORT OR CREATE SIMILAR TO THIS
-export function popDispatch( instruction:{pop:string, [key:string|number]: any} ){
-	switch(instruction.pop){
-		case "open":
-			popStructure.isOpen = true;
-		break;
-		case "close":
-			popStructure.isOpen = false;
-		break;
-		case "update":
-			Object.keys(instruction.val).forEach((key) => {
-				popStructure[key] = instruction.val[key];
-			});
-		break;
-	}
-	return popStructure;
+export type MODAL_TYPE = "update"|"close"|"open";
+export type MODAL_INSTRUCTION = {pop:MODAL_TYPE, val:MODAL_STRUCTURE};
+export function popDispatch( instruction:MODAL_INSTRUCTION ){
 }
 
 
 // Pop is used to modify the dialog modal
 // Color here uses TailwindCSS but you may configure it here if you want.
 export type OPEN_FUNCTION = ()=>void;
-export type ClOSE_FUNCTION = ()=>void;
+export type CLOSE_FUNCTION = ()=>void;
 export class Modal{
-	private dispatch:((instruction:{pop:string, [key:string|number]: any})=>[OPEN_FUNCTION, ClOSE_FUNCTION]) = ()=>[()=>true, ()=>false];
-	private frame:POP_COMMON_FRAME = {};
+	private dispatch:((instruction:MODAL_INSTRUCTION)=>void) = ()=>{};
+	private frame:MODAL_COMMON_FRAME = {};
 	private cachedContent:MODAL_STRUCTURE;
 
-	constructor( dispatch:((instruction:{pop:string, [key:string|number]: any})=>[OPEN_FUNCTION, ClOSE_FUNCTION]) ){
+	constructor( dispatch:((instruction:MODAL_INSTRUCTION)=>void) ){
 		this.dispatch = dispatch; //External function that is use to change a property
 
 		//Copy the existing frame
@@ -95,6 +82,7 @@ export class Modal{
 
 		this.frame = {//This will be the basis of types
 			close:{
+				...basicContent,
 				isOpen: false,
 			},
 			success:{
@@ -143,18 +131,20 @@ export class Modal{
 	}
 
 	//--Setter--//
-	public setDispatch(dispatch:((instruction:{pop:string, [key:string|number]: any})=>[OPEN_FUNCTION, ClOSE_FUNCTION])){
+	public setDispatch(dispatch:((instruction:{pop:string, [key:string|number]: any})=>void)){
 		this.dispatch = dispatch;
 		return this;
 	}
 	//--Setter--//
 
 	//--In-House Helper--//
-	cacheData( object:MODAL_STRUCTURE|{[key:string|number]: any} ){//Accepts object key:value
+	cacheData( object: Partial<MODAL_STRUCTURE> ){//Accepts object key:value
 		const THIS = this;
-		Object.keys(object).forEach(key=>{
-			THIS.cachedContent[key] = object[key];
-		})
+		for(const key in object){
+			if(THIS.cachedContent[key as keyof MODAL_STRUCTURE] === undefined || !THIS.cachedContent) continue;
+			if(object[key as keyof MODAL_STRUCTURE] === undefined) continue;
+			(THIS.cachedContent as MODAL_STRUCTURE as any)[key as keyof MODAL_STRUCTURE] = object[key as keyof MODAL_STRUCTURE]!;
+		};
 		return THIS;
 	}
 	//--In-House Helper--//
@@ -162,13 +152,17 @@ export class Modal{
 	//--DispatchRunner--//
 	//** You must overload this one if you want to change how updating from external function works */
 	run(){//RUN THE DIALOG
-		return this.dispatch( { pop:"update", val: this.cachedContent } );
+		this.dispatch( { pop:"update", val: this.cachedContent } );
+		return [
+			() => { this.dispatch( { pop:"open", val: this.cachedContent } ); },
+			() => { this.dispatch( { pop:"close", val: this.cachedContent } ); }
+		];
 	}
 	//--DispatchRunner--//
 
 	//--Config--//
 	type(type:"close"|"success"|"error"|"info"|"warning"|"loading"|"custom"){//This will determine the basic structure of the popup
-		this.cacheData( this.frame[type] as POP_COMMON_FRAME );
+		this.cacheData( this.frame[type] as MODAL_STRUCTURE );
 		return this;
 	}
 	width(width:string|number){
@@ -181,11 +175,6 @@ export class Modal{
 	}
 	message(message:string){
 		this.cacheData({message: message});
-		return this;
-	}
-	// @description - Fallback for old user since it is published with wrong spelling
-	addtional(addon:string|HTMLElement){
-		this.cacheData({additionalBody:addon});
 		return this;
 	}
 	additional(addon:string|HTMLElement){
