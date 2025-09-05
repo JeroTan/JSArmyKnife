@@ -369,7 +369,7 @@ export function atobEx(encrypted:string){
 }
 
 
-export function xorEnrypt(data: string, key: string): string {
+export function xorEncrypt(data: string, key: string): string {
   const dataBytes = new TextEncoder().encode(data);
   const keyBytes = new TextEncoder().encode(key);
 
