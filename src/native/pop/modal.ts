@@ -31,7 +31,7 @@ export interface MODAL_COMMON_FRAME{
 }
 
 // EXPORT OR COPY THIS ONE
-export const popStructure:MODAL_STRUCTURE = {
+export const modalStructure:MODAL_STRUCTURE = {
 	isOpen: false,
 	width: "450px",
 	icon: "check",
@@ -53,7 +53,7 @@ export const popStructure:MODAL_STRUCTURE = {
 	customDialog: undefined,
 };
 
-const originalStructureCopy = structuredClone(popStructure);
+const originalStructureCopy = structuredClone(modalStructure);
 
 // EXPORT OR CREATE SIMILAR TO THIS
 export type MODAL_TYPE = "update"|"close"|"open";
