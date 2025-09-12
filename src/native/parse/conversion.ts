@@ -225,3 +225,61 @@ export function jsonToFlatObject(
 	}
 	return flatObject;
 }
+
+
+/**
+ * @param flatObjectKey - The key in dot notation or array notation (e.g., "address.street" or "hobbies[0]")
+ * @param data - The object to search within
+ * @description Find and return data from an object using a flat object key with dot notation and array indices
+ * @returns The value found at the specified key, or undefined if not found
+ * @example
+ * const data = {
+ * name: "John",
+ * address: {
+ * street: "123 Main St",
+ * city: "Anytown",
+ * state: "CA"
+ * },
+ * hobbies: ["reading", "traveling"]
+ * };
+ * const street = findDataFromObjectUsingFlatObjectKey<string>("address.street", data);
+ * console.log(street); // Output: "123 Main St"
+ * const firstHobby = findDataFromObjectUsingFlatObjectKey<string>("hobbies[0]", data);
+ * console.log(firstHobby); // Output: "reading"
+ * const nonExistent = findDataFromObjectUsingFlatObjectKey<string>("non.existent.key", data);
+ * console.log(nonExistent); // Output: undefined
+ * */
+export function findDataFromObjectUsingFlatObjectKey<T>(
+	flatObjectKey: string,
+	data: { [key: string]: any }
+): T | undefined {
+	if (!flatObjectKey) return undefined;
+	if (data == null) return undefined;
+
+	// Split by dot and handle array indices like hobbies[0]
+	const parts = (flatObjectKey.split(".") as any).flatMap((p:string) => {
+		const tokens: (string | number)[] = [];
+		const regex = /([^[\]]+)|\[(\d+)\]/g;
+		let match: RegExpExecArray | null;
+
+		while ((match = regex.exec(p))) {
+			if (match[1] !== undefined) {
+				tokens.push(match[1]); // object key
+			} else if (match[2] !== undefined) {
+				tokens.push(Number(match[2])); // array index
+			}
+		}
+		return tokens;
+	});
+
+	// Traverse the object safely
+	let current: any = data;
+	for (const key of parts) {
+		if (current == null || !(key in current)) {
+			return undefined; // fallback
+		}
+		current = current[key];
+	}
+
+	return current as T;
+}
