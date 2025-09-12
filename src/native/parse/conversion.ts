@@ -163,3 +163,65 @@ export function JSONstringifyEx(data:{[key: string]: any}){
     (_, value) => typeof value === 'function' ? value.toString() : value
   );
 }
+
+
+/**
+ * @param data
+ * @param parentKey
+ * @param flatObject
+ * @description Convert JSON object to flat object with dot notation for nested keys
+ * @returns
+ * @example
+ * const data = {
+ *   name: "John",
+ *  address: {
+ * 	street: "123 Main St",
+ * 	city: "Anytown",
+ * 	state: "CA"
+ *  },
+ * hobbies: ["reading", "traveling"]
+ * };
+ *
+ * const flatObject = jsonToFlatObject(data);	
+ * console.log(flatObject);
+ * // Output:
+ * {
+ *  "name": "John",
+ * "address.street": "123 Main St",
+ * "address.city": "Anytown",
+ * "address.state": "CA",
+ * "hobbies[0]": "reading",
+ * "hobbies[1]": "traveling"
+ * }
+ * */
+export function jsonToFlatObject(
+	data: any,
+	parentKey = "",
+	flatObject: { [key: string]: any } = {}
+): { [key: string]: any } {
+	if (typeof data !== "object" || data === null) {
+		if (parentKey) flatObject[parentKey] = data;
+		return flatObject;
+	}
+
+	const isArray = Array.isArray(data);
+	const keys = isArray ? data.keys() : Object.keys(data);
+
+	for (const key of keys) {
+		const value = isArray ? data[key as any] : data[key];
+		const fullKey = parentKey
+			? isArray
+				? `${parentKey}[${key}]`
+				: `${parentKey}.${key}`
+			: isArray
+				? `[${key}]`
+				: key;
+
+		if (typeof value === "object" && value !== null) {
+			jsonToFlatObject(value, fullKey.toString(), flatObject);
+		} else {
+			flatObject[fullKey] = value;
+		}
+	}
+	return flatObject;
+}
