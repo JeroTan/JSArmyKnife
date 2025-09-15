@@ -611,3 +611,19 @@ export class DateNavigator extends Date{
   }   
   //---- Advance----//
 }
+
+export type YEAR = `${number}${number}${number}${number}`; // four digits
+export type MONTH = `0${1|2|3|4|5|6|7|8|9}` | `1${0|1|2}`; // 01-12
+export type DAY =
+	| `0${1|2|3|4|5|6|7|8|9}`        // 01-09
+	| `${1|2}${0|1|2|3|4|5|6|7|8|9}` // 10-29
+	| `3${0|1}`;                     // 30-31
+
+export type DATE_ONLY = `${YEAR}-${MONTH}-${DAY}`;
+export type TIME_ONLY = `${0|1|2}${number}:${0|1|2|3|4|5}${number}`; // 00:00 - 23:59
+export function getDateString(date:string|Date){
+	return new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) as DATE_ONLY;
+}
+export function getTimeString(date:string|Date){
+	return new Date(date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) as TIME_ONLY;
+}
