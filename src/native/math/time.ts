@@ -622,8 +622,12 @@ export type DAY =
 export type DATE_ONLY = `${YEAR}-${MONTH}-${DAY}`;
 export type TIME_ONLY = `${0|1|2}${number}:${0|1|2|3|4|5}${number}`; // 00:00 - 23:59
 export function getDateString(date:string|Date){
-	return new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) as DATE_ONLY;
+	const d = new Date(date);
+	if (isNaN(d.getTime())) throw new Error("Invalid date");
+	return `${padNumber(d.getFullYear(), 4)}-${padNumber(d.getMonth() + 1, 2)}-${padNumber(d.getDate(), 2)}` as DATE_ONLY;
 }
 export function getTimeString(date:string|Date){
-	return new Date(date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) as TIME_ONLY;
+	const d = new Date(date);
+	if (isNaN(d.getTime())) throw new Error("Invalid date");
+	return `${padNumber(d.getHours(), 2)}:${padNumber(d.getMinutes(), 2)}` as TIME_ONLY;
 }
