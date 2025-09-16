@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--math",
-  "version": "0.1.15-beta.0",
+  "version": "0.1.16-beta.0",
   "public": true,
   "description": "All Computational logic and anything that works with number.",
   "main": "dist/index.js",

@@ -631,3 +631,13 @@ export function getTimeString(date:string|Date){
 	if (isNaN(d.getTime())) throw new Error("Invalid date");
 	return `${padNumber(d.getHours(), 2)}:${padNumber(d.getMinutes(), 2)}` as TIME_ONLY;
 }
+
+
+function adjustTimeToInterval(interval:number, date:Date){ // Interval with minutes
+  const totalMinutes = date.getHours() * 60 + date.getMinutes();
+  const roundedTotalMinutes = Math.floor(totalMinutes / interval) * interval;
+  const roundedHour = Math.floor(roundedTotalMinutes / 60);
+  const roundedMinute = roundedTotalMinutes % 60;
+  const adjustedTime = `${roundedHour}:${roundedMinute < 10 ? `0${roundedMinute}` : roundedMinute}` as TIME_ONLY;
+  return adjustedTime;
+}
