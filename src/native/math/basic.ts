@@ -20,6 +20,22 @@ export function randomizer(min:number=0, max:number=Number.MAX_SAFE_INTEGER, all
 }
 
 /**
+ * Generate a random number within a specified range, excluding certain values.
+ * @param min The minimum value (inclusive).
+ * @param max The maximum value (exclusive).
+ * @param exclude An array of values to exclude from the random selection.
+ * @param allowDecimal Whether to allow decimal values (default is false).
+ * @returns A random number within the specified range, excluding the specified values.
+ */
+export function randomizerExclude(min:number=0, max:number=Number.MAX_SAFE_INTEGER, exclude:number[] = [], allowDecimal:boolean|number= false){
+  let result = randomizer(min, max, allowDecimal);
+  while(exclude.includes(result)){
+    result = randomizer(min, max, allowDecimal);
+  }
+  return result;
+}
+
+/**
 * @info Function that will remove a decimal to a number. If you pass a whole number it will just return that number;
 * @param number Value that will be use to remove decimal
 * @returns Whole number without decimal Value
