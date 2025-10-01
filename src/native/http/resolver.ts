@@ -4,7 +4,7 @@ export type OBJECT_READY_RESPONSE<T> = (data:T, headers:Headers, ok:boolean, sta
 
 //This class, in conjunction with HttpPlate objects, Data and Error from its response will be resolve here using this class;
 export class Resolve{
-	promiseResponse:Promise<Response> = Promise.resolve(new Response);
+	promiseResponse:Promise<Response> = null!; //This must be set as developer insert the promise response from constructor
 	excludeStatus:number[] = []; //If use already use the s200, then when you use sOthers it will not trigger the s200. In simple terms none will trigger if you already trigger it.
 	acceptJSON:boolean = true; //If the result must be in json
 

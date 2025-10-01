@@ -279,7 +279,7 @@ interface HTTP_CONFIG<otherKey extends string = ALL_HEADERS_KEY>{
  * - ⚙️ Strongly typed headers and methods (with support for custom keys)
  * - 🌐 Supports base URLs and relative paths
  * - 🛑 Request cancellation with AbortController (`stopFetching`)
- * - 🔄 Resettable state (`reset` and `newSignal`)
+ * - 🔄 Resettable state (`reset` and `newAbortion`)
  * - 🧩 Flexible body types (`JSON`, `FormData`, `Blob`, `ArrayBuffer`, etc.)
  * 
  * Example usage:
@@ -325,7 +325,7 @@ export class HttpNativePlate<
 	}
 	
 	private baseURL: string = "http://localhost:4321" // Default base URL
-	private signal : AbortController = new AbortController; // handles abort
+	private abortion : AbortController = new AbortController; // handles abort
 	private pathURL: PATH_NAME = "/" as PATH_NAME; // request path
 	private paramObject: {[key: string|number]: string} = {}; // query params
 
@@ -432,29 +432,29 @@ export class HttpNativePlate<
   /**
    * Creates a new AbortController for cancelling requests.
    */
-	public newSignal(){
-		this.signal = new AbortController;
+	public newAbortion(){
+		this.abortion = new AbortController;
 		return this;
 	}
 	/**
-   * Reset request config (clears body + resets signal).
+   * Reset request config (clears body + resets AbortController).
    */
 	public reset(){
 		this.Config = {  ...this.Config, body: undefined };
-		this.signal = new AbortController;
+		this.abortion = new AbortController;
 		return this;
 	}
 	/**
    * Get current AbortController signal (for passing to fetch).
    */
-	public getSignal(){
-		return this.signal;
+	public getAbortion(){
+		return this.abortion;
 	}
 	/**
    * Cancel an ongoing fetch request. This function must be used after calling `request()`.
    */
 	public stopFetching(){
-		this.signal.abort();
+		this.abortion.abort();
 		return this;
 	}
 	/**

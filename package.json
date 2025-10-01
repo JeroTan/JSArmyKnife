@@ -26,8 +26,9 @@
     "access": "public"
   },
   "devDependencies": {
+    "@vitest/ui": "^3.2.4",
     "lerna": "^8.1.9",
-    "typescript": "^5.5.3"
-  },
-  "dependencies": {}
+    "typescript": "^5.5.3",
+    "vitest": "^3.2.4"
+  }
 }
