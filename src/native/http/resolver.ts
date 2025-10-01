@@ -6,7 +6,7 @@ export type OBJECT_READY_RESPONSE<T> = (data:T, headers:Headers, ok:boolean, sta
 export class Resolve{
 	promiseResponse:Promise<Response> = null!; //This must be set as developer insert the promise response from constructor
 	excludeStatus:number[] = []; //If use already use the s200, then when you use sOthers it will not trigger the s200. In simple terms none will trigger if you already trigger it.
-	acceptJSON:boolean = true; //If the result must be in json
+	acceptJSONDefault:boolean = true; //If the result must be in json
 
 	constructor(promiseResponse:Promise<Response>|undefined, json = true){ //It must accept a promise;
 		if(promiseResponse !== undefined)
@@ -20,7 +20,7 @@ export class Resolve{
 		return this;
 	}
 	public setDataJSON(isJSON:boolean){
-		this.acceptJSON = isJSON;
+		this.acceptJSONDefault = isJSON;
 		return this;
 	}
 	//--Setter--//
@@ -42,7 +42,7 @@ export class Resolve{
 
 			let responseRead:string|OTHER;
 			try{
-				if(THIS.acceptJSON){
+				if(THIS.acceptJSONDefault){
 					responseRead = await response.clone().json();
 				}else{
 					responseRead = await response.clone().text();
