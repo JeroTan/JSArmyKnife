@@ -1,6 +1,6 @@
 {
   "name": "@jsarmyknife/native--http",
-  "version": "0.1.10-beta.0",
+  "version": "0.2.0-beta.0",
   "public": true,
   "description": "Simplify your http and other network related tasks.",
   "main": "dist/index.js",
