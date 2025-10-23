@@ -250,7 +250,9 @@ export type ALL_HEADERS_KEY = (typeof allHeadersKey)[number];
  * Represents the structure of header data.
  * Allows known header keys + additional custom keys.
  */
-export type HEADER_DATA<otherKey extends string = ALL_HEADERS_KEY> = { [header in ALL_HEADERS_KEY]?: string } & {
+export type HEADER_DATA<otherKey extends string = ALL_HEADERS_KEY> = {
+	[header in ALL_HEADERS_KEY]?: string;
+} & {
 	[key in otherKey]?: string;
 };
 export type METHOD_TYPE = (typeof methods)[number];

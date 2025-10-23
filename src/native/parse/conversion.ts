@@ -1,25 +1,29 @@
 /**
  * @description Convert any type to array
- * @param input 
+ * @param input
  * @param splitter - splitter will be used when input is string to split string with delimiter
- * @returns 
+ * @returns
  */
 export function anyToArr<T>(input: T[]): T[];
 export function anyToArr(input: string, splitter?: string): string[];
 export function anyToArr(input: string[]): string[];
-export function anyToArr(input: (string[]|string)): string[];
+export function anyToArr(input: string[] | string): string[];
 export function anyToArr(input: number): [number];
 export function anyToArr(input: boolean): [boolean];
 export function anyToArr(input: typeof RegExp | RegExpConstructor | RegExp): [RegExp];
-export function anyToArr(input: string|(typeof RegExp | RegExpConstructor | RegExp)): [RegExp|string];
-export function anyToArr(input: (string | number | boolean |typeof RegExp | RegExpConstructor | RegExp)|(string | number | boolean |typeof RegExp | RegExpConstructor | RegExp)[], splitter:string = ",")
-{
-	let arrayResult: (string | number | boolean |typeof RegExp | RegExpConstructor | RegExp)[] = [];
-	if(Array.isArray(input)){
+export function anyToArr(input: string | (typeof RegExp | RegExpConstructor | RegExp)): [RegExp | string];
+export function anyToArr(
+	input:
+		| (string | number | boolean | typeof RegExp | RegExpConstructor | RegExp)
+		| (string | number | boolean | typeof RegExp | RegExpConstructor | RegExp)[],
+	splitter: string = ",",
+) {
+	let arrayResult: (string | number | boolean | typeof RegExp | RegExpConstructor | RegExp)[] = [];
+	if (Array.isArray(input)) {
 		arrayResult = input;
-	}else if(typeof input === "string"){
+	} else if (typeof input === "string") {
 		arrayResult = input.split(splitter);
-	}else if(input instanceof RegExp || typeof input === "boolean" || typeof input === "number"){
+	} else if (input instanceof RegExp || typeof input === "boolean" || typeof input === "number") {
 		arrayResult = [input];
 	}
 
@@ -28,142 +32,136 @@ export function anyToArr(input: (string | number | boolean |typeof RegExp | RegE
 
 /**
  * @description Convert any type of variable to string
- * @param input 
- * @returns 
+ * @param input
+ * @returns
  */
-export function anyToStr<T>( input: T|T[]|string|object|number|typeof RegExp|null|undefined ): string{
-	if(typeof input === "undefined" || input === null){
+export function anyToStr<T>(input: T | T[] | string | object | number | typeof RegExp | null | undefined): string {
+	if (typeof input === "undefined" || input === null) {
 		return "";
-	}else if(typeof input === "object" && input instanceof RegExp){
+	} else if (typeof input === "object" && input instanceof RegExp) {
 		return RegExp.toString();
-	}else if(typeof input === "object"){
+	} else if (typeof input === "object") {
 		return JSON.stringify(input);
-	}else{
+	} else {
 		return String(input);
 	}
 }
 
 /**
  * @description Convert Object and Array into string
- * @param object 
- * @param splitter 
- * @returns 
+ * @param object
+ * @param splitter
+ * @returns
  */
-export function objToString<T extends object>(object: T[] | T, splitter: string = " "){
-	if( Array.isArray(object) ){
+export function objToString<T extends object>(object: T[] | T, splitter: string = " ") {
+	if (Array.isArray(object)) {
 		return object.join(splitter);
-	}else{
+	} else {
 		return Object.values(object).join(splitter);
 	}
 }
 
-
 /**
  * @description shorten new RegExp
- * @param input 
- * @returns 
+ * @param input
+ * @returns
  */
-export function toRegex(input: string|RegExp): RegExp{
+export function toRegex(input: string | RegExp): RegExp {
 	return new RegExp(input);
 }
 
 /**
  * @description sanitize string to allow easy conversion to regex
- * @param string 
- * @returns 
+ * @param string
+ * @returns
  */
-export function escapeToRegex(string:string) {
-	return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+export function escapeToRegex(string: string) {
+	return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
-
 
 /**
  * @description This is for parsing object to string format that you can use for url query string. It also sanitize the string to avoid any error.
  */
-export function parseQueryToString(object:{[key:string|number]:Array<string|number>|string|number}){
-	return Object.keys(object).length > 0 ? Object.keys(object).map((key)=>{
-		if(!Array.isArray(object[key])){
-			return `${key}=${parseQuery(String(object[key]))}`;
-		}
-		if( (object[key] as Array<string|number>).length < 1 )
-			return `${key}=null`;
+export function parseQueryToString(object: { [key: string | number]: Array<string | number> | string | number }) {
+	return Object.keys(object).length > 0
+		? Object.keys(object)
+				.map((key) => {
+					if (!Array.isArray(object[key])) {
+						return `${key}=${parseQuery(String(object[key]))}`;
+					}
+					if ((object[key] as Array<string | number>).length < 1) return `${key}=null`;
 
-		return `${key}=${(object[key] as Array<string|number>).map((e:string|number)=>{
-			return parseQuery(String(e));
-		}).join(",")}`
-	}).join("&"):"";
-
+					return `${key}=${(object[key] as Array<string | number>)
+						.map((e: string | number) => {
+							return parseQuery(String(e));
+						})
+						.join(",")}`;
+				})
+				.join("&")
+		: "";
 }
 
-export function parseQuery(queryString:string){
+export function parseQuery(queryString: string) {
 	return `${queryString
 		.replaceAll("&", "%26")
 		.replaceAll("?", "%3F")
 		.replaceAll("=", "%3D")
-		.replaceAll(",","%2C")
+		.replaceAll(",", "%2C")
 		.replaceAll("+", "%2B")
 		.replaceAll("/", "%2F")
 		.replaceAll("@", "%40")}`;
 }
 
 //To Update the object to be compatible with JSON
-export function objectReplacer(censor:any) {
+export function objectReplacer(censor: any) {
 	var i = 0;
-	
-	return function(_:any, value:any) {
-	  if(i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value) 
-		return '[Circular]'; 
-	  
-	  if(i >= 29) // seems to be a hard maximum of 30 serialized objects?
-		return '[Unknown]';
-	  
-	  ++i; // so we know we aren't using the original object anymore
-	  
-	  return value;
-	}
+
+	return function (_: any, value: any) {
+		if (i !== 0 && typeof censor === "object" && typeof value == "object" && censor == value) return "[Circular]";
+
+		if (i >= 29)
+			// seems to be a hard maximum of 30 serialized objects?
+			return "[Unknown]";
+
+		++i; // so we know we aren't using the original object anymore
+
+		return value;
+	};
 }
 
 /**
- * 
- * @param jsonString 
+ *
+ * @param jsonString
  * @description Convert JSON String Containing functions into an actual object
- * @returns 
+ * @returns
  */
 export function JSONparseEx<T>(jsonString: string) {
-  return JSON.parse(jsonString, (_, value) => {
-
-    if (
-      value != undefined && 
-      value.startsWith && 
-      typeof value === 'string' && 
-      ( 
-        value.startsWith('function') || 
-        value.startsWith('class') || 
-        value.startsWith('async function') || 
-        value.startsWith('() =>') || 
-        value.startsWith('async () =>')
-      )
-      ) {
-      return eval(`(${value})`);
-    }
-    return value;
-  }) as T;
-
+	return JSON.parse(jsonString, (_, value) => {
+		if (
+			value != undefined &&
+			value.startsWith &&
+			typeof value === "string" &&
+			(value.startsWith("function") ||
+				value.startsWith("class") ||
+				value.startsWith("async function") ||
+				value.startsWith("() =>") ||
+				value.startsWith("async () =>"))
+		) {
+			return eval(`(${value})`);
+		}
+		return value;
+	}) as T;
 }
 
 /**
- * 
- * @param data 
+ *
+ * @param data
  * @description convert JSON object containing things like function and convert it to string
- * @returns 
+ * @returns
  */
-export function JSONstringifyEx(data:{[key: string]: any}){
-  return JSON.stringify(
-    data,
-    (_, value) => typeof value === 'function' ? value.toString() : value
-  );
+export function JSONstringifyEx(data: { [key: string]: any }) {
+	return JSON.stringify(data, (_, value) => (typeof value === "function" ? value.toString() : value));
 }
-
 
 /**
  * @param data
@@ -182,7 +180,7 @@ export function JSONstringifyEx(data:{[key: string]: any}){
  * hobbies: ["reading", "traveling"]
  * };
  *
- * const flatObject = jsonToFlatObject(data);	
+ * const flatObject = jsonToFlatObject(data);
  * console.log(flatObject);
  * // Output:
  * {
@@ -197,7 +195,7 @@ export function JSONstringifyEx(data:{[key: string]: any}){
 export function jsonToFlatObject(
 	data: any,
 	parentKey = "",
-	flatObject: { [key: string]: any } = {}
+	flatObject: { [key: string]: any } = {},
 ): { [key: string]: any } {
 	if (typeof data !== "object" || data === null) {
 		if (parentKey) flatObject[parentKey] = data;
@@ -209,13 +207,7 @@ export function jsonToFlatObject(
 
 	for (const key of keys) {
 		const value = isArray ? data[key as any] : data[key];
-		const fullKey = parentKey
-			? isArray
-				? `${parentKey}[${key}]`
-				: `${parentKey}.${key}`
-			: isArray
-				? `[${key}]`
-				: key;
+		const fullKey = parentKey ? (isArray ? `${parentKey}[${key}]` : `${parentKey}.${key}`) : isArray ? `[${key}]` : key;
 
 		if (typeof value === "object" && value !== null) {
 			jsonToFlatObject(value, fullKey.toString(), flatObject);
@@ -225,7 +217,6 @@ export function jsonToFlatObject(
 	}
 	return flatObject;
 }
-
 
 /**
  * @param flatObjectKey - The key in dot notation or array notation (e.g., "address.street" or "hobbies[0]")
@@ -251,13 +242,13 @@ export function jsonToFlatObject(
  * */
 export function findDataFromObjectUsingFlatObjectKey<T>(
 	flatObjectKey: string,
-	data: { [key: string]: any }
+	data: { [key: string]: any },
 ): T | undefined {
 	if (!flatObjectKey) return undefined;
 	if (data == null) return undefined;
 
 	// Split by dot and handle array indices like hobbies[0]
-	const parts = (flatObjectKey.split(".") as any).flatMap((p:string) => {
+	const parts = (flatObjectKey.split(".") as any).flatMap((p: string) => {
 		const tokens: (string | number)[] = [];
 		const regex = /([^[\]]+)|\[(\d+)\]/g;
 		let match: RegExpExecArray | null;
@@ -284,33 +275,31 @@ export function findDataFromObjectUsingFlatObjectKey<T>(
 	return current as T;
 }
 
-
-
 /**
  * Highlights the letters in the reference text that match the query.
  * @param query The query string containing the letters to match.
  * @param refText The reference text to search within.
  * @returns The reference text with matching letters wrapped in <span> elements.
  */
-export function addBoldToMatchedQuery(query:string, refText:string){
-  let queryLetters = query.split('');
-  let searchStart = 0;
-  let positions = [];
-  for (const letter of queryLetters) {
-    const pos = refText.indexOf(letter, searchStart);
-    if (pos !== -1) {
-      positions.push(pos);
-      searchStart = pos + 1;
-    }
-  }
-  let newOutput = "";
-  for (let i = 0; i < refText.length; i++) {
-    if (positions.includes(i)) {
-      newOutput += `<span class="font-bold">${refText[i]}</span>`;
-    } else {
-      newOutput += refText[i];
-    }
-  }
-  refText = newOutput;
-  return refText;
+export function addBoldToMatchedQuery(query: string, refText: string) {
+	let queryLetters = query.split("");
+	let searchStart = 0;
+	let positions = [];
+	for (const letter of queryLetters) {
+		const pos = refText.indexOf(letter, searchStart);
+		if (pos !== -1) {
+			positions.push(pos);
+			searchStart = pos + 1;
+		}
+	}
+	let newOutput = "";
+	for (let i = 0; i < refText.length; i++) {
+		if (positions.includes(i)) {
+			newOutput += `<span class="font-bold">${refText[i]}</span>`;
+		} else {
+			newOutput += refText[i];
+		}
+	}
+	refText = newOutput;
+	return refText;
 }

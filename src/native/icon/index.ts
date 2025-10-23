@@ -1,2 +1,2 @@
-export * from './iconify';
-export * from './iconElement';
+export * from "./iconify";
+export * from "./iconElement";

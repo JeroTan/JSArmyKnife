@@ -1,3 +1,3 @@
-export * from './basic';
-export * from './phone';
-export * from './time';
+export * from "./basic";
+export * from "./phone";
+export * from "./time";

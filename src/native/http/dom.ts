@@ -1,82 +1,82 @@
 /*|---------------------------------------------------------------------------------------|*/
 /*|          This one is for vanilla JS Form Request                                      |*/
 /*|---------------------------------------------------------------------------------------|*/
-interface DOM_REQUEST_CONFIG{
-	method:undefined|"POST"|"GET",
-	action:undefined|string,
-	target?:undefined|string,
-	enctype?:undefined|string,
+interface DOM_REQUEST_CONFIG {
+	method: undefined | "POST" | "GET";
+	action: undefined | string;
+	target?: undefined | string;
+	enctype?: undefined | string;
 }
-interface DOM_REQUEST_DATA{
-	key:string,
-	value:string,
+interface DOM_REQUEST_DATA {
+	key: string;
+	value: string;
 }
 
-export class DOMRequest{
-	private config:DOM_REQUEST_CONFIG = {method:undefined, action:undefined, target:undefined};
-	private dataContainer:HTMLElement[] = [];
+export class DOMRequest {
+	private config: DOM_REQUEST_CONFIG = {
+		method: undefined,
+		action: undefined,
+		target: undefined,
+	};
+	private dataContainer: HTMLElement[] = [];
 
-	constructor(method?:undefined|"POST"|"GET", action?:undefined|string, target?:undefined|string){
-		if(method)
-			this.method(method);
-		if(action)
-			this.action(action);
-		if(target)
-			this.target(target);
+	constructor(method?: undefined | "POST" | "GET", action?: undefined | string, target?: undefined | string) {
+		if (method) this.method(method);
+		if (action) this.action(action);
+		if (target) this.target(target);
 	}
 
 	//--Setter--//
-	public method(method:"POST"|"GET"){
+	public method(method: "POST" | "GET") {
 		this.config.method = method;
 		return this;
 	}
-	public get(){
+	public get() {
 		return this.method("GET");
 	}
-	public post(){
+	public post() {
 		return this.method("POST");
 	}
-	public action(action:string){
+	public action(action: string) {
 		this.config.action = action;
 		return this;
 	}
-	public url(action:string){
+	public url(action: string) {
 		return this.action(action);
 	}
-	public target(target:string){
+	public target(target: string) {
 		this.config.target = target;
 		return this;
 	}
 	//--Setter--//
 
 	//--In House--//
-	protected pushDataToStack(data:DOM_REQUEST_DATA){
-		const newElement:HTMLInputElement = document.createElement("input");
+	protected pushDataToStack(data: DOM_REQUEST_DATA) {
+		const newElement: HTMLInputElement = document.createElement("input");
 		newElement.name = data.key;
 		newElement.value = data.value;
-		
-		this.dataContainer.push( newElement );
+
+		this.dataContainer.push(newElement);
 	}
 	//--In House--//1
 
 	//--Functionalities--//
-	public data(data:DOM_REQUEST_DATA|DOM_REQUEST_DATA[]){
+	public data(data: DOM_REQUEST_DATA | DOM_REQUEST_DATA[]) {
 		const THIS = this;
 
-		if(!Array.isArray(data)){
+		if (!Array.isArray(data)) {
 			this.pushDataToStack(data);
 			return this;
 		}
 
-		data.forEach((e:DOM_REQUEST_DATA)=>{
+		data.forEach((e: DOM_REQUEST_DATA) => {
 			THIS.pushDataToStack(e);
-		})
-		
+		});
+
 		return this;
 	}
-	public request(){
-		if(this.config.action === undefined || this.config.method === undefined)
-			return;
+	public request() {
+		if (this.config.action === undefined || this.config.method === undefined) return;
 		const formContainer = document.createElement("form");
 		formContainer.style.opacity = "0";
 		formContainer.style.position = "absolute";
@@ -86,7 +86,7 @@ export class DOMRequest{
 		formContainer.method = this.config.method;
 		document.body.appendChild(formContainer);
 
-		this.dataContainer.forEach(e=>{
+		this.dataContainer.forEach((e) => {
 			formContainer.appendChild(e);
 		});
 
@@ -100,11 +100,10 @@ export class DOMRequest{
 	//--Functionalities--//
 }
 
-
 /*|---------------------------------------------------------------------------------------|*/
 /*|          GET PARAMS ON CLIENT SIDE                                                    |*/
 /*|---------------------------------------------------------------------------------------|*/
-export function getParams(key:string){
+export function getParams(key: string) {
 	const params = new URLSearchParams(window.location.search);
 	return params.get(key);
 }

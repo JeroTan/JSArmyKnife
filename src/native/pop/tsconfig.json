@@ -1,11 +1,11 @@
 {
-  "extends": "../../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-  },
-  "include": ["index.ts"],
-  "dependencies": {
-    "@jsarmyknife/dom":"latest",
-    "@jsarmyknife/animation":"latest"
-  }
+	"extends": "../../../tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./dist"
+	},
+	"include": ["index.ts"],
+	"dependencies": {
+		"@jsarmyknife/dom": "latest",
+		"@jsarmyknife/animation": "latest"
+	}
 }

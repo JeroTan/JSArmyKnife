@@ -12,7 +12,7 @@ describe("Resolve class", () => {
 	beforeEach(() => {
 		// Reset mocks
 		mockFetch.mockReset();
-		
+
 		// Create a fresh resolver instance
 		resolver = new Resolve(undefined);
 	});
@@ -72,7 +72,7 @@ describe("Resolve class", () => {
 			resolver.s200(callback, "RAW");
 
 			// Wait for async operations
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(callback).toHaveBeenCalledWith("Hello World", expect.any(Response));
 		});
@@ -84,7 +84,7 @@ describe("Resolve class", () => {
 			const callback: STRING_RESPONSE = vi.fn();
 			resolver.default(callback, "RAW");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(callback).toHaveBeenCalledWith("Default response", expect.any(Response));
 		});
@@ -93,7 +93,7 @@ describe("Resolve class", () => {
 	// describe("Response type parsing - JSON", () => {
 	// 	it("should parse JSON response", async () => {
 	// 		const jsonData = { name: "test", value: 123 };
-	// 		mockResponse = new Response(JSON.stringify(jsonData), { 
+	// 		mockResponse = new Response(JSON.stringify(jsonData), {
 	// 			status: 200,
 	// 			headers: { "Content-Type": "application/json" }
 	// 		});
@@ -112,7 +112,7 @@ describe("Resolve class", () => {
 	// 		resolver.addResponse(Promise.resolve(mockResponse));
 
 	// 		const callback: JSON_RESPONSE = vi.fn();
-			
+
 	// 		// Expect JSON parsing to throw an error
 	// 		expect(() => {
 	// 			resolver.s200(callback, "JSON");
@@ -142,7 +142,7 @@ describe("Resolve class", () => {
 			const callback: FILE_RESPONSE = vi.fn();
 			resolver.s200(callback, "FILE");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(callback).toHaveBeenCalledWith(expect.any(Blob), expect.any(Response));
 		});
@@ -157,7 +157,7 @@ describe("Resolve class", () => {
 			const callback: BUFFER_RESPONSE = vi.fn();
 			resolver.s200(callback, "BUFFER");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(callback).toHaveBeenCalledWith(expect.any(ArrayBuffer), expect.any(Response));
 		});
@@ -172,7 +172,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s200(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 
@@ -183,7 +183,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s201(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 
@@ -194,7 +194,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s204(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 		});
@@ -207,7 +207,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s301(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 		});
@@ -220,7 +220,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s400(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 
@@ -231,7 +231,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s401(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 
@@ -242,7 +242,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s404(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 
@@ -253,7 +253,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s418(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 		});
@@ -266,7 +266,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s500(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 
@@ -277,7 +277,7 @@ describe("Resolve class", () => {
 				const callback = vi.fn();
 				resolver.s503(callback, "RAW");
 
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 				expect(callback).toHaveBeenCalled();
 			});
 		});
@@ -293,8 +293,8 @@ describe("Resolve class", () => {
 					text: () => Promise.resolve("Network Error"),
 					json: () => Promise.reject(new Error("No JSON for status 0")),
 					blob: () => Promise.resolve(new Blob(["Network Error"])),
-					arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
-				})
+					arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+				}),
 			} as Response;
 
 			resolver.addResponse(Promise.resolve(mockResponseWithStatus0));
@@ -302,7 +302,7 @@ describe("Resolve class", () => {
 			const callback = vi.fn();
 			resolver.s0(callback, "RAW");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 			expect(callback).toHaveBeenCalled();
 		});
 
@@ -313,7 +313,7 @@ describe("Resolve class", () => {
 			const callback = vi.fn();
 			resolver.sOthers(callback, "RAW");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 			expect(callback).toHaveBeenCalled();
 		});
 
@@ -324,7 +324,7 @@ describe("Resolve class", () => {
 			const callback = vi.fn();
 			resolver.sAfter(callback, "RAW");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 			expect(callback).toHaveBeenCalled();
 		});
 	});
@@ -339,11 +339,11 @@ describe("Resolve class", () => {
 
 			// First register s200 handler
 			resolver.s200(callback200, "RAW");
-			
+
 			// Then register sOthers handler - should not trigger for 200
 			resolver.sOthers(callbackOthers, "RAW");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(callback200).toHaveBeenCalled();
 			// sOthers should not be called because 200 is already handled and excluded
@@ -356,13 +356,11 @@ describe("Resolve class", () => {
 			const callback1 = vi.fn();
 			const callback2 = vi.fn();
 
-			const result = resolver
-				.s200(callback1, "RAW")
-				.s404(callback2, "RAW"); // This won't trigger for 200
+			const result = resolver.s200(callback1, "RAW").s404(callback2, "RAW"); // This won't trigger for 200
 
 			expect(result).toBe(resolver); // Should return this for chaining
-			
-			await new Promise(resolve => setTimeout(resolve, 10));
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(callback1).toHaveBeenCalled();
 			expect(callback2).not.toHaveBeenCalled();
@@ -376,7 +374,7 @@ describe("Resolve class", () => {
 			const callback = vi.fn();
 			resolver.s200(callback, "RAW");
 
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			// Should not call callback with undefined response
 			expect(callback).not.toHaveBeenCalled();
@@ -386,14 +384,14 @@ describe("Resolve class", () => {
 			resolver.addResponse(Promise.reject(new Error("Network error")));
 
 			const callback = vi.fn();
-			
+
 			// Should not throw synchronously
 			expect(() => {
 				resolver.s200(callback, "RAW");
 			}).not.toThrow();
 
 			// Wait for async operations to complete
-			await new Promise(resolve => setTimeout(resolve, 20));
+			await new Promise((resolve) => setTimeout(resolve, 20));
 
 			// Callback should not be called when promise rejects
 			expect(callback).not.toHaveBeenCalled();
@@ -404,7 +402,7 @@ describe("Resolve class", () => {
 	describe("Real API Integration", () => {
 		it("should work with real HTTP response from JSONPlaceholder", async () => {
 			// Create a real fetch promise
-			const realPromise =  fetch("https://jsonplaceholder.typicode.com/posts/1");
+			const realPromise = fetch("https://jsonplaceholder.typicode.com/posts/1");
 			const realResolver = new Resolve(realPromise);
 
 			let receivedData: { id: number; title: string; userId: number } | null = null;
@@ -436,17 +434,16 @@ describe("Resolve class", () => {
 
 			let receivedResponse: Response | null = null;
 			const was404Called = await new Promise((resolve) => {
-        resolver404
-				.s404((_, response) => {
-					receivedResponse = response;
-					resolve(true);
-				}, "RAW")
-				.sOthers(() => {
-					resolve(false);
-				}, "RAW");
+				resolver404
+					.s404((_, response) => {
+						receivedResponse = response;
+						resolve(true);
+					}, "RAW")
+					.sOthers(() => {
+						resolve(false);
+					}, "RAW");
+			});
 
-      });
-		
 			// Wait for async processing
 			await resolver.promiseResponse;
 

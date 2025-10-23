@@ -1,1 +1,1 @@
-export * as Native from './native/index';
+export * as Native from "./native/index";

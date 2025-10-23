@@ -1,7 +1,5 @@
 {
-  "npmClient": "npm",
-  "packages": [
-    "src/native/**/*"
-  ],
-  "version": "0.1.2-beta.0"
+	"npmClient": "npm",
+	"packages": ["src/native/**/*"],
+	"version": "0.1.2-beta.0"
 }

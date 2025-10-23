@@ -82,14 +82,12 @@
 //     }
 // }
 
-
-
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Public Class Starts Here                                                   |*/
 /*|------------------------------------------------------------------------------------------|*/
 
 // export class Hash extends CryptTemplate{//One-way encryption, meaning once converted you can never convert it back again, unlike divorce where lovers can be unfaithful to each other.
-//     algorithm:HASH_ALGORITHM = "sha256"; 
+//     algorithm:HASH_ALGORITHM = "sha256";
 
 //     constructor(key?:string|undefined, data?:string|undefined, algorithm?:HASH_ALGORITHM|undefined, encoding?:DIGEST|undefined){
 //         super(key, data, algorithm, encoding)
@@ -123,7 +121,7 @@
 //         return this;
 //     }
 //     //--Setter--//
-	
+
 //     public async generate(newData?:string|undefined){
 //         const streamData = (new TextEncoder()).encode(newData !== undefined ? newData : this.data);
 //         const rawHash = await subtle.digest(this.algorithm, streamData);
@@ -137,14 +135,14 @@
 // }
 
 // class SymmetricCrypt extends CryptTemplate{//Unlike hash, if you encrypt something you can still turn it back as long as you have key. Just like no matter what sin we have, we can always come to God.
-//     algorithm:CIPHER_ALGORITHM = "aes-128-cbc"; 
+//     algorithm:CIPHER_ALGORITHM = "aes-128-cbc";
 //     iv:Buffer|string = Buffer.from(randomBytes(16));
 
 //     constructor(key?:string|undefined, data?:string|undefined, iv?:Buffer|string|undefined, algorithm?:CIPHER_ALGORITHM|undefined, encoding?:DIGEST|undefined){
 //         super(key, data, algorithm, encoding);
 //         if(iv)
 //             this.setIV(iv);
-//         else 
+//         else
 //             this.iv == this.key;
 //     }
 
@@ -182,209 +180,207 @@
 //         return text + encoder;
 //     }
 
-
 // }
 
 // class AsymmetricCrypt{
 //     //To Be Continue
 // }
 
-
 /*|------------------------------------------------------------------------------------------|*/
 /*|               Classic Encryption                                                         |*/
 /*|------------------------------------------------------------------------------------------|*/
 
-export class Vigenere{
+export class Vigenere {
 	private data = "";
-	private key = "419and68"
+	private key = "419and68";
 
-	constructor(key?:string|undefined, data?:string|undefined){
-		if(key)
-			this.setkey(key);
+	constructor(key?: string | undefined, data?: string | undefined) {
+		if (key) this.setkey(key);
 
-		if(data)
-			this.setData(data);
+		if (data) this.setData(data);
 	}
 
 	//--Set--//
-	public setData(data:string){
+	public setData(data: string) {
 		this.data = data;
 		return this;
 	}
-	public setkey(key:string){
+	public setkey(key: string) {
 		this.key = key;
 		return this;
 	}
 	//--Set--//
 
-	encrypt(){
-		let result = ''
+	encrypt() {
+		let result = "";
 		const preCryptData = btoa(this.data);
 		for (let i = 0, j = 0; i < preCryptData.length; i++) {
-			const c = preCryptData.charAt(i)
-			result += String.fromCharCode((c.charCodeAt(0) + this.key.charCodeAt(j) )%65535 );
-			j = ++j % this.key.length
+			const c = preCryptData.charAt(i);
+			result += String.fromCharCode((c.charCodeAt(0) + this.key.charCodeAt(j)) % 65535);
+			j = ++j % this.key.length;
 		}
-		return btoa(result)
+		return btoa(result);
 	}
-	
-	decrypt(){
-		let result = '';
-		try{
+
+	decrypt() {
+		let result = "";
+		try {
 			const preDecryptData = atob(this.data);
 			for (let i = 0, j = 0; i < preDecryptData.length; i++) {
-				const c = preDecryptData.charAt(i)
-				result += String.fromCharCode((65535 + c.charCodeAt(0) - this.key.charCodeAt(j) )%65535 );
-				j = ++j % this.key.length
+				const c = preDecryptData.charAt(i);
+				result += String.fromCharCode((65535 + c.charCodeAt(0) - this.key.charCodeAt(j)) % 65535);
+				j = ++j % this.key.length;
 			}
-			return atob(result)
-		}catch{
+			return atob(result);
+		} catch {
 			return "";
 		}
-		
 	}
 }
-
 
 //NOT MINE
 //SEE HERE: https://stackoverflow.com/questions/59777670/how-can-i-hash-a-string-with-sha256
 //@ts-ignore
-export function pureHash(message:string) {
-	var sha256 = function sha256(ascii:string) {
-		function rightRotate(value:any, amount:any) {
-			return (value>>>amount) | (value<<(32 - amount));
-		};
-		
+export function pureHash(message: string) {
+	var sha256 = function sha256(ascii: string) {
+		function rightRotate(value: any, amount: any) {
+			return (value >>> amount) | (value << (32 - amount));
+		}
+
 		var mathPow = Math.pow;
 		var maxWord = mathPow(2, 32);
-		var lengthProperty = 'length'
+		var lengthProperty = "length";
 		var i, j; // Used as a counter across the whole file
-		var result = ''
-	
-		var words:any = [];
-		var asciiBitLength = ascii[lengthProperty as any] as any*8;
-		
+		var result = "";
+
+		var words: any = [];
+		var asciiBitLength = (ascii[lengthProperty as any] as any) * 8;
+
 		//* caching results is optional - remove/add slash from front of this line to toggle
 		// Initial hash value: first 32 bits of the fractional parts of the square roots of the first 8 primes
 		// (we actually calculate the first 64, but extra values are just ignored)
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		var hash = sha256.h = sha256.h || [];
+		var hash = (sha256.h = sha256.h || []);
 		// Round constants: first 32 bits of the fractional parts of the cube roots of the first 64 primes
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		var k = sha256.k = sha256.k || [];
+		var k = (sha256.k = sha256.k || []);
 		var primeCounter = k[lengthProperty];
 		/*/
 		var hash = [], k = [];
 		var primeCounter = 0;
 		//*/
-	
-		var isComposite:any = {};
+
+		var isComposite: any = {};
 		for (var candidate = 2; primeCounter < 64; candidate++) {
 			if (!isComposite[candidate as any] as any) {
 				for (i = 0; i < 313; i += candidate) {
 					isComposite[i] = candidate;
 				}
-				hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0;
-				k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0;
+				hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+				k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
 			}
 		}
-		
-		ascii += '\x80' // Append Ƈ' bit (plus zero padding)
-		while (ascii[lengthProperty as any]as any%64 - 56) ascii += '\x00' // More zero padding
+
+		ascii += "\x80"; // Append Ƈ' bit (plus zero padding)
+		while (((ascii[lengthProperty as any] as any) % 64) - 56) ascii += "\x00"; // More zero padding
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		for (i = 0; i < ascii[lengthProperty as any]as unknown; i++) {
+		for (i = 0; (i < ascii[lengthProperty as any]) as unknown; i++) {
 			j = ascii.charCodeAt(i);
-			if (j>>8) return; // ASCII check: only accept characters in range 0-255
-			words[i>>2] |= j << ((3 - i)%4)*8;
+			if (j >> 8) return; // ASCII check: only accept characters in range 0-255
+			words[i >> 2] |= j << (((3 - i) % 4) * 8);
 		}
-		words[words[lengthProperty]] = ((asciiBitLength/maxWord)|0);
-		words[words[lengthProperty]] = (asciiBitLength)
-		
+		words[words[lengthProperty]] = (asciiBitLength / maxWord) | 0;
+		words[words[lengthProperty]] = asciiBitLength;
+
 		// process each chunk
-		for (j = 0; j < words[lengthProperty];) {
-			var w = words.slice(j, j += 16); // The message is expanded into 64 words as part of the iteration
+		for (j = 0; j < words[lengthProperty]; ) {
+			var w = words.slice(j, (j += 16)); // The message is expanded into 64 words as part of the iteration
 			var oldHash = hash;
 			// This is now the undefinedworking hash", often labelled as variables a...g
 			// (we have to truncate as well, otherwise extra entries at the end accumulate
 			hash = hash.slice(0, 8);
-			
+
 			for (i = 0; i < 64; i++) {
 				// var i2 = i + j;
 				// Expand the message into 64 words
-				// Used below if 
-				var w15 = w[i - 15], w2 = w[i - 2];
-	
+				// Used below if
+				var w15 = w[i - 15],
+					w2 = w[i - 2];
+
 				// Iterate
-				var a = hash[0], e = hash[4];
-				var temp1 = hash[7]
-					+ (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) // S1
-					+ ((e&hash[5])^((~e)&hash[6])) // ch
-					+ k[i]
+				var a = hash[0],
+					e = hash[4];
+				var temp1 =
+					hash[7] +
+					(rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + // S1
+					((e & hash[5]) ^ (~e & hash[6])) + // ch
+					k[i] +
 					// Expand the message schedule if needed
-					+ (w[i] = (i < 16) ? w[i] : (
-							w[i - 16]
-							+ (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3)) // s0
-							+ w[i - 7]
-							+ (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10)) // s1
-						)|0
-					);
+					(w[i] =
+						i < 16
+							? w[i]
+							: (w[i - 16] +
+									(rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + // s0
+									w[i - 7] +
+									(rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | // s1
+								0);
 				// This is only used once, so *could* be moved below, but it only saves 4 bytes and makes things unreadble
-				var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) // S0
-					+ ((a&hash[1])^(a&hash[2])^(hash[1]&hash[2])); // maj
-				
-				hash = [(temp1 + temp2)|0].concat(hash); // We don't bother trimming off the extra ones, they're harmless as long as we're truncating when we do the slice()
-				hash[4] = (hash[4] + temp1)|0;
+				var temp2 =
+					(rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + // S0
+					((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2])); // maj
+
+				hash = [(temp1 + temp2) | 0].concat(hash); // We don't bother trimming off the extra ones, they're harmless as long as we're truncating when we do the slice()
+				hash[4] = (hash[4] + temp1) | 0;
 			}
-			
+
 			for (i = 0; i < 8; i++) {
-				hash[i] = (hash[i] + oldHash[i])|0;
+				hash[i] = (hash[i] + oldHash[i]) | 0;
 			}
 		}
-		
+
 		for (i = 0; i < 8; i++) {
 			for (j = 3; j + 1; j--) {
-				var b = (hash[i]>>(j*8))&255;
-				result += ((b < 16) ? 0 : '') + b.toString(16);
+				var b = (hash[i] >> (j * 8)) & 255;
+				result += (b < 16 ? 0 : "") + b.toString(16);
 			}
 		}
 		return result;
 	};
 
 	return sha256(message);
-};
-
-export function btoaEx(anyStringPoint:string){
-	const binString = Array.from(new TextEncoder().encode(anyStringPoint), (byte:number) =>
-    String.fromCodePoint(byte),
-  ).join("");
-  return btoa(binString);
 }
 
-export function atobEx(encrypted:string){
+export function btoaEx(anyStringPoint: string) {
+	const binString = Array.from(new TextEncoder().encode(anyStringPoint), (byte: number) =>
+		String.fromCodePoint(byte),
+	).join("");
+	return btoa(binString);
+}
+
+export function atobEx(encrypted: string) {
 	const binString = atob(encrypted);
-  return new TextDecoder().decode(Uint8Array.from<string>(binString, (m) => m.codePointAt(0) || 0));
+	return new TextDecoder().decode(Uint8Array.from<string>(binString, (m) => m.codePointAt(0) || 0));
 }
-
 
 export function xorEncrypt(data: string, key: string): string {
-  const dataBytes = new TextEncoder().encode(data);
-  const keyBytes = new TextEncoder().encode(key);
+	const dataBytes = new TextEncoder().encode(data);
+	const keyBytes = new TextEncoder().encode(key);
 
-  const encrypted = dataBytes.map((byte, i) => byte ^ keyBytes[i % keyBytes.length]);
+	const encrypted = dataBytes.map((byte, i) => byte ^ keyBytes[i % keyBytes.length]);
 
-  return btoa(String.fromCharCode(...encrypted));
+	return btoa(String.fromCharCode(...encrypted));
 }
 
 export function xorDecrypt(encrypted: string, key: string): string {
-  const encryptedBytes = Uint8Array.from(atob(encrypted), char => char.charCodeAt(0));
-  const keyBytes = new TextEncoder().encode(key);
+	const encryptedBytes = Uint8Array.from(atob(encrypted), (char) => char.charCodeAt(0));
+	const keyBytes = new TextEncoder().encode(key);
 
-  const decrypted = encryptedBytes.map((byte, i) => byte ^ keyBytes[i % keyBytes.length]);
+	const decrypted = encryptedBytes.map((byte, i) => byte ^ keyBytes[i % keyBytes.length]);
 
-  return new TextDecoder().decode(decrypted);
+	return new TextDecoder().decode(decrypted);
 }
 
 export class NumberCrypt {
@@ -402,13 +398,12 @@ export class NumberCrypt {
 	}
 }
 
-
-export function numberEncode(number: number){
+export function numberEncode(number: number) {
 	const numberCrypt = new NumberCrypt(123);
 	return numberCrypt.encrypt(number);
 }
 
-export function numberDecode(encoded: number){
+export function numberDecode(encoded: number) {
 	const numberCrypt = new NumberCrypt(123);
 	return numberCrypt.decrypt(encoded);
 }

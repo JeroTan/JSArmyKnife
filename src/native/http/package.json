@@ -1,26 +1,26 @@
 {
-  "name": "@jsarmyknife/native--http",
-  "version": "0.2.1-beta.0",
-  "public": true,
-  "description": "Simplify your http and other network related tasks.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "test": "vitest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JeroTan/JSArmyKnife.git"
-  },
-  "author": "Jerowe Tan",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/JeroTan/JSArmyKnife/issues"
-  },
-  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
-  "keywords": [],
-  "dependencies": {
-    "@jsarmyknife/native--parse": "latest"
-  }
+	"name": "@jsarmyknife/native--http",
+	"version": "0.2.1-beta.0",
+	"public": true,
+	"description": "Simplify your http and other network related tasks.",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "vitest"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/JeroTan/JSArmyKnife.git"
+	},
+	"author": "Jerowe Tan",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/JeroTan/JSArmyKnife/issues"
+	},
+	"homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
+	"keywords": [],
+	"dependencies": {
+		"@jsarmyknife/native--parse": "latest"
+	}
 }

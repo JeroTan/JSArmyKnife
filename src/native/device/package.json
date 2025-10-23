@@ -1,22 +1,22 @@
 {
-  "name": "@jsarmyknife/native--device",
-  "version": "0.0.2-beta.0",
-  "public": true,
-  "description": "Somet things you need to access user device.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JeroTan/JSArmyKnife.git"
-  },
-  "author": "Jerowe Tan",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/JeroTan/JSArmyKnife/issues"
-  },
-  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
-  "keywords": []
+	"name": "@jsarmyknife/native--device",
+	"version": "0.0.2-beta.0",
+	"public": true,
+	"description": "Somet things you need to access user device.",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/JeroTan/JSArmyKnife.git"
+	},
+	"author": "Jerowe Tan",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/JeroTan/JSArmyKnife/issues"
+	},
+	"homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
+	"keywords": []
 }

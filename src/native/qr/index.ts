@@ -1,1 +1,1 @@
-export * from './webQR';
+export * from "./webQR";

@@ -1,24 +1,24 @@
 {
-  "name": "@jsarmyknife/native--storage",
-  "version": "0.1.6-beta.0",
-  "public": true,
-  "description": "All state and storage related tools that you can include separately.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JeroTan/JSArmyKnife.git"
-  },
-  "author": "Jerowe Tan",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/JeroTan/JSArmyKnife/issues"
-  },
-  "homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
-  "dependencies": {
-    "@jsarmyknife/native--parse": "latest"
-  }
+	"name": "@jsarmyknife/native--storage",
+	"version": "0.1.6-beta.0",
+	"public": true,
+	"description": "All state and storage related tools that you can include separately.",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/JeroTan/JSArmyKnife.git"
+	},
+	"author": "Jerowe Tan",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/JeroTan/JSArmyKnife/issues"
+	},
+	"homepage": "https://github.com/JeroTan/JSArmyKnife#readme",
+	"dependencies": {
+		"@jsarmyknife/native--parse": "latest"
+	}
 }

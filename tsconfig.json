@@ -1,14 +1,14 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["node", "vitest/globals"]
-  },
-  "include": ["src/**/*"]
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "commonjs",
+		"declaration": true,
+		"outDir": "./dist",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node", "vitest/globals"]
+	},
+	"include": ["src/**/*"]
 }
