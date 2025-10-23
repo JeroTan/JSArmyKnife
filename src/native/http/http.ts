@@ -1,19 +1,19 @@
 /**
  * HttpNativePlate - A lightweight, chainable HTTP request builder class.
- * 
+ *
  * This utility provides a fluent interface for constructing and executing
  * `fetch` requests in TypeScript/JavaScript. It helps with setting base URLs,
  * headers, query params, HTTP methods, and request bodies in a consistent way.
- * 
+ *
  * Example usage:
- * 
+ *
  * const api = new HttpNativePlate("https://api.example.com");
  * const response = await api
  *   .path("/users")
  *   .params({ page: "2" })
  *   .get()
  *   .request();
- * 
+ *
  * const data = await response.json();
  */
 //------------------------ Imports
@@ -225,55 +225,66 @@ export const allHeadersKey = [
 	"*",
 ] as const;
 
-
 /**
  * Supported HTTP methods
  */
-export const methods = ["get", "post", "put", "patch", "delete", "GET", "PATCH", "POST", "PUT", "PATCH", "DELETE"] as const;
-
+export const methods = [
+	"get",
+	"post",
+	"put",
+	"patch",
+	"delete",
+	"GET",
+	"PATCH",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE",
+] as const;
 
 //------------------------ Types
-export type RESPONSE_TYPE = typeof responseType[number];
-export type ALL_HEADERS_KEY = typeof allHeadersKey[number];
+export type RESPONSE_TYPE = (typeof responseType)[number];
+export type ALL_HEADERS_KEY = (typeof allHeadersKey)[number];
 
 /**
  * Represents the structure of header data.
  * Allows known header keys + additional custom keys.
  */
-export type HEADER_DATA<otherKey extends string = ALL_HEADERS_KEY> = {[header in ALL_HEADERS_KEY]?: string} & {[key in otherKey]?: string};
-export type METHOD_TYPE = typeof methods[number];
+export type HEADER_DATA<otherKey extends string = ALL_HEADERS_KEY> = { [header in ALL_HEADERS_KEY]?: string } & {
+	[key in otherKey]?: string;
+};
+export type METHOD_TYPE = (typeof methods)[number];
 
 /**
  * Basic HTTP request configuration object.
  */
-interface HTTP_CONFIG<otherKey extends string = ALL_HEADERS_KEY>{
-	headers: HEADER_DATA<otherKey>,
-	method: "get"|"post"|"put"|"patch"|"delete"|"GET"|"PATCH"|"POST"|"PUT"|"PATCH"|"DELETE",
-	body?:    
+interface HTTP_CONFIG<otherKey extends string = ALL_HEADERS_KEY> {
+	headers: HEADER_DATA<otherKey>;
+	method: "get" | "post" | "put" | "patch" | "delete" | "GET" | "PATCH" | "POST" | "PUT" | "PATCH" | "DELETE";
+	body?:
 		| string
-    | null
-    | ReadableStream
-    | ReadableStream<Uint8Array>
-    | ArrayBuffer
-    | DataView
-    | Blob
-    | File
-    | Uint8Array
-    | BufferSource
-    | FormData
-    | URLSearchParams,
+		| null
+		| ReadableStream
+		| ReadableStream<Uint8Array>
+		| ArrayBuffer
+		| DataView
+		| Blob
+		| File
+		| Uint8Array
+		| BufferSource
+		| FormData
+		| URLSearchParams;
 	// credentials?:"omit"|"same-origin"|"include",
 }
-
 
 //------------------------ Main Class
 /**
  * HttpNativePlate - A fluent, type-safe wrapper for the Fetch API.
- * 
+ *
  * This class provides a chainable interface for constructing HTTP requests.
  * It simplifies common tasks like setting headers, attaching request bodies,
  * adding query parameters, and switching between HTTP methods.
- * 
+ *
  * Key Features:
  * - 🔗 Chainable methods (`.get().path("/users").params({...}).request()`)
  * - ⚙️ Strongly typed headers and methods (with support for custom keys)
@@ -281,23 +292,23 @@ interface HTTP_CONFIG<otherKey extends string = ALL_HEADERS_KEY>{
  * - 🛑 Request cancellation with AbortController (`stopFetching`)
  * - 🔄 Resettable state (`reset` and `newAbortion`)
  * - 🧩 Flexible body types (`JSON`, `FormData`, `Blob`, `ArrayBuffer`, etc.)
- * 
+ *
  * Example usage:
- * 
+ *
  * ```ts
  * const api = new HttpNativePlate("https://api.example.com", {
  *   Authorization: "Bearer token123",
  * });
- * 
+ *
  * // GET request with query params
  * const response = await api
  *   .path("/users")
  *   .params({ page: "2", limit: "20" })
  *   .get()
  *   .request();
- * 
+ *
  * const data = await response.json();
- * 
+ *
  * // POST request with JSON body
  * const postResponse = await api
  *   .path("/users")
@@ -305,47 +316,42 @@ interface HTTP_CONFIG<otherKey extends string = ALL_HEADERS_KEY>{
  *   .data(JSON.stringify({ name: "Alice" }))
  *   .request();
  * ```
- * 
+ *
  * Typical workflow:
  * 1. Initialize `HttpNativePlate` with a base URL.
  * 2. Set path, headers, params, method, and/or body as needed.
  * 3. Call `.request()` to execute and receive a standard Fetch `Response`.
  */
-export class HttpNativePlate<
-	PATH_NAME extends string = string, 
-	otherHeaderKey extends string = ALL_HEADERS_KEY
->{
+export class HttpNativePlate<PATH_NAME extends string = string, otherHeaderKey extends string = ALL_HEADERS_KEY> {
 	// Default request config
 	private Config: HTTP_CONFIG<otherHeaderKey> = {
 		headers: {
-			"Content-Type":"application/json",
+			"Content-Type": "application/json",
 		},
 		method: "get",
 		// credentials: "include",
-	}
-	
-	private baseURL: string = "http://localhost:4321" // Default base URL
-	private abortion : AbortController = new AbortController; // handles abort
+	};
+
+	private baseURL: string = "http://localhost:4321"; // Default base URL
+	private abortion: AbortController = new AbortController(); // handles abort
 	private pathURL: PATH_NAME = "/" as PATH_NAME; // request path
-	private paramObject: {[key: string|number]: string} = {}; // query params
+	private paramObject: { [key: string | number]: string } = {}; // query params
 
 	/**
-   * Create a new instance.
-   * @param baseURL Optional base URL (defaults to localhost:4321)
-   * @param initialHeaders Optional initial headers
-   */
-	constructor(baseURL?:undefined|string, initialHeaders?:undefined|HEADER_DATA<otherHeaderKey>){
-		if(baseURL !== undefined)
-			this.setBaseURL(baseURL);
-		if(initialHeaders !== undefined)
-			this.headers(initialHeaders);
+	 * Create a new instance.
+	 * @param baseURL Optional base URL (defaults to localhost:4321)
+	 * @param initialHeaders Optional initial headers
+	 */
+	constructor(baseURL?: undefined | string, initialHeaders?: undefined | HEADER_DATA<otherHeaderKey>) {
+		if (baseURL !== undefined) this.setBaseURL(baseURL);
+		if (initialHeaders !== undefined) this.headers(initialHeaders);
 	}
 
 	//--Default Setters--//
 	/**
-   * Set or change the base URL.
-   */
-	public setBaseURL(baseURL:string){
+	 * Set or change the base URL.
+	 */
+	public setBaseURL(baseURL: string) {
 		this.baseURL = baseURL;
 		return this;
 	}
@@ -353,39 +359,40 @@ export class HttpNativePlate<
 
 	//--Modifiers--//
 	/**
-   * Attach request body data.
-   */
+	 * Attach request body data.
+	 */
 
-	public data(data:
-		|string
-		|null
-		|ReadableStream
-		|ReadableStream<Uint8Array>
-		|ArrayBuffer
-		|DataView
-		|Blob
-		|File
-		|Uint8Array
-		|BufferSource
-		|FormData
-		|URLSearchParams
-	){
+	public data(
+		data:
+			| string
+			| null
+			| ReadableStream
+			| ReadableStream<Uint8Array>
+			| ArrayBuffer
+			| DataView
+			| Blob
+			| File
+			| Uint8Array
+			| BufferSource
+			| FormData
+			| URLSearchParams,
+	) {
 		this.Config["body"] = data;
 		return this;
 	}
 
 	/**
-   * Set headers. If `update` is true, merges with existing headers, maintaining existing ones unless overwritten.
-   */
-	public headers(headers:HEADER_DATA<otherHeaderKey>, update:boolean = false){
-		if(!update){
+	 * Set headers. If `update` is true, merges with existing headers, maintaining existing ones unless overwritten.
+	 */
+	public headers(headers: HEADER_DATA<otherHeaderKey>, update: boolean = false) {
+		if (!update) {
 			this.Config.headers = headers;
 			return this;
 		}
-		this.Config.headers = {...this.Config.headers, ...headers};
+		this.Config.headers = { ...this.Config.headers, ...headers };
 		// Clean up undefined values
-		for(const i in this.Config.headers){
-			if(this.Config.headers[i as keyof HEADER_DATA<otherHeaderKey>] == undefined){
+		for (const i in this.Config.headers) {
+			if (this.Config.headers[i as keyof HEADER_DATA<otherHeaderKey>] == undefined) {
 				delete this.Config.headers[i as keyof HEADER_DATA<otherHeaderKey>];
 			}
 		}
@@ -393,83 +400,96 @@ export class HttpNativePlate<
 	}
 
 	/**
-   * Define the request path (relative to baseURL).
-   */
-	public path(path: PATH_NAME){
+	 * Define the request path (relative to baseURL).
+	 */
+	public path(path: PATH_NAME) {
 		this.pathURL = path;
 		return this;
 	}
 
 	/**
-   * Set query parameters. If `update` is true, merges with existing params.
-   */
-	public params(object:{[key: string|number]: string}, update= false){
-		if(update){
-			this.paramObject = {...this.paramObject, ...object};
-		}else{
+	 * Set query parameters. If `update` is true, merges with existing params.
+	 */
+	public params(object: { [key: string | number]: string }, update = false) {
+		if (update) {
+			this.paramObject = { ...this.paramObject, ...object };
+		} else {
 			this.paramObject = object;
 		}
 		return this;
 	}
 
 	/**
-   * Set request method (GET, POST, PUT, etc.)
-   */
-	public method(method:METHOD_TYPE){
+	 * Set request method (GET, POST, PUT, etc.)
+	 */
+	public method(method: METHOD_TYPE) {
 		this.Config.method = method;
 		return this;
 	}
 	// Convenience shorthands
-	public get(){ return this.method("GET");}
-	public post(){ return this.method("POST");}
-	public put(){ return this.method("PUT");}
-	public patch(){ return this.method("PATCH");}
-	public delete(){ return this.method("DELETE");}
+	public get() {
+		return this.method("GET");
+	}
+	public post() {
+		return this.method("POST");
+	}
+	public put() {
+		return this.method("PUT");
+	}
+	public patch() {
+		return this.method("PATCH");
+	}
+	public delete() {
+		return this.method("DELETE");
+	}
 	//--Modifiers--//
-	
 
 	//--Functionalities--//
-  /**
-   * Creates a new AbortController for cancelling requests.
-   */
-	public newAbortion(){
-		this.abortion = new AbortController;
+	/**
+	 * Creates a new AbortController for cancelling requests.
+	 */
+	public newAbortion() {
+		this.abortion = new AbortController();
 		return this;
 	}
 	/**
-   * Reset request config (clears body + resets AbortController).
-   */
-	public reset(){
-		this.Config = {  ...this.Config, body: undefined };
-		this.abortion = new AbortController;
+	 * Reset request config (clears body + resets AbortController).
+	 */
+	public reset() {
+		this.Config = { ...this.Config, body: undefined };
+		this.abortion = new AbortController();
 		return this;
 	}
 	/**
-   * Get current AbortController signal (for passing to fetch).
-   */
-	public getAbortion(){
+	 * Get current AbortController signal (for passing to fetch).
+	 */
+	public getAbortion() {
 		return this.abortion;
 	}
 	/**
-   * Cancel an ongoing fetch request. This function must be used after calling `request()`.
-   */
-	public stopFetching(){
+	 * Cancel an ongoing fetch request. This function must be used after calling `request()`.
+	 */
+	public stopFetching() {
 		this.abortion.abort();
 		return this;
 	}
 	/**
-   * Execute the fetch request with the current config.
-   * Returns a `Response` object (or a fallback error response).
-   */
-	async request(){
-		try{
-			return await fetch(this.baseURL+this.pathURL+(Object.keys(this.paramObject).length > 0? "?" +parseQueryToString(this.paramObject): ""), this.Config as RequestInit);
-		}catch{
-			return new Promise((resolve)=>{
-				console.error(`There is an error before fetching the path name ${this.baseURL+this.pathURL}`);
-				resolve(Response.json({message:"Fetch Error"}, {status:503}));
-			}) as Promise<Response>
+	 * Execute the fetch request with the current config.
+	 * Returns a `Response` object (or a fallback error response).
+	 */
+	async request() {
+		try {
+			return await fetch(
+				this.baseURL +
+					this.pathURL +
+					(Object.keys(this.paramObject).length > 0 ? "?" + parseQueryToString(this.paramObject) : ""),
+				this.Config as RequestInit,
+			);
+		} catch {
+			return new Promise((resolve) => {
+				console.error(`There is an error before fetching the path name ${this.baseURL + this.pathURL}`);
+				resolve(Response.json({ message: "Fetch Error" }, { status: 503 }));
+			}) as Promise<Response>;
 		}
-		
 	}
 }

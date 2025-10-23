@@ -9,7 +9,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run --reporter=verbose",
     "build": "tsc"
   },
   "repository": {
@@ -26,9 +26,14 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/node": "^24.7.2",
     "@vitest/ui": "^3.2.4",
     "lerna": "^8.1.9",
     "typescript": "^5.5.3",
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "fake-indexeddb": "^6.2.4",
+    "jsdom": "^27.0.1"
   }
 }
