@@ -60,12 +60,12 @@ export class Storage<Type> {
 	 * @returns - The value that is stored in the local storage
 	 */
 	get(): Type;
-	get(parseJSON: true): Type;
-	get(parseJSON: false): string;
-	get(parseJSON = true): Type | string {
-		let value: string | null = localStorage.getItem(this.key);
+	get(noParsing: true): string;
+	get(noParsing: false): Type;
+	get(noParsing = false): Type | string {
+		const value: string | null = localStorage.getItem(this.key);
 		if (value === null) return "";
-		if (parseJSON) {
+		if (!noParsing) {
 			return JSON.parse(value) as Type;
 		}
 		return value as string;
